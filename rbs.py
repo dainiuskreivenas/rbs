@@ -268,7 +268,7 @@ class RBS:
         fsa.stateTurnsOffState(rePop,0,rePop,0)
         
         #apply retraction
-        for m in match:
+        for m in match: 
             if m[1] == retraction:
                 turnOfCa = m[0][1]       
         fsa.stateTurnsOffState(rePop, 0, turnOfCa, 0)
