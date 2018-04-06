@@ -1,3 +1,5 @@
+mkdir results
+
 python tests/Monkey_SingleFruit.py
 python printPklFile.py pkls/Monkey_SingleFruit > ./results/Monkey_SingleFruit.sp
 
