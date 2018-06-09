@@ -1,6 +1,6 @@
 """
 
-Operators Tests
+Operators Tests for numerical
 
 """
 
@@ -90,19 +90,19 @@ sim.run(200)
 
 for key in rbs.retractions.keys():
     re = rbs.retractions[key]
-    re.printSpikes("pkls/Operators_Tests/retractions/{}.pkl".format(re.label))
+    re.printSpikes("pkls/Operators_Numerics_Tests/retractions/{}.pkl".format(re.label))
 
 # "################### assertions ###############"
 
 for key in rbs.assertions.keys():
     aa = rbs.assertions[key]
-    aa.printSpikes("pkls/Operators_Tests/assertions/{}.pkl".format(aa.label))
+    aa.printSpikes("pkls/Operators_Numerics_Tests/assertions/{}.pkl".format(aa.label))
 
 
 # "################### facts ###############"
 
 for key in list(rbs.factGroups):
     for f in rbs.factGroups[key]:
-        f[0][1].printSpikes("pkls/Operators_Tests/facts/{}.pkl".format(f[0][1].label))
+        f[0][1].printSpikes("pkls/Operators_Numerics_Tests/facts/{}.pkl".format(f[0][1].label))
 
 sim.end()

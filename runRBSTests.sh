@@ -19,4 +19,4 @@ python tests/Monkey_TwoSamePlaceFruits.py
 python printPklFile.py pkls/Monkey_TwoSamePlaceFruits > ./results/Monkey_TwoSamePlaceFruits.sp
 
 python tests/Operators_Test.py
-python printPklFile.py pkls/Operators_Tests > ./results/Operators_Test.sp
+python printPklFile.py pkls/Operators_Numerics_Tests > ./results/Operators_Numerics_Tests.sp
