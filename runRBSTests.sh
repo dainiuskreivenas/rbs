@@ -17,3 +17,6 @@ python printPklFile.py pkls/Monkey_TwoSameFruits > ./results/Monkey_TwoSameFruit
 
 python tests/Monkey_TwoSamePlaceFruits.py
 python printPklFile.py pkls/Monkey_TwoSamePlaceFruits > ./results/Monkey_TwoSamePlaceFruits.sp
+
+python tests/Operators_Test.py
+python printPklFile.py pkls/Operators_Tests > ./results/Operators_Test.sp

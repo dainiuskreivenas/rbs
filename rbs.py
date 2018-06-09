@@ -147,7 +147,24 @@ class RBS:
                 var = self.extractVariables(var, found, item[2])
                 newTree.append((var, f[1] + [(found,item[3])]))
 
+
+
         return newTree
+
+    def testVariables(self, match, item):
+        op = item[1]
+        left = match[0][item[2]]
+        right = match[0][item[3]]
+        if(op == ">"):
+            return left > right
+        elif(op == "<"):
+            return left < right
+        elif(op == "="):
+            return left == right
+        elif(op == "<>"):
+            return left != right
+        else:
+            return False
 
     def applyRulesToFacts(self):
         for key in list(self.rules):
@@ -157,9 +174,27 @@ class RBS:
 
             matches = [({},[])]
             for i in range(0, len(ifs)):
-                matches = self.buildFounds(matches, ifs[i])
+                if(ifs[i][0] == "Test"):
+                    continue
+                else:
+                    matches = self.buildFounds(matches, ifs[i])
 
-            for m in matches:
+
+            validMatches = []
+            for m in range(0, len(matches)):
+                isMatch = True
+                for i in range(0, len(ifs)):
+                    if(ifs[i][0] == "Test"):
+                        isMatch = self.testVariables(matches[m], ifs[i])
+                        if(isMatch == False):
+                            break
+                    else:
+                        continue
+                if(isMatch):
+                    validMatches.append(matches[m])
+                
+
+            for m in validMatches:
                 for t in thens:
                     option,item = t
                     if(option == "assert"):
