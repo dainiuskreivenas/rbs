@@ -225,14 +225,22 @@ class RBS:
                 
 
             for m in validMatches:
+                assertions = []
+                retractions = []
                 for t in thens:
                     option,item = t
                     if(option == "assert"):
-                        self.addAssertion(item, m)
+                        assertions.append(item)
+                        #self.addAssertion(item, m)
                     elif(option == "retract"):
-                        self.addRetraction(item, m[1]) 
+                        retractions.append(item)
+                        #self.addRetraction(item, m[1]) 
                     else:
                         raise "Invalid Rule Configuration"
+
+                self.addAssertions(assertions, m)
+                self.addRetractions(retractions, m[1])
+
 
     def twoTurnOnOne(self,pop1,pop2,pop3):
         #print "[{} and {}] turns on [{}]".format(pop1.label,pop2.label,pop3.label)
@@ -273,7 +281,7 @@ class RBS:
 
                 index = index + 1
 
-    def addAssertion(self, assertion, match):       
+    def addAssertions(self, asssertions, match):
         label = ""
         for i,m in enumerate(match[1]):
             newLabel = "({} == {})".format(m[1],m[0][1].label)
@@ -285,19 +293,23 @@ class RBS:
         if(label in self.assertions):
             return
 
-        variables = match[0]
-        properties = assertion[1]
-        newProps = []
-        for p in properties:
-            prop = self.extractValue(p, variables)
-            newProps.append(prop)
+        facts = []
+        for assertion in asssertions:
+            variables = match[0]
+            properties = assertion[1]
+            newProps = []
+            for p in properties:
+                prop = self.extractValue(p, variables)
+                newProps.append(prop)
         
-        fact = (assertion[0],tuple(newProps))
-        # allocate temporary before adding new fact
-        self.assertions[label] = None
+            fact = (assertion[0],tuple(newProps))
 
-        # create new fact to be asserted
-        fact = self.getFact(fact)
+            # allocate temporary before adding new fact
+            self.assertions[label] = None
+
+            # create new fact to be asserted
+            fact = self.getFact(fact)
+            facts.append(fact)
         
         #create assertion ca
         aaPop = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} asserts {}".format(label, fact[1].label))
@@ -305,13 +317,14 @@ class RBS:
         fsa.makeCA(aaPop, 0)
         self.assertions[label] = aaPop
         
+        for fact in facts:
         #apply assertion
-        fsa.stateTurnsOnState(aaPop,0,fact[1],0)
-        fsa.stateTurnsOffState(aaPop,0,aaPop,0)
+            fsa.stateTurnsOnState(aaPop,0,fact[1],0)
+            fsa.stateTurnsOffState(aaPop,0,aaPop,0)
 
         self.matchesTurnOnOperator(match[1], aaPop)
-
-    def addRetraction(self, retraction, match):
+    
+    def addRetractions(self, retractions, match):
         label = ""
         for i,m in enumerate(match):
             newLabel = "({} == {})".format(m[1],m[0][1].label)
@@ -324,18 +337,18 @@ class RBS:
             return
 
         #create retraction CA
-        rePop = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} retracts {}".format(label, retraction))
+        rePop = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} retracts {}".format(label, retractions))
         rePop.record("spikes")
         fsa.makeCA(rePop, 0)
         self.retractions[label] = rePop
         fsa.stateTurnsOffState(rePop,0,rePop,0)
         
         #apply retraction
-        for m in match: 
-            if m[1] == retraction:
-                turnOfCa = m[0][1]       
-        fsa.stateTurnsOffState(rePop, 0, turnOfCa, 0)
+        for retraction in retractions:
+            for m in match: 
+                if m[1] == retraction:
+                    turnOfCa = m[0][1]       
+            fsa.stateTurnsOffState(rePop, 0, turnOfCa, 0)
 
         self.matchesTurnOnOperator(match, rePop)
-
     
