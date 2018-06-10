@@ -139,7 +139,7 @@ rbs.addRule(
 
 rbs.addFact(("ToH",(4,)))
 
-sim.run(1000)
+sim.run(1200)
 
 for key in list(rbs.factGroups):
     for f in rbs.factGroups[key]:
