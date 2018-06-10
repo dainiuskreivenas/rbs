@@ -20,3 +20,15 @@ python printPklFile.py pkls/Monkey_TwoSamePlaceFruits > ./results/Monkey_TwoSame
 
 python tests/Operators_Test.py
 python printPklFile.py pkls/Operators_Numerics_Tests > ./results/Operators_Numerics_Tests.sp
+
+python tests/Test_Decrement_Numerics.py
+python printPklFile.py pkls/Test_Decrement_Numerics > ./results/Test_Decrement_Numerics.sp
+
+python tests/Test_Increment_Numerics.py
+python printPklFile.py pkls/Test_Increment_Numerics > ./results/Test_Increment_Numerics.sp
+
+python tests/Test_Multiply_Numerics.py
+python printPklFile.py pkls/Test_Multiply_Numerics > ./results/Test_Multiply_Numerics.sp
+
+python tests/Test_Divide_Numerics.py
+python printPklFile.py pkls/Test_Divide_Numerics > ./results/Test_Divide_Numerics.sp

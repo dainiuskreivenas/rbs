@@ -96,11 +96,15 @@ class RBS:
                         break
                     val = properties[i]
 
+                    #is anything?
                     if(val == "?" and positive):
                         continue
 
-                    if(isinstance(val,str) and list(val)[0] == "?"):
-                        val = val[:1]
+                    if(isinstance(val, str)):
+                        lVal = list(val)
+                        #is variable?
+                        if(lVal[0] == "?"):
+                            val = val[:1]
 
                     if(positive):
                         if(val != "?" and val != prop):
@@ -151,10 +155,38 @@ class RBS:
 
         return newTree
 
+    def extractCalcValues(self, item, match):
+        if(isinstance(item, tuple)):
+            c = item[0]
+            cLeft = item[1]
+            cRight = item[2]
+            if(isinstance(cLeft, str) and cLeft[0] == "?"):
+                cLeft = match[cLeft]
+            
+            if(isinstance(cRight, str) and cRight[0] == "?"):
+                cRight = match[cRight]
+
+            if(c == "+"):
+                value = cLeft + cRight
+            elif(c == "-"):
+                value = cLeft - cRight
+            elif(c == "*"):
+                value = cLeft * cRight
+            elif(c == "/"):
+                value = cLeft / cRight
+        else:
+            if(isinstance(item, str) and item[0] == "?"):
+                value = match[item]
+            else:
+                value = item
+        
+        return value
+
     def testVariables(self, match, item):
         op = item[1]
-        left = match[0][item[2]]
-        right = match[0][item[3]]
+        left = self.extractCalcValues(item[2], match[0])
+        right = self.extractCalcValues(item[3], match[0])
+
         if(op == ">"):
             return left > right
         elif(op == "<"):
