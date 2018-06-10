@@ -151,29 +151,27 @@ class RBS:
                 var = self.extractVariables(var, found, item[2])
                 newTree.append((var, f[1] + [(found,item[3])]))
 
-
-
         return newTree
 
-    def extractCalcValues(self, item, match):
+    def extractValue(self, item, match):
         if(isinstance(item, tuple)):
             c = item[0]
-            cLeft = item[1]
-            cRight = item[2]
-            if(isinstance(cLeft, str) and cLeft[0] == "?"):
-                cLeft = match[cLeft]
+            left = item[1]
+            right = item[2]
+            if(isinstance(left, str) and left[0] == "?"):
+                left = match[left]
             
-            if(isinstance(cRight, str) and cRight[0] == "?"):
-                cRight = match[cRight]
+            if(isinstance(right, str) and right[0] == "?"):
+                right = match[right]
 
             if(c == "+"):
-                value = cLeft + cRight
+                value = left + right
             elif(c == "-"):
-                value = cLeft - cRight
+                value = left - right
             elif(c == "*"):
-                value = cLeft * cRight
+                value = left * right
             elif(c == "/"):
-                value = cLeft / cRight
+                value = left / right
         else:
             if(isinstance(item, str) and item[0] == "?"):
                 value = match[item]
@@ -184,8 +182,8 @@ class RBS:
 
     def testVariables(self, match, item):
         op = item[1]
-        left = self.extractCalcValues(item[2], match[0])
-        right = self.extractCalcValues(item[3], match[0])
+        left = self.extractValue(item[2], match[0])
+        right = self.extractValue(item[3], match[0])
 
         if(op == ">"):
             return left > right
@@ -287,14 +285,12 @@ class RBS:
         if(label in self.assertions):
             return
 
-        var = match[0]
+        variables = match[0]
         properties = assertion[1]
         newProps = []
         for p in properties:
-            if(p in var):
-                newProps.append(var[p])
-            else:
-                newProps.append(p)
+            prop = self.extractValue(p, variables)
+            newProps.append(prop)
         
         fact = (assertion[0],tuple(newProps))
         # allocate temporary before adding new fact

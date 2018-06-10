@@ -32,3 +32,15 @@ python printPklFile.py pkls/Test_Multiply_Numerics > ./results/Test_Multiply_Num
 
 python tests/Test_Divide_Numerics.py
 python printPklFile.py pkls/Test_Divide_Numerics > ./results/Test_Divide_Numerics.sp
+
+python tests/Assert_Decrement_Numerics.py
+python printPklFile.py pkls/Assert_Decrement_Numerics > ./results/Assert_Decrement_Numerics.sp
+
+python tests/Assert_Increment_Numerics.py
+python printPklFile.py pkls/Assert_Increment_Numerics > ./results/Assert_Increment_Numerics.sp
+
+python tests/Assert_Multiply_Numerics.py
+python printPklFile.py pkls/Assert_Multiply_Numerics > ./results/Assert_Multiply_Numerics.sp
+
+python tests/Assert_Divide_Numerics.py
+python printPklFile.py pkls/Assert_Divide_Numerics > ./results/Assert_Divide_Numerics.sp
