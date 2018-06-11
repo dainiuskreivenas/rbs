@@ -6,6 +6,7 @@ Test for numerical Decrement within Test condition
 
 
 import pyNN.nest as sim
+import numpy as np
 from rbs import RBS
 
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
@@ -20,12 +21,12 @@ rbs.addRule(
                 (True, "ToH", ("?d",), "r1"),            
             ],
             [
-                ("assert", ("tower", (1,))),
-                ("assert", ("tower", (2,))),
-                ("assert", ("tower", (3,))),
+                ("assert", ("tower", ("A",))),
+                ("assert", ("tower", ("B",))),
+                ("assert", ("tower", ("C",))),
                 ("assert", ("stackTop", (0,))),
-                ("assert", ("stack", (0, "goal", 1, "?d", 1, 3))),
-                ("assert", ("addDisk", ("?d", 1))),
+                ("assert", ("stack", (0, "goal", 1, "?d", "A", "C"))),
+                ("assert", ("addDisk", ("?d", "A"))),
                 ("retract", "r1")
             ]
         )
@@ -137,12 +138,47 @@ rbs.addRule(
     )
 )
 
-rbs.addFact(("ToH",(4,)))
+rbs.addFact(("ToH",(5,)))
 
-sim.run(1200)
+
+sim.run(5000)
+
+"""
+Extracts data for Excel
+
+data = {}
+total = []
+
+for f in rbs.factGroups["diskAt"]:
+    
+    var = f[0][0]
+    pop = f[0][1]
+    spiketrain = pop.get_data().segments[0].spiketrains[0]
+
+    discAt = "{} {}".format(var[0],var[1])
+    if (not discAt in data):
+        data[discAt] = []
+
+    for d in spiketrain.magnitude:
+        if(d in data[discAt]):
+            continue
+        else:
+            data[discAt].append(d)
+
+    for d in data:
+        for n in data[d]:
+            value = "{} {}".format(d, round(n, -1))
+            if(not value in total):
+                total.append(value)
+
+for t in total:
+    print t
+
+"""
 
 for key in list(rbs.factGroups):
     for f in rbs.factGroups[key]:
         f[0][1].printSpikes("pkls/TowerOfHanoi/facts/{}.pkl".format(f[0][1].label))
+
 
 sim.end()
