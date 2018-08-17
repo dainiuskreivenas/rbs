@@ -139,17 +139,30 @@ class RBS:
                 var[prop] = found[0][i]
         return var
 
-    def buildFounds(self, tree, item):
+    def buildFounds(self, tree, item, tests):
         newTree = []
         for f in tree:
             search = self.getSearch(item, f[0])
             founds = self.findMatches(search)
+
             if(founds == None):
                 continue
+
             for found in founds:
                 var = f[0].copy()
                 var = self.extractVariables(var, found, item[2])
-                newTree.append((var, f[1] + [(found,item[3])]))
+                treeItem = (var, f[1] + [(found,item[3])])
+
+                testPass = True
+                for test in tests:
+                    testPass = self.testVariables(treeItem, test)
+                    if(testPass == False):
+                        break
+
+                if(testPass == False):
+                    continue
+
+                newTree.append(treeItem)
 
         return newTree
 
@@ -174,7 +187,10 @@ class RBS:
                 value = left / right
         else:
             if(isinstance(item, str) and item[0] == "?"):
-                value = match[item]
+                if(item in match):
+                    value = match[item]
+                else:
+                    value = None
             else:
                 value = item
         
@@ -184,6 +200,11 @@ class RBS:
         op = item[1]
         left = self.extractValue(item[2], match[0])
         right = self.extractValue(item[3], match[0])
+
+        if(left == None):
+            return True
+        if(right == None):
+            return True
 
         if(op == ">"):
             return left > right
@@ -202,48 +223,39 @@ class RBS:
             ifs = rule[0]
             thens = rule[1]
 
-            matches = [({},[])]
+            assertions = []
+            retractions = []
+            for t in thens:
+                option,item = t
+                if(option == "assert"):
+                    assertions.append(item)
+                elif(option == "retract"):
+                    retractions.append(item)
+                else:
+                    raise "Invalid Rule Configuration"
+
+            tests = []
+            conditions = []
             for i in range(0, len(ifs)):
                 if(ifs[i][0] == "Test"):
-                    continue
+                    tests.append(ifs[i])
                 else:
-                    matches = self.buildFounds(matches, ifs[i])
+                    conditions.append(ifs[i])
 
+            matches = [({},[])]
+            for i in range(0, len(conditions)):
+                x = len(matches)
+                matches = self.buildFounds(matches, conditions[i], tests)              
 
-            validMatches = []
-            for m in range(0, len(matches)):
-                isMatch = True
-                for i in range(0, len(ifs)):
-                    if(ifs[i][0] == "Test"):
-                        isMatch = self.testVariables(matches[m], ifs[i])
-                        if(isMatch == False):
-                            break
-                    else:
-                        continue
-                if(isMatch):
-                    validMatches.append(matches[m])
-                
-
-            for m in validMatches:
-                assertions = []
-                retractions = []
-                for t in thens:
-                    option,item = t
-                    if(option == "assert"):
-                        assertions.append(item)
-                        #self.addAssertion(item, m)
-                    elif(option == "retract"):
-                        retractions.append(item)
-                        #self.addRetraction(item, m[1]) 
-                    else:
-                        raise "Invalid Rule Configuration"
-
-                self.addAssertions(assertions, m)
-                self.addRetractions(retractions, m[1])
+            x = len(matches)
+            for m in matches:
+                if(len(assertions) > 0):
+                    self.addAssertions(assertions, m)
+                if(len(retractions) > 0):
+                    self.addRetractions(retractions, m[1])
 
 
     def twoTurnOnOne(self,pop1,pop2,pop3):
-        #print "[{} and {}] turns on [{}]".format(pop1.label,pop2.label,pop3.label)
         fsa.stateHalfTurnsOnState(pop1,0,pop3,0)
         fsa.stateHalfTurnsOnState(pop2,0,pop3,0)
 
