@@ -135,7 +135,7 @@ class RBS:
 
     def extractVariables(self, var, found, precon):
         for i,prop in enumerate(precon):
-            if(len(prop) > 1 and prop[0] == "?" and prop not in var):
+            if(isinstance(prop, str) and len(prop) > 1 and prop[0] == "?" and prop not in var):
                 var[prop] = found[0][i]
         return var
 
@@ -244,10 +244,10 @@ class RBS:
 
             matches = [({},[])]
             for i in range(0, len(conditions)):
-                x = len(matches)
-                matches = self.buildFounds(matches, conditions[i], tests)              
+                matches = self.buildFounds(matches, conditions[i], tests)      
+                if(len(matches) == 0):
+                    break;        
 
-            x = len(matches)
             for m in matches:
                 if(len(assertions) > 0):
                     self.addAssertions(assertions, m)

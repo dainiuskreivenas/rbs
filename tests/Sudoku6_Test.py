@@ -2,6 +2,9 @@
 
 import pyNN.nest as sim
 from Sudoku6 import Sudoku6
+import time
+import datetime
+
 
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 
@@ -18,13 +21,26 @@ sudoku = [[  1 ,None,  3       ,None,  4 ,None],
           [  2 ,None,  1       ,None,  5 ,  4 ],
           [None,  5 ,None      ,  1 ,None,  2 ]]  
 
-sudoku6.activateBoard(sudoku)
 
-sim.run(10000)
+print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-for key in list(sudoku6.rbs.factGroups):
-    for f in sudoku6.rbs.factGroups[key]:
-        print f[0][1].label
-        print f[0][1].get_data().segments[0].spiketrains[0]
+sudoku6.solve(sudoku)
+sim.run(1500)
+
+for f in sudoku6.rbs.factGroups["Item"]:
+    hasSpiked = len(f[0][1].get_data().segments[0].spiketrains[0]) > 0
+    print "{} - {}".format(f[0][1].label,hasSpiked)
+
+
+print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
+sudoku6.solve(sudoku)
+sim.run(1500)
+
+for f in sudoku6.rbs.factGroups["Item"]:
+    hasSpiked = len(f[0][1].get_data().segments[0].spiketrains[0]) > 0
+    print "{} - {}".format(f[0][1].label,hasSpiked)
+
+print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
 sim.end()
