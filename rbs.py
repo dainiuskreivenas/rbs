@@ -71,6 +71,7 @@ class RBS:
         self.rules[rule[0]] = rule[1]
         self.applyRulesToFacts()
 
+
     def getMatchingFacts(self, positive,name,properties):
         if(name not in self.factGroups):
             return None
@@ -208,95 +209,6 @@ class RBS:
         else:
             return False
 
-    def applyRulesToFacts(self):
-        for key in list(self.rules):
-            rule = self.rules[key]
-            ifs = rule[0]
-            thens = rule[1]
-
-            assertions = []
-            retractions = []
-            for t in thens:
-                option,item = t
-                if(option == "assert"):
-                    assertions.append(item)
-                elif(option == "retract"):
-                    retractions.append(item)
-                else:
-                    raise "Invalid Rule Configuration"
-
-            tests = []
-            conditions = []
-            for i in range(0, len(ifs)):
-                if(ifs[i][0] == "Test"):
-                    tests.append(ifs[i])
-                else:
-                    conditions.append(ifs[i])
-
-            matches = [({},[])]
-            for i in range(0, len(conditions)):
-                matches = self.buildFounds(matches, conditions[i], tests)      
-                if(len(matches) == 0):
-                    break;        
-
-            for m in matches:
-                aaPop = None
-                rePop = None
-
-                if(len(assertions) > 0):
-                    aaPop = self.addAssertions(assertions, m)
-                if(len(retractions) > 0):
-                    rePop = self.addRetractions(retractions, m[1])
-
-                self.matchesTurnOnOperator(m[1],aaPop,rePop)
-
-                
-    def twoStatesTurnOnOneNueron(self, pop1, pop2, pop3):
-        fsa.stateHalfTurnsOnOneNueron(pop1, 0, pop3, 0)
-        fsa.stateHalfTurnsOnOneNueron(pop2, 0, pop3, 0)
-
-    def neuronAndStateTurnsOnNeuron(self, pop1, pop2, pop3):
-        fsa.oneNeuronHalfTurnsOnOneNeuron(pop1, 0, pop3, 0)
-        fsa.stateHalfTurnsOnOneNueron(pop2, 0, pop3, 0)
-
-    def addTwoStateIntermediate(self, pop1, pop2):
-        intermediate = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
-        intermediate.record("spikes")
-        self.twoStatesTurnOnOneNueron(pop1,pop2,intermediate)
-        self.interns.append(intermediate)
-        return intermediate
-
-    def addNeuronAndStateIntermediate(self, pop1, pop2):
-        intermediate = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
-        intermediate.record("spikes")
-        self.neuronAndStateTurnsOnNeuron(pop1, pop2, intermediate)
-        self.interns.append(intermediate)
-        return intermediate
-
-    def matchesTurnOnOperator(self, match, aaPop, rePop):
-        if len(match) == 1:
-            if(aaPop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,aaPop,0)
-            if(rePop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,rePop,0)
-        elif (len(match) == 2):
-            if(aaPop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],aaPop)
-            if(rePop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],rePop)
-        else:
-            index = 0
-
-            pop1 = match[index][0][1]
-            pop2 = match[index+1][0][1]
-
-            intermediate = self.addTwoStateIntermediate(pop1,pop2)
-            while(index < len(match)-2):
-                pop3 = match[index+2][0][1]
-                if(index == len(match)-3):
-                    if(aaPop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, aaPop)
-                    if(rePop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, rePop)
-                else:
-                    inter2 = self.addNeuronAndStateIntermediate(intermediate, pop3)
-                    intermediate = inter2
-
-                index = index + 1
 
     def addAssertions(self, asssertions, match):
         label = ""
@@ -365,4 +277,94 @@ class RBS:
             fsa.oneNeuronTurnsOffState(rePop, 0, turnOfCa, 0)
 
         return rePop        
-    
+
+
+    def twoStatesTurnOnOneNueron(self, pop1, pop2, pop3):
+        fsa.stateHalfTurnsOnOneNueron(pop1, 0, pop3, 0)
+        fsa.stateHalfTurnsOnOneNueron(pop2, 0, pop3, 0)
+
+    def neuronAndStateTurnsOnNeuron(self, pop1, pop2, pop3):
+        fsa.oneNeuronHalfTurnsOnOneNeuron(pop1, 0, pop3, 0)
+        fsa.stateHalfTurnsOnOneNueron(pop2, 0, pop3, 0)
+
+    def addTwoStateIntermediate(self, pop1, pop2):
+        intermediate = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
+        intermediate.record("spikes")
+        self.twoStatesTurnOnOneNueron(pop1,pop2,intermediate)
+        self.interns.append(intermediate)
+        return intermediate
+
+    def addNeuronAndStateIntermediate(self, pop1, pop2):
+        intermediate = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
+        intermediate.record("spikes")
+        self.neuronAndStateTurnsOnNeuron(pop1, pop2, intermediate)
+        self.interns.append(intermediate)
+        return intermediate
+
+    def setUpActivations(self, match, aaPop, rePop):
+        if len(match) == 1:
+            if(aaPop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,aaPop,0)
+            if(rePop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,rePop,0)
+        elif (len(match) == 2):
+            if(aaPop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],aaPop)
+            if(rePop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],rePop)
+        else:
+            index = 0
+
+            pop1 = match[index][0][1]
+            pop2 = match[index+1][0][1]
+
+            intermediate = self.addTwoStateIntermediate(pop1,pop2)
+            while(index < len(match)-2):
+                pop3 = match[index+2][0][1]
+                if(index == len(match)-3):
+                    if(aaPop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, aaPop)
+                    if(rePop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, rePop)
+                else:
+                    inter2 = self.addNeuronAndStateIntermediate(intermediate, pop3)
+                    intermediate = inter2
+
+                index = index + 1
+
+
+    def applyRulesToFacts(self):
+        for key in list(self.rules):
+            rule = self.rules[key]
+            ifs = rule[0]
+            thens = rule[1]
+
+            assertions = []
+            retractions = []
+            for t in thens:
+                option,item = t
+                if(option == "assert"):
+                    assertions.append(item)
+                elif(option == "retract"):
+                    retractions.append(item)
+                else:
+                    raise "Invalid Rule Configuration"
+
+            tests = []
+            conditions = []
+            for i in range(0, len(ifs)):
+                if(ifs[i][0] == "Test"):
+                    tests.append(ifs[i])
+                else:
+                    conditions.append(ifs[i])
+
+            matches = [({},[])]
+            for i in range(0, len(conditions)):
+                matches = self.buildFounds(matches, conditions[i], tests)      
+                if(len(matches) == 0):
+                    break;        
+
+            for m in matches:
+                aaPop = None
+                rePop = None
+
+                if(len(assertions) > 0):
+                    aaPop = self.addAssertions(assertions, m)
+                if(len(retractions) > 0):
+                    rePop = self.addRetractions(retractions, m[1])
+
+                self.setUpActivations(m[1],aaPop,rePop)
