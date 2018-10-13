@@ -162,6 +162,12 @@ class Sudoku6:
                         (True, "Item", ("?x2","?y2", "?5", "?b"), "5"),
                         (True, "Number", ("?6",), "n6"),
                         (True, "Box", ("?x3", "?y2", "?b"), "b"),
+
+                        ("Test", "<>","?x1","?x2"),
+                        ("Test", "<>","?x1","?x3"),
+                        ("Test", "<>","?x2","?x3"),                        
+                        ("Test", "<>","?y1","?y2"),
+
                         ("Test","<>","?1","?2"),
                         ("Test","<>","?1","?3"),
                         ("Test","<>","?1","?4"),
@@ -180,96 +186,6 @@ class Sudoku6:
                     ],
                     [
                         ("assert", ("Item", ("?x3", "?y2", "?6", "?b")))
-                    ]
-                )
-            )
-        )
-
-        # End
-        self.rbs.addRule(
-            (
-                "End",
-                (
-                    [
-                        (True, "Item", (1,1,"?","?"), "i1"),
-                        (True, "Item", (1,2,"?","?"), "i2"),
-                        (True, "Item", (1,3,"?","?"), "i3"),
-                        (True, "Item", (1,4,"?","?"), "i4"),
-                        (True, "Item", (1,5,"?","?"), "i5"),
-                        (True, "Item", (1,6,"?","?"), "i6"),
-
-                        (True, "Item", (2,1,"?","?"), "i7"),
-                        (True, "Item", (2,2,"?","?"), "i8"),
-                        (True, "Item", (2,3,"?","?"), "i9"),
-                        (True, "Item", (2,4,"?","?"), "i10"),
-                        (True, "Item", (2,5,"?","?"), "i11"),
-                        (True, "Item", (2,6,"?","?"), "i12"),
-
-                        (True, "Item", (3,1,"?","?"), "i13"),
-                        (True, "Item", (3,2,"?","?"), "i14"),
-                        (True, "Item", (3,3,"?","?"), "i15"),
-                        (True, "Item", (3,4,"?","?"), "i16"),
-                        (True, "Item", (3,5,"?","?"), "i17"),
-                        (True, "Item", (3,6,"?","?"), "i18"),
-                        
-                        (True, "Item", (4,1,"?","?"), "i19"),
-                        (True, "Item", (4,2,"?","?"), "i20"),
-                        (True, "Item", (4,3,"?","?"), "i21"),
-                        (True, "Item", (4,4,"?","?"), "i22"),
-                        (True, "Item", (4,5,"?","?"), "i23"),
-                        (True, "Item", (4,6,"?","?"), "i24"),
-                        
-                        (True, "Item", (5,1,"?","?"), "i25"),
-                        (True, "Item", (5,2,"?","?"), "i26"),
-                        (True, "Item", (5,3,"?","?"), "i27"),
-                        (True, "Item", (5,4,"?","?"), "i28"),
-                        (True, "Item", (5,5,"?","?"), "i29"),
-                        (True, "Item", (5,6,"?","?"), "i30"),
-                        
-                        (True, "Item", (6,1,"?","?"), "i31"),
-                        (True, "Item", (6,2,"?","?"), "i32"),
-                        (True, "Item", (6,3,"?","?"), "i33"),
-                        (True, "Item", (6,4,"?","?"), "i34"),
-                        (True, "Item", (6,5,"?","?"), "i35"),
-                        (True, "Item", (6,6,"?","?"), "i36"),
-                    ],
-                    [
-                        ("retract", "i1"),
-                        ("retract", "i2"),
-                        ("retract", "i3"),
-                        ("retract", "i4"),
-                        ("retract", "i5"),
-                        ("retract", "i6"),
-                        ("retract", "i7"),
-                        ("retract", "i8"),
-                        ("retract", "i9"),
-                        ("retract", "i10"),
-                        ("retract", "i11"),
-                        ("retract", "i12"),
-                        ("retract", "i13"),
-                        ("retract", "i14"),
-                        ("retract", "i15"),
-                        ("retract", "i16"),
-                        ("retract", "i17"),
-                        ("retract", "i18"),
-                        ("retract", "i19"),
-                        ("retract", "i20"),
-                        ("retract", "i21"),
-                        ("retract", "i22"),
-                        ("retract", "i23"),
-                        ("retract", "i24"),
-                        ("retract", "i25"),
-                        ("retract", "i26"),
-                        ("retract", "i27"),
-                        ("retract", "i28"),
-                        ("retract", "i29"),
-                        ("retract", "i30"),
-                        ("retract", "i31"),
-                        ("retract", "i32"),
-                        ("retract", "i33"),
-                        ("retract", "i34"),
-                        ("retract", "i35"),
-                        ("retract", "i36"),
                     ]
                 )
             )

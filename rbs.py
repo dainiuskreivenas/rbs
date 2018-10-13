@@ -67,18 +67,9 @@ class RBS:
         
         return found
 
-
     def addRule(self, rule):
         self.rules[rule[0]] = rule[1]
-
         self.applyRulesToFacts()
-
-    def updateFact(self, factToUpdate,  fact):
-        ca = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = fact)
-        fsa.makeCA(ca, 0)
-        ca.record("spikes")
-
-        factToUpdate[1].append((fact[1][0],ca))
 
     def getMatchingFacts(self, positive,name,properties):
         if(name not in self.factGroups):
@@ -249,46 +240,60 @@ class RBS:
                     break;        
 
             for m in matches:
+                aaPop = None
+                rePop = None
+
                 if(len(assertions) > 0):
-                    self.addAssertions(assertions, m)
+                    aaPop = self.addAssertions(assertions, m)
                 if(len(retractions) > 0):
-                    self.addRetractions(retractions, m[1])
+                    rePop = self.addRetractions(retractions, m[1])
 
+                self.matchesTurnOnOperator(m[1],aaPop,rePop)
 
-    def twoTurnOnOne(self,pop1,pop2,pop3):
-        fsa.stateHalfTurnsOnState(pop1,0,pop3,0)
-        fsa.stateHalfTurnsOnState(pop2,0,pop3,0)
+                
+    def twoStatesTurnOnOneNueron(self, pop1, pop2, pop3):
+        fsa.stateHalfTurnsOnOneNueron(pop1, 0, pop3, 0)
+        fsa.stateHalfTurnsOnOneNueron(pop2, 0, pop3, 0)
 
-    def addIntermediate(self, pop1, pop2):
-        intermediate = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
+    def neuronAndStateTurnsOnNeuron(self, pop1, pop2, pop3):
+        fsa.oneNeuronHalfTurnsOnOneNeuron(pop1, 0, pop3, 0)
+        fsa.stateHalfTurnsOnOneNueron(pop2, 0, pop3, 0)
+
+    def addTwoStateIntermediate(self, pop1, pop2):
+        intermediate = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
         intermediate.record("spikes")
-        fsa.makeCA(intermediate, 0)
-        self.twoTurnOnOne(pop1,pop2,intermediate)
+        self.twoStatesTurnOnOneNueron(pop1,pop2,intermediate)
         self.interns.append(intermediate)
         return intermediate
 
-    def matchesTurnOnOperator(self, match, ca):
+    def addNeuronAndStateIntermediate(self, pop1, pop2):
+        intermediate = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} and {}".format(pop1.label,pop2.label))
+        intermediate.record("spikes")
+        self.neuronAndStateTurnsOnNeuron(pop1, pop2, intermediate)
+        self.interns.append(intermediate)
+        return intermediate
+
+    def matchesTurnOnOperator(self, match, aaPop, rePop):
         if len(match) == 1:
-            fsa.stateTurnsOnState(match[0][0][1],0,ca,0)
+            if(aaPop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,aaPop,0)
+            if(rePop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,rePop,0)
         elif (len(match) == 2):
-            self.twoTurnOnOne(match[0][0][1],match[1][0][1],ca)
+            if(aaPop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],aaPop)
+            if(rePop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],rePop)
         else:
             index = 0
 
             pop1 = match[index][0][1]
             pop2 = match[index+1][0][1]
 
-            intermediate = self.addIntermediate(pop1,pop2)
+            intermediate = self.addTwoStateIntermediate(pop1,pop2)
             while(index < len(match)-2):
-
                 pop3 = match[index+2][0][1]
-
                 if(index == len(match)-3):
-                    self.twoTurnOnOne(intermediate,pop3,ca)
-                    fsa.stateTurnsOffState(ca,0,intermediate,0)
+                    if(aaPop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, aaPop)
+                    if(rePop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, rePop)
                 else:
-                    inter2 = self.addIntermediate(intermediate,pop3)
-                    fsa.stateTurnsOffState(inter2,0,intermediate,0)
+                    inter2 = self.addNeuronAndStateIntermediate(intermediate, pop3)
                     intermediate = inter2
 
                 index = index + 1
@@ -324,17 +329,15 @@ class RBS:
             facts.append(fact)
         
         #create assertion ca
-        aaPop = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} asserts {}".format(label, fact[1].label))
+        aaPop = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} asserts {}".format(label, fact[1].label))
         aaPop.record("spikes")
-        fsa.makeCA(aaPop, 0)
         self.assertions[label] = aaPop
-        
-        for fact in facts:
-        #apply assertion
-            fsa.stateTurnsOnState(aaPop,0,fact[1],0)
-            fsa.stateTurnsOffState(aaPop,0,aaPop,0)
 
-        self.matchesTurnOnOperator(match[1], aaPop)
+        #apply assertion
+        for fact in facts:
+            fsa.oneNeuronTurnsOnState(aaPop,0,fact[1],0)
+
+        return aaPop
     
     def addRetractions(self, retractions, match):
         label = ""
@@ -349,18 +352,17 @@ class RBS:
             return
 
         #create retraction CA
-        rePop = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} retracts {}".format(label, retractions))
+        rePop = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} retracts {}".format(label, retractions))
         rePop.record("spikes")
-        fsa.makeCA(rePop, 0)
         self.retractions[label] = rePop
-        fsa.stateTurnsOffState(rePop,0,rePop,0)
         
         #apply retraction
         for retraction in retractions:
             for m in match: 
                 if m[1] == retraction:
-                    turnOfCa = m[0][1]       
-            fsa.stateTurnsOffState(rePop, 0, turnOfCa, 0)
+                    turnOfCa = m[0][1]
+                    break
+            fsa.oneNeuronTurnsOffState(rePop, 0, turnOfCa, 0)
 
-        self.matchesTurnOnOperator(match, rePop)
+        return rePop        
     
