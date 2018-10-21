@@ -55,12 +55,6 @@ class MonekyProblem:
         )
 
     def printSpikes(self, name):
-        # "################### retracts ###############"
-
-        for key in self.rbs.retractions.keys():
-            re = self.rbs.retractions[key]
-            re.printSpikes("pkls/"+name+"/retractions/{}.pkl".format(re.label))
-
         # "################### assertions ###############"
 
         for key in self.rbs.assertions.keys():

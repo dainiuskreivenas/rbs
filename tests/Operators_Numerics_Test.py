@@ -86,12 +86,6 @@ rbs.addFact(("item4", (1,2)))
 
 sim.run(200)
 
-# "################### retracts ###############"
-
-for key in rbs.retractions.keys():
-    re = rbs.retractions[key]
-    re.printSpikes("pkls/Operators_Numerics_Tests/retractions/{}.pkl".format(re.label))
-
 # "################### assertions ###############"
 
 for key in rbs.assertions.keys():

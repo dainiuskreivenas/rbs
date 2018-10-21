@@ -30,8 +30,7 @@ rbs.addRule(
 
 rbs.addFact(("MonkeyCanReach",("banana",)))
 
-sim.run(30)
-
+sim.run(100)
 
 print "assertions"
 for a in rbs.assertions:
@@ -40,14 +39,6 @@ for a in rbs.assertions:
     for i, st in enumerate(pop.get_data().segments[0].spiketrains):
         for d in st.magnitude:
             print "{} {}".format(i, d)
-
-print "retractions"
-for a in rbs.retractions:
-    pop = rbs.retractions[a]
-
-    for i, st in enumerate(pop.get_data().segments[0].spiketrains):
-        for d in st.magnitude:
-            print "{} {}".format(i+10, d)
 
 add = 10
 

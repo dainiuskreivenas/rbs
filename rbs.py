@@ -12,9 +12,9 @@ class RBS:
     def __init__(self):
         self.factGroups = {}
         self.rules = {}
-        self.retractions = {}
         self.assertions = {}
         self.interns = []
+        self.factIndex = 0
 
     def findGroup(self, name):
         if(name not in self.factGroups):
@@ -32,7 +32,9 @@ class RBS:
     def addFact(self, fact, active = True):
         group = self.getGroup(fact[0])
 
-        ca = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = fact)
+
+        self.factIndex = self.factIndex + 1 
+        ca = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = self.factIndex)
         fsa.makeCA(ca, 0)
 
         if(active):
@@ -42,7 +44,7 @@ class RBS:
 
         ca.record("spikes")
 
-        f = (fact[1],ca)
+        f = (fact[1], ca, self.factIndex)
         group.append([f])
 
         self.applyRulesToFacts()
@@ -55,7 +57,7 @@ class RBS:
         found = None
         for f in group:
             match = True
-            for i,p in enumerate(f[0][0]):
+            for i,p in enumerate(f[0][0]): 
                 if(p != fact[1][i]):
                     match = False
                     break
@@ -72,7 +74,7 @@ class RBS:
         self.applyRulesToFacts()
 
 
-    def getMatchingFacts(self, positive,name,properties):
+    def getMatchingFacts(self, positive, name, properties):
         if(name not in self.factGroups):
             return None
         
@@ -110,9 +112,6 @@ class RBS:
                     
         return found
 
-    def findMatches(self, precon):
-        return self.getMatchingFacts(precon[0], precon[1], precon[2])
-
     def getSearch(self, item, variables):
         params = []            
         for p in item[2]:
@@ -135,7 +134,7 @@ class RBS:
         newTree = []
         for f in tree:
             search = self.getSearch(item, f[0])
-            founds = self.findMatches(search)
+            founds = self.getMatchingFacts(search[0], search[1], search[2])
 
             if(founds == None):
                 continue
@@ -209,75 +208,45 @@ class RBS:
         else:
             return False
 
-
-    def addAssertions(self, asssertions, match):
+    def createRule(self, ma, ruleName):
         label = ""
-        for i,m in enumerate(match[1]):
-            newLabel = "({} == {})".format(m[1],m[0][1].label)
-            if (i == 0):
-                label = label+newLabel
+        for i,m in enumerate(ma[1]):
+            if(i == 0):
+                label = "{}".format(m[0][2])
             else:
-                label = label+" and "+newLabel
+                label = "{} and {}".format(label, m[0][2])
 
         if(label in self.assertions):
-            return
+            return None
 
-        facts = []
+        rulePop = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label=label + " - " + ruleName)
+        rulePop.record("spikes")
+        self.assertions[label] = rulePop
+
+        return rulePop
+
+    def addAssertions(self, asssertions, match, rulePop):
         for assertion in asssertions:
             variables = match[0]
             properties = assertion[1]
             newProps = []
+
             for p in properties:
                 prop = self.extractValue(p, variables)
                 newProps.append(prop)
         
             fact = (assertion[0],tuple(newProps))
-
-            # allocate temporary before adding new fact
-            self.assertions[label] = None
-
-            # create new fact to be asserted
             fact = self.getFact(fact)
-            facts.append(fact)
-        
-        #create assertion ca
-        aaPop = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} asserts {}".format(label, fact[1].label))
-        aaPop.record("spikes")
-        self.assertions[label] = aaPop
-
-        #apply assertion
-        for fact in facts:
-            fsa.oneNeuronTurnsOnState(aaPop,0,fact[1],0)
-
-        return aaPop
+            fsa.oneNeuronTurnsOnState(rulePop, 0, fact[1], 0)
     
-    def addRetractions(self, retractions, match):
-        label = ""
-        for i,m in enumerate(match):
-            newLabel = "({} == {})".format(m[1],m[0][1].label)
-            if (i == 0):
-                label = label+newLabel
-            else:
-                label = label+" and "+newLabel
-
-        if(label in self.retractions):
-            return
-
-        #create retraction CA
-        rePop = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="{} retracts {}".format(label, retractions))
-        rePop.record("spikes")
-        self.retractions[label] = rePop
-        
+    def addRetractions(self, retractions, match, rulePop):
         #apply retraction
         for retraction in retractions:
             for m in match: 
                 if m[1] == retraction:
                     turnOfCa = m[0][1]
                     break
-            fsa.oneNeuronTurnsOffState(rePop, 0, turnOfCa, 0)
-
-        return rePop        
-
+            fsa.oneNeuronTurnsOffState(rulePop, 0, turnOfCa, 0)
 
     def twoStatesTurnOnOneNueron(self, pop1, pop2, pop3):
         fsa.stateHalfTurnsOnOneNueron(pop1, 0, pop3, 0)
@@ -301,13 +270,11 @@ class RBS:
         self.interns.append(intermediate)
         return intermediate
 
-    def setUpActivations(self, match, aaPop, rePop):
+    def setUpActivations(self, match, rulePop):
         if len(match) == 1:
-            if(aaPop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,aaPop,0)
-            if(rePop != None): fsa.stateTurnsOnOneNeuron(match[0][0][1],0,rePop,0)
+            fsa.stateTurnsOnOneNeuron(match[0][0][1],0,rulePop,0)
         elif (len(match) == 2):
-            if(aaPop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],aaPop)
-            if(rePop != None): self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],rePop)
+            self.twoStatesTurnOnOneNueron(match[0][0][1],match[1][0][1],rulePop)
         else:
             index = 0
 
@@ -318,14 +285,12 @@ class RBS:
             while(index < len(match)-2):
                 pop3 = match[index+2][0][1]
                 if(index == len(match)-3):
-                    if(aaPop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, aaPop)
-                    if(rePop != None): self.neuronAndStateTurnsOnNeuron(intermediate, pop3, rePop)
+                    self.neuronAndStateTurnsOnNeuron(intermediate, pop3, rulePop)
                 else:
                     inter2 = self.addNeuronAndStateIntermediate(intermediate, pop3)
                     intermediate = inter2
 
                 index = index + 1
-
 
     def applyRulesToFacts(self):
         for key in list(self.rules):
@@ -354,17 +319,19 @@ class RBS:
 
             matches = [({},[])]
             for i in range(0, len(conditions)):
-                matches = self.buildFounds(matches, conditions[i], tests)      
+                matches = self.buildFounds(matches, conditions[i], tests)
                 if(len(matches) == 0):
-                    break;        
+                    break 
 
-            for m in matches:
-                aaPop = None
-                rePop = None
+            for ma in matches:
+
+                rulePop = self.createRule(ma, key)
+                if(rulePop == None):
+                    continue
 
                 if(len(assertions) > 0):
-                    aaPop = self.addAssertions(assertions, m)
+                    self.addAssertions(assertions, ma, rulePop)
                 if(len(retractions) > 0):
-                    rePop = self.addRetractions(retractions, m[1])
+                    self.addRetractions(retractions, ma[1], rulePop)
 
-                self.setUpActivations(m[1],aaPop,rePop)
+                self.setUpActivations(ma[1], rulePop)
