@@ -3,15 +3,17 @@
 import pyNN.nest as sim
 from Sudoku6_CanBe import Sudoku6_CanBe
 import time
+import numpy as np
 import datetime
 
 
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 
+
+print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
 sudoku6 = Sudoku6_CanBe()
 
-
-"""
 sudoku = [[None,  6 ,None      ,None,None,  1 ],
           [None,None,None      ,  4 ,  2 ,None],
 
@@ -23,66 +25,48 @@ sudoku = [[None,  6 ,None      ,None,None,  1 ],
           [None,  4 ,  5       ,None,None,None],
           [  3 ,None,None      ,None,  4 ,None]]
 
-"""
-
-sudoku = [[  1 ,None,  3       ,None,  4 ,None],
-          [  4 ,  6 ,None      ,  2 ,  1 ,  3 ],
-
-
-          [None,  4 ,  6      ,  3 ,None,  1 ],
-          [  3 ,None,  2       ,  4 ,  6 ,  5 ],
-
-
-          [  2 ,None,  1       ,None,  5 ,  4 ],
-          [None,  5 ,None      ,  1 ,None,  2 ]]
-
-
-"""
-sudoku = [[None,  3 ,  6       ,  1 ,  2 ,None],
-          [  1 ,  2 ,None      ,  6 ,None,  3 ],
-
-
-          [  6 ,  1 ,  4       ,None,  5 ,  2 ],
-          [  2 ,None,  3       ,  4 ,  1 ,None],
-
-
-          [None,  4 ,None      ,  5 ,None,  1 ],
-          [  5 ,None,  1       ,None,  3 ,  4 ]]
-
-
-sudoku = [[  2 ,None,  5        ,  3 ,  1 ,None],
-          [None,  3 ,  1        ,  2 ,None,  5 ],
-
-
-          [  4 ,  5 ,None       ,  6 ,  3 ,None],
-          [  3 ,  1 ,  6        ,None,  5 ,  2 ],
-
-
-          [None,None,  3        ,  1 ,  2 ,  4 ],
-          [  1 ,  2 ,  4        ,None,None,  3 ]]
-"""
+sudoku6.solve(sudoku)
 
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-sudoku6.solve(sudoku)
-sim.run(1500)
+sim.run(200)
 
-mins = []
+print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-for f in sudoku6.rbs.factGroups["Item"]:
+"""
+for g in sudoku6.rbs.net.facts:
+    for f in sudoku6.rbs.net.facts[g]:
+        min = 10000
+        data = sudoku6.rbs.exe.assembly[f.ca[0]:f.ca[9]].get_data()
+        if len(data.segments[0].spiketrains[0]) > 0:
+            min = data.segments[0].spiketrains[0].magnitude[0]
+        hasSpiked = len(data.segments[0].spiketrains[0]) > 0
+        print "(f-{} - {} {}) - {} - at {}".format(f.index, f.group, f.attributes, hasSpiked, min)
+"""
 
-    min = 10000
-    for t in f[0][1].get_data().segments[0].spiketrains[0].magnitude:
-        if(t < min):
-            min = t
+assertionTimes = {}
 
-    mins.append(min)
+neurons = []
 
-    hasSpiked = len(f[0][1].get_data().segments[0].spiketrains[0]) > 0
-    print "{} - {}".format(f[0][1].label,hasSpiked)
+for l in sudoku6.rbs.net.assertions:
+    neuron = sudoku6.rbs.net.assertions[l]
+    neurons.append(neuron)
 
+pop = sudoku6.rbs.exe.assembly[neurons]
+print pop
 
-print mins
+data = pop.get_data()
+for spikes in data.segments[0].spiketrains:
+    hasSpiked = len(spikes) > 0
+    if(hasSpiked):
+        t = spikes.magnitude[0]
+        if (t in assertionTimes):
+            assertionTimes[t] += 1
+        else:
+            assertionTimes[t] = 1
+
+for t in assertionTimes:
+    print "{} - {}".format(t,assertionTimes[t])
 
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 

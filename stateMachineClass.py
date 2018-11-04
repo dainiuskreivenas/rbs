@@ -40,21 +40,21 @@ class FSAHelperFunctions:
             self.CA_STOPS_CA_WEIGHT = -0.15
             self.ONE_NEURON_STOPS_CA_WEIGHT = -1.0
 
-        self.ONE_NEURON_STARTS_CA_WEIGHT = 1.0
+        self.ONE_NEURON_STARTS_CA_WEIGHT = 0.08
         self.INTRA_CA_WEIGHT = 0.016 
         
         #---- STATE to ? WEIGHTS
 
         self.FULL_ON_WEIGHT = 0.01
-        self.STATE_TO_ONE_WEIGHT = 0.002
+        self.STATE_TO_ONE_WEIGHT = 0.01
 
         self.FULL_ON_WEIGHT_SLOW = 0.0015
         
         self.HALF_ON_WEIGHT = 0.0008
-        self.HALF_ON_ONE_WEIGHT = .007
+        self.HALF_ON_ONE_WEIGHT = .001
 
         #---- NEURON to ? WEIGHTS
-        self.ONE_HALF_ON_WEIGHT = .005
+        self.ONE_HALF_ON_WEIGHT = 0.03
         self.ONE_HALF_ON_ONE_WEIGHT = 0.03
         
         if (nealParameters.simulator == 'nest'):
@@ -116,165 +116,86 @@ class FSAHelperFunctions:
     #-------- SPIKE GENERATOR FUCNTION
     def turnOnStateFromSpikeSource(self,spikeSource, toNeurons, toCA):
         connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
+        for toNeuron in range (toCA,toCA+self.CA_SIZE-self.CA_INHIBS):
             connector = connector + [(0,toNeuron,self.INPUT_WEIGHT,
                                       nealParameters.DELAY)]
         self.neal.nealProjection(spikeSource, toNeurons, connector,'excitatory')
 
-    def stimulateStateFromSpikeSource(self,spikeSource, toNeurons, toCA, weight):
+################ NEURON METHODS #################
+    def oneNeuronStimulatesState(self,fromNeurons, fromNeuron, toNeurons, toCA, weight):
         connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
-            connector = connector + [(0,toNeuron,weight,
-                                      nealParameters.DELAY)]
-        self.neal.nealProjection(spikeSource, toNeurons, connector,'excitatory')
+        for toNeuron in range (0,self.CA_SIZE-self.CA_INHIBS):
+            connector = connector + [(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
 
+        self.neal.nealProjection(fromNeurons, toNeurons, connector,'excitatory')
+
+    def oneNueronStimulatesNeuron(self, fromNeurons,fromCA,toNeurons,toCA,weight):
+        connector = [(fromCA, toCA, weight, nealParameters.DELAY)]
+        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
 
     #-------- ONE TURNS ON ?
-    def oneNeuronStimulatesState(self,fromNeurons,fromNeuron, toNeurons, toCA, 
-                                weight):
-        connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
-            connector = connector + [(fromNeuron,toNeuron,weight,
-                                      nealParameters.DELAY)]
-        self.neal.nealProjection(fromNeurons, toNeurons, connector,'excitatory')
-
     def oneNeuronTurnsOnState(self,fromNeurons,fromNeuron, toNeurons, toCA):
-        connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
-            connector = connector + [(fromNeuron,toNeuron,self.INPUT_WEIGHT,
-                                      nealParameters.DELAY)]
-        self.neal.nealProjection(fromNeurons, toNeurons, connector,'excitatory')
+        self.oneNeuronStimulatesState(fromNeurons, fromNeuron, toNeurons, toCA, self.ONE_NEURON_STARTS_CA_WEIGHT)
 
     def oneNeuronTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = [(fromCA, toCA, self.INPUT_WEIGHT, nealParameters.DELAY)]
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+        self.oneNueronStimulatesNeuron(fromNeurons,fromCA,toNeurons,toCA, self.INPUT_WEIGHT)
 
     #-------- ONE HALF TURNS ON ?
     def oneNeuronHalfTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = [(fromCA, toCA, self.ONE_HALF_ON_ONE_WEIGHT, nealParameters.DELAY)]
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+        self.oneNueronStimulatesNeuron(fromNeurons,fromCA,toNeurons,toCA, self.ONE_HALF_ON_ONE_WEIGHT)
 
     def oneNeuronHalfTurnsOnState(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
-            connector = connector + [(fromCA,toCA,
-                                      self.ONE_HALF_ON_WEIGHT,
-                                      nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
-
+        self.oneNeuronStimulatesState(fromNeurons,fromCA,toNeurons,toCA,self.ONE_HALF_ON_WEIGHT)
 
     #-------- ONE TURNS OFF ?
     def oneNeuronTurnsOffState(self,fromNeurons, fromNeuron, toNeurons, toCA):
         connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
-            connector = connector + [(fromNeuron,toNeuron,
-                                      self.ONE_NEURON_STOPS_CA_WEIGHT,
-                                      nealParameters.DELAY)]
+        for toNeuron in range (toCA,toCA+self.CA_SIZE-self.CA_INHIBS):
+            connector = connector + [(fromNeuron,toNeuron,self.ONE_NEURON_STOPS_CA_WEIGHT,nealParameters.DELAY)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 
+################ STATE METHODS #################
+    def stateStimulatesState(self,fromNeurons,fromCA,toNeurons,toCA,weight):
+        connector = []
+        for fromNeuron in range (fromCA, fromCA+self.CA_SIZE-self.CA_INHIBS):
+            for toNeuron in range (toCA, toCA+self.CA_SIZE-self.CA_INHIBS):
+                connector=connector+[(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+
+        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+
+    def stateInhibitsState(self,fromNeurons,fromCA,toNeurons,toCA,weight):
+        connector = []
+        for fromNeuron in range (fromCA, fromCA+self.CA_SIZE-self.CA_INHIBS):
+            for toNeuron in range (toCA, toCA+self.CA_SIZE-self.CA_INHIBS):
+                connector=connector+[(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+
+        self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
+
+    def stateStimulatesNeuron(self,fromNeurons,fromCA,toNeurons,toNeuron,weight):
+        connector = []
+        for fromNeuron in range (0,self.CA_SIZE-self.CA_INHIBS):
+            connector=connector+[(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+
+        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
 
     #-------- STATE TURNS ON ?
     def stateTurnsOnState(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = []
-        #uses FULL_ON_WEIGHT
-        for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-                toNeuron = toOffset + (toCA*self.CA_SIZE)
-                connector=connector+[(fromNeuron,toNeuron,
-                                          self.FULL_ON_WEIGHT,
-                                          nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+        self.stateStimulatesState(fromNeurons,fromCA, toNeurons, toCA, self.FULL_ON_WEIGHT)
 
     def stateTurnsOnStateSlow(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = []
-        #uses FULL_ON_WEIGHT_SLOW
-        for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-                toNeuron = toOffset + (toCA*self.CA_SIZE)
-                connector=connector+[(fromNeuron,toNeuron,
-                                          self.FULL_ON_WEIGHT_SLOW,
-                                          nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+        self.stateStimulatesState(fromNeurons,fromCA, toNeurons, toCA, self.FULL_ON_WEIGHT_SLOW)
 
     def stateTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toNeuron):
-        connector = []
-        #uses FULL_ON_WEIGHT
-        for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            connector=connector+[(fromNeuron,toNeuron,
-                                  self.STATE_TO_ONE_WEIGHT,
-                                  nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
-
-    def stateStimulatesState(self,fromNeurons,fromCA,toNeurons,toCA,weight):
-        connector = []
-        for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-                toNeuron = toOffset + (toCA*self.CA_SIZE)
-                connector=connector+[(fromNeuron,toNeuron,
-                    weight, nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+        self.stateStimulatesNeuron(fromNeurons,fromCA,toNeurons,toNeuron,self.STATE_TO_ONE_WEIGHT)
 
     #-------- STATE TURNS OFF ?
     def stateTurnsOffState(self,fromNeurons, fromCA, toNeurons, toCA):
-        connector = []
-        for fromOffset in range (0,self.CA_SIZE):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            for toOffset in range (0,self.CA_SIZE):
-                toNeuron = toOffset + (toCA*self.CA_SIZE)
-                connector = connector + [(fromNeuron,toNeuron,
-                                              self.CA_STOPS_CA_WEIGHT,
-                                              nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
-    
-    #undone need a test for this.
-    def stateInhibitsState(self,fromNeurons, fromCA, toNeurons, toCA, wt):
-        connector = []
-        for fromOffset in range (0,self.CA_SIZE):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            for toOffset in range (0,self.CA_SIZE):
-                toNeuron = toOffset + (toCA*self.CA_SIZE)
-                connector = connector + [(fromNeuron,toNeuron,
-                                              wt,nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
+        self.stateInhibitsState(fromNeurons, fromCA, toNeurons, toCA, self.CA_STOPS_CA_WEIGHT)
 
     #-------- STATE HALF TURNS ON ?
     def stateHalfTurnsOnState(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = []
-        #uses HALF_ON_WEIGHT
-        for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
-            for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-                toNeuron = toOffset + (toCA*self.CA_SIZE)
-                connector=connector+[(fromNeuron,toNeuron,
-                                          self.HALF_ON_WEIGHT,
-                                          nealParameters.DELAY)]
+        self.stateStimulatesState(fromNeurons,fromCA, toNeurons, toCA, self.HALF_ON_WEIGHT)
 
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
-
-    def stateHalfTurnsOnOneNueron(self,fromNeurons,fromCA,toNeurons,toCA):
-        connector = []
-        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
-            toNeuron = toOffset + (toCA*self.CA_SIZE)
-            connector = connector + [(fromCA,toNeuron,
-                                      self.HALF_ON_ONE_WEIGHT,
-                                      nealParameters.DELAY)]
-
-        self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+    def stateHalfTurnsOnOneNueron(self,fromNeurons,fromCA,toNeurons,toNeuron):
+        self.stateStimulatesNeuron(fromNeurons,fromCA,toNeurons,toNeuron,self.HALF_ON_ONE_WEIGHT)

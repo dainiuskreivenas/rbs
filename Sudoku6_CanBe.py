@@ -1,6 +1,7 @@
 
 import pyNN.nest as sim
 from rbs import RBS
+import os.path
 from stateMachineClass import FSAHelperFunctions
 
 fsa = FSAHelperFunctions("nest")
@@ -34,12 +35,15 @@ class Sudoku6_CanBe:
                 self.rbs.addFact(("Box", (i, y, boxIndex)))
 
     def __init__(self):
-        self.rbs = RBS()
+        if(os.path.exists("sudoku6_canBe.pkl")):
+            self.rbs = RBS(fromFile="sudoku6_canBe.pkl")
+        else:
 
-        self.setupBoard()
-        
+            self.rbs = RBS()
 
-        self.rbs.addRule(
+            self.setupBoard()
+
+            self.rbs.addRule(
             (
                 "CantBeHorizontal",
                 (
@@ -75,9 +79,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
+            )
 
-        self.rbs.addRule(
+            self.rbs.addRule(
             (
                 "CantBeVertical",
                 (
@@ -113,9 +117,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
-        
-        self.rbs.addRule(
+            )
+
+            self.rbs.addRule(
             (
                 "CantBeBox",
                 (
@@ -140,9 +144,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
+            )
 
-        self.rbs.addRule(
+            self.rbs.addRule(
             (
                 "CellIs",
                 (
@@ -175,9 +179,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
+            )
 
-        self.rbs.addRule(
+            self.rbs.addRule(
             (
                 "BoxCellIs",
                 (
@@ -218,9 +222,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
-        
-        self.rbs.addRule(
+            )
+
+            self.rbs.addRule(
             (
                 "RowCellIs",
                 (
@@ -256,9 +260,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
+            )
 
-        self.rbs.addRule(
+            self.rbs.addRule(
             (
                 "ColumnCellIs",
                 (
@@ -294,9 +298,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
+            )
 
-        self.rbs.addRule(
+            self.rbs.addRule(
             (
                 "CellCantBe",
                 (
@@ -332,7 +336,9 @@ class Sudoku6_CanBe:
                     ]
                 )
             )
-        )
+            )
+
+            self.rbs.net.save("sudoku6_canBe.pkl")
     
     def solve(self, sudoku):
         for y,s in enumerate(sudoku):
@@ -340,6 +346,8 @@ class Sudoku6_CanBe:
                 if (i <> None):
                     boxIndex = self.getBoxIndex(x+1, y+1)
                     f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)))
-                    spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
-                    spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
-                    fsa.turnOnStateFromSpikeSource(spikeGen,f[1],0)
+                    if f.ca not in self.rbs.net.activations:
+                        self.rbs.net.activations.append(f.ca)
+                                        
+        self.rbs.exe.apply()
+        self.rbs.net.save("sudoku6_canBe.pkl")

@@ -1,6 +1,7 @@
 
 import pyNN.nest as sim
 from rbs import RBS
+import os.path
 from stateMachineClass import FSAHelperFunctions
 
 fsa = FSAHelperFunctions("nest")
@@ -29,18 +30,20 @@ class Sudoku6:
             self.rbs.addFact(("X-Axis",(i,)))
             self.rbs.addFact(("Y-Axis",(i,)))
 
-            for x in range(1,7):
-                for y in range(1,7):
-                    boxIndex = self.getBoxIndex(x, y)
-                    self.rbs.addFact(("Box", (x, y, boxIndex)))
+            for y in range(1,7):
+                boxIndex = self.getBoxIndex(i, y)
+                self.rbs.addFact(("Box", (i, y, boxIndex)))
 
     def __init__(self):
-        self.rbs = RBS()
+        if(os.path.exists("sudoku6.pkl")):
+            self.rbs = RBS(fromFile="sudoku6.pkl")
+        else:
+            self.rbs = RBS()
 
-        self.setupBoard()
-        
-        # Fill in 1 missing row value
-        self.rbs.addRule(
+            self.setupBoard()
+
+            # Fill in 1 missing row value
+            self.rbs.addRule(
             (
                 "Distinct-H-Line",
                 (
@@ -94,8 +97,8 @@ class Sudoku6:
                 )
             ))
 
-        # Fill in 1 Missing column value
-        self.rbs.addRule(
+            # Fill in 1 Missing column value
+            self.rbs.addRule(
             (
                 "Distinct-Y-Line",
                 (
@@ -148,9 +151,9 @@ class Sudoku6:
                     ]
                 )
             ))
-        
-        # Fill in 1 Missing box value
-        self.rbs.addRule(
+
+            # Fill in 1 Missing box value
+            self.rbs.addRule(
             (
                 "Distinct-Box-Top-Value",
                 (
@@ -189,17 +192,18 @@ class Sudoku6:
                     ]
                 )
             )
-        )
+            )
 
-        # TODO : Match missing based on row, column and box
+            self.rbs.net.save("sudoku6.pkl")
     
     def solve(self, sudoku):
         for y,s in enumerate(sudoku):
             for x,i in enumerate(s):
                 if (i <> None):
                     boxIndex = self.getBoxIndex(x+1, y+1)
-                    f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)))
-                    spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
-                    spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
-                    fsa.turnOnStateFromSpikeSource(spikeGen,f[1],0)        
+                    f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)))                    
+                    self.rbs.net.activations.append(f.ca)
+                    self.rbs.exe.apply()
+
+        self.rbs.net.save("sudoku6.pkl")
 

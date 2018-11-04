@@ -37,7 +37,18 @@ def stateToState():
 
     sim.run(200)
 
-    print "State To State - {}".format(len(ca2.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
+    
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2 "
+        print data.segments[0].spiketrains[0]
+
+        print "State To State - {}".format(success)
 
 def stateToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
@@ -50,7 +61,18 @@ def stateToNeuron():
 
     sim.run(200)
 
-    print "State To Neuron - {}".format(len(n1.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(n1.get_data().segments[0].spiketrains[0]) > 0
+
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "State To Neuron - {}".format(success)
 
 def twoStateToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
@@ -65,7 +87,22 @@ def twoStateToState():
 
     sim.run(200)
 
-    print "2 State To State - {}".format(len(ca3.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(ca3.get_data().segments[0].spiketrains[0]) > 0
+
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = ca3.get_data()
+        print "ca3"
+        print data.segments[0].spiketrains[0]
+
+        print "2 State To State - {}".format(success)
 
 def twoStateToState_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
@@ -79,7 +116,22 @@ def twoStateToState_Half():
 
     sim.run(200)
 
-    print "2 State To State Half - {}".format(len(ca3.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
+
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = ca3.get_data()
+        print "ca3"
+        print data.segments[0].spiketrains[0]
+
+        print "2 State To State Half - {}".format(success)
 
 def twoStateToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
@@ -94,7 +146,21 @@ def twoStateToNeuron():
 
     sim.run(200)
 
-    print "2 State To Neruon - {}".format(len(n1.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(n1.get_data().segments[0].spiketrains[0]) > 0
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "2 State To Neruon - {}".format(success)
 
 def twoStateToNeuron_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
@@ -108,12 +174,27 @@ def twoStateToNeuron_Half():
 
     sim.run(200)
 
-    print "2 State To Neruon Half - {}".format(len(n1.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(n1.get_data().segments[0].spiketrains[0]) == 0
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "2 State To Neruon Half - {}".format(success)
 
 def neuronToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
-
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+
     fsa.oneNeuronTurnsOnState(n1,0,ca2,0)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
@@ -122,12 +203,28 @@ def neuronToState():
 
     sim.run(200)
 
-    print "Neruon To State - {}".format(len(ca2.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "Neruon To State - {}".format(success)
 
 def neuronToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
-
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+
+
     fsa.oneNeuronTurnsOnOneNeuron(n1,0,n2,0)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
@@ -136,15 +233,32 @@ def neuronToNeuron():
 
     sim.run(200)
 
-    print "Neruon To Neuron - {}".format(len(n2.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(n2.get_data().segments[0].spiketrains[0]) > 0
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        print "Neruon To Neuron - {}".format(success)
 
 def twoNeuronToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
     fsa.stateTurnsOnOneNeuron(ca,0,n2,0)
+
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca2,0)
     fsa.oneNeuronHalfTurnsOnState(n2,0,ca2,0)
+
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
@@ -152,12 +266,32 @@ def twoNeuronToState():
 
     sim.run(200)
 
-    print "2 Neruon To State - {}".format(len(ca2.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
+
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        print "2 Neruon To State - {}".format(success)
 
 def twoNeuronToState_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
     
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca2,0)
     fsa.oneNeuronHalfTurnsOnState(n2,0,ca2,0)
@@ -168,13 +302,33 @@ def twoNeuronToState_Half():
 
     sim.run(200)
 
-    print "2 Neruon To State Half - {}".format(len(ca2.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(ca2.get_data().segments[0].spiketrains[0]) == 0
+    if (not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        print "2 Neruon To State Half - {}".format(success)
 
 def twoNeuronToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
     fsa.stateTurnsOnOneNeuron(ca,0,n2,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n3,0)
     fsa.oneNeuronHalfTurnsOnOneNeuron(n2,0,n3,0)
 
@@ -184,12 +338,31 @@ def twoNeuronToNeuron():
 
     sim.run(200)
 
-    print "2 Neruon To Neuron - {}".format(len(n3.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(n3.get_data().segments[0].spiketrains[0]) > 0
+    if (not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        data = n3.get_data()
+        print "n3"
+        print data.segments[0].spiketrains[0]
+
+        print "2 Neruon To Neuron - {}".format(success)
 
 def twoNeuronToNeuron_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
     
     fsa.oneNeuronHalfTurnsOnState(n1,0,n3,0)
     fsa.oneNeuronHalfTurnsOnState(n2,0,n3,0)
@@ -200,11 +373,30 @@ def twoNeuronToNeuron_Half():
 
     sim.run(200)
 
-    print "2 Neruon To Neuron Half - {}".format(len(n3.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(n3.get_data().segments[0].spiketrains[0]) == 0
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        data = n3.get_data()
+        print "n3"
+        print data.segments[0].spiketrains[0]
+
+        print "2 Neruon To Neuron Half - {}".format(success)
 
 def neruonAndStateToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
@@ -216,27 +408,65 @@ def neruonAndStateToState():
 
     sim.run(200)
 
-    print "Neuron And State To State - {}".format(len(ca3.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(ca3.get_data().segments[0].spiketrains[0]) > 0
+    if(not success):
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = ca3.get_data()
+        print "ca3"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "Neuron And State To State - {}".format(success)
 
 def neruonAndStateToState_NotNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
-    #fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
     sim.run(200)
 
-    print "Neuron And State To State NotNeuron - {}".format(len(ca3.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
+
+    if not success:
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = ca3.get_data()
+        print "ca3"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "Neuron And State To State NotNeuron - {}".format(success)
 
 def neruonAndStateToState_NotState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
@@ -244,15 +474,33 @@ def neruonAndStateToState_NotState():
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
-    #fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
     sim.run(200)
 
-    print "Neuron And State To State NotState - {}".format(len(ca3.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
+    if not success:
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = ca3.get_data()
+        print "ca3"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        print "Neuron And State To State NotState - {}".format(success)
 
 def neuronAndStateToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
@@ -264,11 +512,31 @@ def neuronAndStateToNeuron():
 
     sim.run(200)
 
-    print "Neuron And State To Neuron - {}".format(len(n2.get_data().segments[0].spiketrains[0]) > 0)
+    success = len(n2.get_data().segments[0].spiketrains[0]) > 0
+    if not success:
+
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        print "Neuron And State To Neuron - {}".format(success)
 
 def neuronAndStateToNeuron_NotNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
@@ -280,12 +548,32 @@ def neuronAndStateToNeuron_NotNeuron():
 
     sim.run(200)
 
-    print "Neuron And State To Neuron NotNeuron - {}".format(len(n2.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(n2.get_data().segments[0].spiketrains[0]) == 0
+    if not success:
+
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        print "Neuron And State To Neuron NotNeuron - {}".format(success)
 
 
 def neuronAndStateToNeuron_NotState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
@@ -296,7 +584,26 @@ def neuronAndStateToNeuron_NotState():
 
     sim.run(200)
 
-    print "Neuron And State To Neuron NotState - {}".format(len(n2.get_data().segments[0].spiketrains[0]) == 0)
+    success = len(n2.get_data().segments[0].spiketrains[0]) == 0
+    if not success:
+
+        data = ca.get_data()
+        print "ca"
+        print data.segments[0].spiketrains[0]
+
+        data = ca2.get_data()
+        print "ca2"
+        print data.segments[0].spiketrains[0]
+
+        data = n1.get_data()
+        print "n1"
+        print data.segments[0].spiketrains[0]
+
+        data = n2.get_data()
+        print "n2"
+        print data.segments[0].spiketrains[0]
+
+        print "Neuron And State To Neuron NotState - {}".format(success)
 
 stateToState()
 stateToNeuron()

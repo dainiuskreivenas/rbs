@@ -50,37 +50,18 @@ sudoku = [[  2 ,None,  5        ,  3 ,  1 ,None],
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
 sudoku6.solve(sudoku)
-sim.run(1500)
+sim.run(500)
 
-mins = []
-
-for f in sudoku6.rbs.factGroups["Item"]:
-
+data = sudoku6.rbs.get_data()
+for f in sudoku6.rbs.net.facts["Item"]:
     min = 10000
-    for t in f[0][1].get_data().segments[0].spiketrains[0].magnitude:
+    for t in data.segments[0].spiketrains[f.ca[0]].magnitude:
         if(t < min):
             min = t
-
-    mins.append(min)
-
-    hasSpiked = len(f[0][1].get_data().segments[0].spiketrains[0]) > 0
-    print "{} - {}".format(f[0][1].label,hasSpiked)
-
-
-print mins
+    hasSpiked = len(data.segments[0].spiketrains[f.ca[0]]) > 0
+    print "(f-{} - {} {}) - {} - at {}".format(f.index, f.group, f.attributes,hasSpiked,min)
 
 
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-"""
-
-sudoku6.solve(sudoku)
-sim.run(1500)
-
-for f in sudoku6.rbs.factGroups["Item"]:
-    hasSpiked = len(f[0][1].get_data().segments[0].spiketrains[0]) > 0
-    print "{} - {}".format(f[0][1].label,hasSpiked)
-
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-"""
 
 sim.end()
