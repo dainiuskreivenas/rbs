@@ -33,7 +33,9 @@ sim.run(200)
 
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
-"""
+print "neuron - {}".format(sudoku6.rbs.net.neuron)
+print "synapses - {}".format(len(sudoku6.rbs.net.connections))
+
 for g in sudoku6.rbs.net.facts:
     for f in sudoku6.rbs.net.facts[g]:
         min = 10000
@@ -42,7 +44,6 @@ for g in sudoku6.rbs.net.facts:
             min = data.segments[0].spiketrains[0].magnitude[0]
         hasSpiked = len(data.segments[0].spiketrains[0]) > 0
         print "(f-{} - {} {}) - {} - at {}".format(f.index, f.group, f.attributes, hasSpiked, min)
-"""
 
 assertionTimes = {}
 
@@ -53,7 +54,6 @@ for l in sudoku6.rbs.net.assertions:
     neurons.append(neuron)
 
 pop = sudoku6.rbs.exe.assembly[neurons]
-print pop
 
 data = pop.get_data()
 for spikes in data.segments[0].spiketrains:
