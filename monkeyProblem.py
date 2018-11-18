@@ -55,16 +55,6 @@ class MonekyProblem:
         )
 
     def printSpikes(self, name):
-        # "################### assertions ###############"
-
-        for key in self.rbs.assertions.keys():
-            aa = self.rbs.assertions[key]
-            aa.printSpikes("pkls/"+name+"/assertions/{}.pkl".format(aa.label))
-
-        # "################### facts ###############"
-
-        for key in list(self.rbs.factGroups):
-            for f in self.rbs.factGroups[key]:
-                f[0][1].printSpikes("pkls/"+name+"/facts/{}.pkl".format(f[0][1].label))
+        self.rbs.printSpikes()
 
     

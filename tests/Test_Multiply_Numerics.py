@@ -4,8 +4,11 @@ Test for numerical incrementation within Test Condition
 
 """
 
-
-import pyNN.nest as sim
+import nealParams as nealParameters
+if (nealParameters.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParameters.simulator=="nest"):
+    import pyNN.nest as sim
 from rbs import RBS
 
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
@@ -32,9 +35,6 @@ rbs.addFact(("item", (2,5)))
 
 sim.run(50)
 
-
-for key in list(rbs.factGroups):
-    for f in rbs.factGroups[key]:
-        f[0][1].printSpikes("pkls/Test_Multiply_Numerics/facts/{}.pkl".format(f[0][1].label))
+rbs.printSpikes()
 
 sim.end()

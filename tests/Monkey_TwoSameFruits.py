@@ -10,7 +10,10 @@ Chair:
 """
 
 import nealParams as nealParameters
-import pyNN.nest as sim
+if (nealParameters.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParameters.simulator=="nest"):
+    import pyNN.nest as sim
 from monkeyProblem import MonekyProblem
 
 sim.setup(timestep=nealParameters.DELAY,min_delay=nealParameters.DELAY,max_delay=nealParameters.DELAY, debug=0)

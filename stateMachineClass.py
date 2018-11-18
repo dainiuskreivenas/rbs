@@ -6,14 +6,7 @@
 #excitatory connections to the first 8 neurons.
 
 import nealParams as nealParameters
-
-if (nealParameters.simulator=="spinnaker"):
-    import pyNN.spiNNaker as sim
-elif (nealParameters.simulator=="nest"):
-    import pyNN.nest as sim
-
 import numpy as np
-
 from nealCoverClass import NealCoverFunctions
 
 class FSAHelperFunctions:
@@ -30,15 +23,11 @@ class FSAHelperFunctions:
 
         self.INPUT_WEIGHT = 0.1
         self.INTRA_CA_TO_INHIB_WEIGHT = 0.001 
-        if (nealParameters.simulator=="spinnaker"):
-            #if you over inhib on my spinnaker, it fires.
-            self.INTRA_CA_FROM_INHIB_WEIGHT = 0.1  
-            self.CA_STOPS_CA_WEIGHT = 0.15
-            self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0
-        elif (nealParameters.simulator=="nest"):
-            self.INTRA_CA_FROM_INHIB_WEIGHT = -0.1  
-            self.CA_STOPS_CA_WEIGHT = -0.15
-            self.ONE_NEURON_STOPS_CA_WEIGHT = -1.0
+     
+        #----- removed the spinnaker switch controlled in rbs.exe
+        self.INTRA_CA_FROM_INHIB_WEIGHT = -0.1
+        self.CA_STOPS_CA_WEIGHT = -0.15
+        self.ONE_NEURON_STOPS_CA_WEIGHT = -1.0
 
         self.ONE_NEURON_STARTS_CA_WEIGHT = 0.08
         self.INTRA_CA_WEIGHT = 0.016 
@@ -104,9 +93,11 @@ class FSAHelperFunctions:
             fromNeuron = fromOffset + (CA*self.CA_SIZE)
             for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
                 toNeuron = toOffset + (CA*self.CA_SIZE)
-                connector = connector + [(fromNeuron,toNeuron,
-                        self.INTRA_CA_FROM_INHIB_WEIGHT, nealParameters.DELAY)]
-
+                w = self.INTRA_CA_FROM_INHIB_WEIGHT
+                if(self.simulator == "spinnaker"):
+                    w = w*-1
+                connector = connector + [(fromNeuron,toNeuron, w, nealParameters.DELAY)]
+        
         self.neal.nealProjection(neurons,neurons,connector,'inhibitory')
 
     #--------Finite State Automata Functions ------------
@@ -151,7 +142,10 @@ class FSAHelperFunctions:
     def oneNeuronTurnsOffState(self,fromNeurons, fromNeuron, toNeurons, toCA):
         connector = []
         for toNeuron in range (toCA,toCA+self.CA_SIZE-self.CA_INHIBS):
-            connector = connector + [(fromNeuron,toNeuron,self.ONE_NEURON_STOPS_CA_WEIGHT,nealParameters.DELAY)]
+            w = self.ONE_NEURON_STOPS_CA_WEIGHT
+            if(self.simulator == "spinnaker"):
+                w = w*-1
+            connector = connector + [(fromNeuron,toNeuron,w,nealParameters.DELAY)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 
@@ -168,7 +162,10 @@ class FSAHelperFunctions:
         connector = []
         for fromNeuron in range (fromCA, fromCA+self.CA_SIZE-self.CA_INHIBS):
             for toNeuron in range (toCA, toCA+self.CA_SIZE-self.CA_INHIBS):
-                connector=connector+[(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+                w = weight
+                if(self.simulator == "spinnaker"):
+                    w = w*-1
+                connector=connector+[(fromNeuron,toNeuron,w,nealParameters.DELAY)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 

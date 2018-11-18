@@ -1,6 +1,11 @@
 
 
-import pyNN.nest as sim
+import nealParams as nealParameters
+if (nealParameters.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParameters.simulator=="nest"):
+    import pyNN.nest as sim
+
 from Sudoku9 import Sudoku9
 import time
 import datetime
@@ -29,21 +34,26 @@ print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 sudoku9.solve(sudoku)
 sim.run(5000)
 
-mins = []
+data = {}
+def getData(population):
+    if population.pop.label in data:
+        return data[population.pop.label]
+    
+    d = population.pop.get_data()
+    data[population.pop.lalbe] = d
 
-for f in sudoku9.rbs.factGroups["Item"]:
-
-    min = 10000
-    for t in f[0][1].get_data().segments[0].spiketrains[0].magnitude:
-        if(t < min):
-            min = t
-
-    mins.append(min)
-
-    hasSpiked = len(f[0][1].get_data().segments[0].spiketrains[0]) > 0
-    print "{} - {}".format(f[0][1].label,hasSpiked)
-
-print mins
+    return d
+    
+for g in sudoku9.rbs.net.facts:
+    for f in sudoku9.rbs.net.facts[g]:
+        min = 10000
+        pop = sudoku9.rbs.get_population(f.ca[0])
+        data = getData(pop)
+        st = data.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
+        if len(st) > 0:
+            min = st.magnitude[0]
+        hasSpiked = len(st) > 0
+        print "(f-{} - {} {}) - {} - at {}".format(f.index, f.group, f.attributes, hasSpiked, min)
 
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 

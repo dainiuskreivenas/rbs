@@ -7,13 +7,9 @@
 #2 simulator = nest
 
 #Select the simulator by changing the import and simulator_name
-simulator = "nest"
-#simulator = "spinnaker"
+#simulator = "nest"
+simulator = "spinnaker"
 
-if (simulator == "spinnaker"):
-    import pyNN.spiNNaker as spinn
-elif (simulator=="nest"):
-    import pyNN.nest as sim
 
 printSmall = False #True
 #autoRun =  False 

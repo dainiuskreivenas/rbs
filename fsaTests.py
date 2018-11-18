@@ -1,10 +1,13 @@
-import pyNN.nest as sim
+import nealParams
+
+if (nealParams.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParams.simulator=="nest"):
+    import pyNN.nest as sim
+
 from stateMachineClass import FSAHelperFunctions
+fsa = FSAHelperFunctions(nealParams.simulator)
 
-
-fsa = FSAHelperFunctions("nest")
-
-sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 
 
 def createNeurons():
@@ -605,24 +608,78 @@ def neuronAndStateToNeuron_NotState():
 
         print "Neuron And State To Neuron NotState - {}".format(success)
 
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 stateToState()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 stateToNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoStateToState()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoStateToState_Half()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoStateToNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoStateToNeuron_Half()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neuronToState()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neuronToNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoNeuronToState()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoNeuronToState_Half()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoNeuronToNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 twoNeuronToNeuron_Half()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neruonAndStateToState()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neruonAndStateToState_NotNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neruonAndStateToState_NotState()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neuronAndStateToNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neuronAndStateToNeuron_NotNeuron()
+sim.end()
+
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 neuronAndStateToNeuron_NotState()
+sim.end()
+
 
 
 

@@ -20,12 +20,12 @@ class NealCoverFunctions:
         else: print "bad simulator in nealFunctions"
         """
 
-    def nealProjection(self,preNeurons,postNeurons, connectorList,inhExc):
-        connList = sim.FromListConnector(connectorList)
+    def nealProjection(self,preNeurons,postNeurons, connectorList, type="excitatory"):
         if (nealParameters.simulator=="spinnaker"):
-            sim.Projection(preNeurons, postNeurons, connList,target=inhExc)   
+            connList = sim.FromListConnector(connectorList)
+            sim.Projection(preNeurons, postNeurons, connList, receptor_type=type)
         elif (nealParameters.simulator=="nest"):
+            connList = sim.FromListConnector(connectorList)
             sim.Projection(preNeurons, postNeurons, connList) 
-
         else: print "bad simulator nealProjection"
 

@@ -1,3 +1,5 @@
 *.pkl
-*.sp
+results/*
 *.pyc
+reports/*
+application_generated_data_files/*

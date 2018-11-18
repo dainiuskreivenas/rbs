@@ -1,12 +1,17 @@
 """
 Rule Based System using Nest Simulator
 """
+import nealParams
+
+if (nealParams.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParams.simulator=="nest"):
+    import pyNN.nest as sim
 
 from stateMachineClass import FSAHelperFunctions
-import pyNN.nest as sim
-import pickle
+fsa = FSAHelperFunctions(nealParams.simulator)
 
-fsa = FSAHelperFunctions("nest")
+import pickle
 
 class Fact:
     def __init__(self, group, attributes):
@@ -95,8 +100,7 @@ class ParallelRuleGenerator:
                 index = index + 1
 
 class RbsNetwork:
-    def __init__(self, ruleGenerator = "sequential", fromFile = None):
-
+    def __init__(self, ruleGenerator = "sequential", fromFile = None):        
         if(fromFile != None):
             net = pickle.load(open(fromFile))
             self.facts = net.facts
@@ -455,16 +459,92 @@ class RbsNetwork:
     def save(self, fileName):
         pickle.dump(self, open(fileName, "wb"))
 
+class RbsNetWrapper:
+    def __init__(self, net):
+        self.net = net
+        self.population = None
+        self.neurons = net.neuron
+
+class RbsPopulation:
+    def __init__(self, neurons, fromIndex):
+        self.pop = sim.Population(neurons, sim.IF_cond_exp, fsa.CELL_PARAMS)
+        self.pop.record("spikes")
+        self.fromIndex = fromIndex
+        self.toIndex = fromIndex + neurons
+
 class RbsExecutor:
     def __init__(self, net):
         self.net = net
-        self.assembly = None
         self.connections = 0
         self.populations = []
         self.neuron = 0
-        self.actived = -1
+        self.actived = 0
+
+    def getConnection(self, conn):
+        fromPop = None
+        toPop = None
+
+        fromN = conn[0]
+        toN = conn[1]
+
+        for pop in self.populations:
+            if(pop.fromIndex <= fromN and pop.toIndex > fromN):
+                fromPop = pop
+                if(toPop != None):
+                    break
+            
+            if(pop.fromIndex <= toN and pop.toIndex > toN):
+                toPop = pop
+                if(fromPop != None):
+                    break
+        
+        connector = (conn[0]-fromPop.fromIndex,conn[1]-toPop.fromIndex,conn[2],conn[3])
+        connType = "excitatory"
+        
+        if(conn[2] < 0):
+            connType = "inhibitory"
+            if(nealParams.simulator == "spinnaker"):
+                connector = (conn[0],conn[1],conn[2]*-1,conn[3])
+        
+        return (
+            fromPop.pop,
+            toPop.pop,
+            connector,
+            connType
+        )
+
+    def connect(self, connections):
+        if(len(connections) > 0):
+            excitatory = {}
+            inhibitory = {}
+            for c in connections:
+                conn = self.getConnection(c)
+                label = "{}{}".format(conn[0].label,conn[1].label)
+                if(nealParams.simulator == "nest" or conn[3] == "excitatory"):
+                    if(label in excitatory):
+                        excitatory[label][2] = excitatory[label][2] + [conn[2]]
+                    else:
+                        excitatory[label] = [conn[0],conn[1],[conn[2]]]
+                else:
+                    if(label in inhibitory):
+                        inhibitory[label][2] = inhibitory[label][2] + [conn[2]]
+                    else:
+                        inhibitory[label] = [conn[0],conn[1],[conn[2]]]
+            
+            for e in excitatory:
+                ex = excitatory[e]
+                conn = sim.FromListConnector(ex[2])
+                sim.Projection(ex[0], ex[1], conn, receptor_type="excitatory")
+
+            for i in inhibitory:
+                inh = inhibitory[i]
+                conn = sim.FromListConnector(inh[2])
+                sim.Projection(inh[0], inh[1], conn, receptor_type="inhibitory")
 
     def apply(self):
+        population = None
+        connections = []
+
         addNeurons = 0
         if(self.neuron == 0):
             self.neuron += self.net.neuron + 1
@@ -474,13 +554,8 @@ class RbsExecutor:
             self.neuron += addNeurons
 
         if(addNeurons > 0):
-            population = sim.Population(addNeurons, sim.IF_cond_exp, fsa.CELL_PARAMS)
-            population.record("spikes")
-
-            if(self.assembly == None):
-                self.assembly = sim.Assembly(population)
-            else:
-                self.assembly = self.assembly + population
+            population = RbsPopulation(addNeurons, self.neuron - addNeurons)
+            self.populations.append(population)
 
         connections = None
         if(self.connections == 0):
@@ -490,47 +565,27 @@ class RbsExecutor:
             start = self.connections-1
             connections = self.net.connections[start:]
             self.connections += len(connections)
-
-        if(len(connections) > 0):
-            connList = sim.FromListConnector(connections)
-            sim.Projection(self.assembly, self.assembly, connList)
-
+        
+        self.connect(connections)
 
         activate = []
-        if(self.actived == -1):
+        if(self.actived == 0):
             activate = self.net.activations
         else:
             activate = self.net.activations[self.actived:]
 
-        if(True):
+        if(len(activate) > 0):
             spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
             spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
             for a in activate:
-                fsa.turnOnStateFromSpikeSource(spikeGen,self.assembly,a[0])
-                self.actived += 1
+                population = None
+                for pop in self.populations:
+                    if(pop.fromIndex <= a[0] and pop.toIndex > a[0]):
+                        population = pop
+                        break
 
-    def printSpikes(self):        
-        data = self.assembly.get_data()
-        for a in self.net.assertions:
-            st = data.segments[0].spiketrains[self.net.assertions[a]]
-            if(len(st) > 0):
-                print "({})".format(a)
-                for s in st.magnitude:
-                    print "{} {}".format(self.net.assertions[a], s)
-        for a in self.net.interns:
-            st = data.segments[0].spiketrains[a]
-            if(len(st) > 0):
-                print "({})".format(a)
-                for s in st.magnitude:
-                    print "{} {}".format(a, s)
-        for g in self.net.facts:
-            for f in self.net.facts[g]:
-                print "(f-{} - {} {})".format(f.index, f.group, f.attributes)
-                for n in f.ca:
-                    st = data.segments[0].spiketrains[n]
-                    if(len(st) > 0):
-                        for s in st.magnitude:
-                            print "{} {}".format(n, s)
+                fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
+                self.actived += 1
 
 class RBS:
     def __init__(self, ruleGenerator = "sequential", fromFile = None):
@@ -540,8 +595,9 @@ class RBS:
             self.exe.apply()
 
     def addFact(self, fact, active = True):
-        self.net.addFact(Fact(fact[0],fact[1]),active)
+        fact = self.net.addFact(Fact(fact[0],fact[1]),active)
         self.exe.apply()
+        return fact
 
     def getFact(self, fact):
         fact = self.net.getFact(Fact(fact[0],fact[1]))
@@ -552,8 +608,46 @@ class RBS:
         self.net.addRule(Rule(rule[0],rule[1][0],rule[1][1]))
         self.exe.apply()
 
+     
+    def get_population(self, index):
+        for pop in self.exe.populations:
+            if(pop.fromIndex <= index and pop.toIndex > index):
+                return pop
+        return None
+
     def printSpikes(self):
-        self.exe.printSpikes()
+        data = self.get_data()
+
+        for a in self.exe.net.assertions:
+            pop = self.get_population(self.net.assertions[a])
+            d = data[pop.pop.label]            
+            st = d.segments[0].spiketrains[self.net.assertions[a]-pop.fromIndex]
+            if(len(st) > 0):
+                print "({})".format(a)
+                for s in st.magnitude:
+                    print "{} {}".format(self.net.assertions[a], s)
+        for a in self.net.interns:
+            pop = self.get_population(a)
+            d = data[pop.pop.label]
+            st = d.segments[0].spiketrains[a-pop.fromIndex]
+            if(len(st) > 0):
+                print "({})".format(a)
+                for s in st.magnitude:
+                    print "{} {}".format(a, s)
+        for g in self.net.facts:
+            for f in self.net.facts[g]:
+                print "(f-{} - {} {})".format(f.index, f.group, f.attributes)
+                for n in f.ca:
+                    pop = self.get_population(n)
+                    d = data[pop.pop.label]
+                    st = d.segments[0].spiketrains[n-pop.fromIndex]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
+
 
     def get_data(self):
-        return self.exe.assembly.get_data()
+        data = {}
+        for pop in self.exe.populations:
+            data[pop.pop.label] = pop.pop.get_data()
+        return data

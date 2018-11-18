@@ -1,10 +1,5 @@
-
-import pyNN.nest as sim
 from rbs import RBS
 import os.path
-from stateMachineClass import FSAHelperFunctions
-
-fsa = FSAHelperFunctions("nest")
 
 class Sudoku6:
 
@@ -35,8 +30,8 @@ class Sudoku6:
                 self.rbs.addFact(("Box", (i, y, boxIndex)))
 
     def __init__(self):
-        if(os.path.exists("sudoku6.pkl")):
-            self.rbs = RBS(fromFile="sudoku6.pkl")
+        if(os.path.exists("sudoku6.rbs")):
+            self.rbs = RBS(fromFile="sudoku6.rbs")
         else:
             self.rbs = RBS()
 
@@ -194,7 +189,7 @@ class Sudoku6:
             )
             )
 
-            self.rbs.net.save("sudoku6.pkl")
+            self.rbs.net.save("sudoku6.rbs")
     
     def solve(self, sudoku):
         for y,s in enumerate(sudoku):
@@ -202,8 +197,9 @@ class Sudoku6:
                 if (i <> None):
                     boxIndex = self.getBoxIndex(x+1, y+1)
                     f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)))                    
-                    self.rbs.net.activations.append(f.ca)
-                    self.rbs.exe.apply()
-
-        self.rbs.net.save("sudoku6.pkl")
+                    if(f.ca not in self.rbs.net.activations):
+                        self.rbs.net.activations.append(f.ca)
+                    
+        self.rbs.exe.apply()
+        self.rbs.net.save("sudoku6.rbs")
 

@@ -1,6 +1,10 @@
 
+import nealParams as nealParameters
+if (nealParameters.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParameters.simulator=="nest"):
+    import pyNN.nest as sim
 
-import pyNN.nest as sim
 from Sudoku9_CanBe import Sudoku9
 import time
 import datetime
@@ -58,33 +62,50 @@ print "synapses - {}".format(len(sudoku9.rbs.net.connections))
 print "GetData"
 print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
+
+data = {}
+def getData(population):
+    if population.pop.label in data:
+        return data[population.pop.label]
+    
+    d = population.pop.get_data()
+    data[population.pop.lalbe] = d
+
+    return d
+    
+
 for g in sudoku9.rbs.net.facts:
     for f in sudoku9.rbs.net.facts[g]:
         min = 10000
-        data = sudoku9.rbs.exe.assembly[f.ca[0]:f.ca[9]].get_data()
-        if len(data.segments[0].spiketrains[0]) > 0:
-            min = data.segments[0].spiketrains[0].magnitude[0]
-        hasSpiked = len(data.segments[0].spiketrains[0]) > 0
+        pop = sudoku9.rbs.get_population(f.ca[0])
+        data = getData(pop)
+        st = data.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
+        if len(st) > 0:
+            min = st.magnitude[0]
+        hasSpiked = len(st) > 0
         print "(f-{} - {} {}) - {} - at {}".format(f.index, f.group, f.attributes, hasSpiked, min)
 
 assertionTimes = {}
+
 neurons = []
 
 for l in sudoku9.rbs.net.assertions:
     neuron = sudoku9.rbs.net.assertions[l]
     neurons.append(neuron)
 
-pop = sudoku9.rbs.exe.assembly[neurons]
+for n in neurons:
+    pop = sudoku9.rbs.get_population(n)
+    data = getData(pop)
 
-data = pop.get_data()
-for spikes in data.segments[0].spiketrains:
-    hasSpiked = len(spikes) > 0
-    if(hasSpiked):
-        t = spikes.magnitude[0]
-        if (t in assertionTimes):
-            assertionTimes[t] += 1
-        else:
-            assertionTimes[t] = 1
+    for spikes in data.segments[0].spiketrains[n - pop.fromIndex]:
+        hasSpiked = len(spikes) > 0
+        if(hasSpiked):
+            t = spikes.magnitude[0]
+            if (t in assertionTimes):
+                assertionTimes[t] += 1
+            else:
+                assertionTimes[t] = 1
+        break
 
 for t in assertionTimes:
     print "{} - {}".format(t,assertionTimes[t])
