@@ -1,7 +1,13 @@
 """
 Rule Based System using Nest Simulator
 """
+import sys
+from operator import itemgetter
+from itertools import groupby
+
 import nealParams
+import logging
+
 
 if (nealParams.simulator=="spinnaker"):
     import pyNN.spiNNaker as sim
@@ -473,12 +479,13 @@ class RbsPopulation:
         self.toIndex = fromIndex + neurons
 
 class RbsExecutor:
-    def __init__(self, net):
+    def __init__(self, net, debug = False):
         self.net = net
         self.connections = 0
         self.populations = []
         self.neuron = 0
         self.actived = 0
+        self.debug = debug
 
     def getConnection(self, conn):
         fromPop = None
@@ -487,13 +494,14 @@ class RbsExecutor:
         fromN = conn[0]
         toN = conn[1]
 
+
         for pop in self.populations:
-            if(pop.fromIndex <= fromN and pop.toIndex > fromN):
+            rng = range(pop.fromIndex, pop.toIndex)
+            if(fromN in rng):
                 fromPop = pop
                 if(toPop != None):
                     break
-            
-            if(pop.fromIndex <= toN and pop.toIndex > toN):
+            if(toN in rng):
                 toPop = pop
                 if(fromPop != None):
                     break
@@ -513,38 +521,7 @@ class RbsExecutor:
             connType
         )
 
-    def connect(self, connections):
-        if(len(connections) > 0):
-            excitatory = {}
-            inhibitory = {}
-            for c in connections:
-                conn = self.getConnection(c)
-                label = "{}{}".format(conn[0].label,conn[1].label)
-                if(nealParams.simulator == "nest" or conn[3] == "excitatory"):
-                    if(label in excitatory):
-                        excitatory[label][2] = excitatory[label][2] + [conn[2]]
-                    else:
-                        excitatory[label] = [conn[0],conn[1],[conn[2]]]
-                else:
-                    if(label in inhibitory):
-                        inhibitory[label][2] = inhibitory[label][2] + [conn[2]]
-                    else:
-                        inhibitory[label] = [conn[0],conn[1],[conn[2]]]
-            
-            for e in excitatory:
-                ex = excitatory[e]
-                conn = sim.FromListConnector(ex[2])
-                sim.Projection(ex[0], ex[1], conn, receptor_type="excitatory")
-
-            for i in inhibitory:
-                inh = inhibitory[i]
-                conn = sim.FromListConnector(inh[2])
-                sim.Projection(inh[0], inh[1], conn, receptor_type="inhibitory")
-
-    def apply(self):
-        population = None
-        connections = []
-
+    def populate(self):
         addNeurons = 0
         if(self.neuron == 0):
             self.neuron += self.net.neuron + 1
@@ -557,6 +534,7 @@ class RbsExecutor:
             population = RbsPopulation(addNeurons, self.neuron - addNeurons)
             self.populations.append(population)
 
+    def connect(self):
         connections = None
         if(self.connections == 0):
             connections = self.net.connections[:]
@@ -565,9 +543,23 @@ class RbsExecutor:
             start = self.connections-1
             connections = self.net.connections[start:]
             self.connections += len(connections)
-        
-        self.connect(connections)
 
+        if(len(connections) > 0):
+
+            allC = [self.getConnection(c) for c in connections]
+            allC.sort(key=itemgetter(0,1,3))
+            groups = groupby(allC,key=itemgetter(0,1,3))
+            
+            for key,data in groups:
+                items = [item[2] for item in data]
+                if(nealParams.simulator == "nest" or key[2] == "excitatory"):
+                    conn = sim.FromListConnector(items)
+                    sim.Projection(key[0],key[1], conn, receptor_type="excitatory")
+                else:
+                    conn = sim.FromListConnector(items)
+                    sim.Projection(key[0],key[1], conn, receptor_type="inhibitory")   
+
+    def activate(self):
         activate = []
         if(self.actived == 0):
             activate = self.net.activations
@@ -587,10 +579,22 @@ class RbsExecutor:
                 fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
                 self.actived += 1
 
+    def writeDebug(self, msg):
+        if(self.debug):
+            logging.info(msg)
+
+    def apply(self): 
+        self.writeDebug("Populating network")
+        self.populate()
+        self.writeDebug("Making connections")
+        self.connect()
+        self.writeDebug("Setting activations")
+        self.activate()
+        
 class RBS:
-    def __init__(self, ruleGenerator = "sequential", fromFile = None):
+    def __init__(self, ruleGenerator = "sequential", fromFile = None, debug = False):
         self.net = RbsNetwork(ruleGenerator = ruleGenerator, fromFile=fromFile)
-        self.exe = RbsExecutor(self.net)
+        self.exe = RbsExecutor(self.net, debug=debug)
         if(fromFile != None):
             self.exe.apply()
 
@@ -608,7 +612,6 @@ class RBS:
         self.net.addRule(Rule(rule[0],rule[1][0],rule[1][1]))
         self.exe.apply()
 
-     
     def get_population(self, index):
         for pop in self.exe.populations:
             if(pop.fromIndex <= index and pop.toIndex > index):

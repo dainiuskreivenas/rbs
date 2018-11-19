@@ -7,14 +7,14 @@ elif (nealParams.simulator=="nest"):
     import pyNN.nest as sim
 
 from Sudoku6_CanBe import Sudoku6_CanBe
-import time
+import logging
 import numpy as np
 import datetime
 
 
-sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0)
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, time_scale_factor=5)
 
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+logging.info("Setting up the Sudoku Board")
 
 sudoku6 = Sudoku6_CanBe()
 
@@ -29,18 +29,15 @@ sudoku = [[None,  6 ,None      ,None,None,  1 ],
           [None,  4 ,  5       ,None,None,None],
           [  3 ,None,None      ,None,  4 ,None]]
 
-print "Beginning To Solve the Puzzle"
+logging.info("Applying a puzzle")
 sudoku6.solve(sudoku)
 
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-
+logging.info("Running Simulation")
 sim.run(200)
 
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
 print "neuron - {}".format(sudoku6.rbs.net.neuron)
 print "synapses - {}".format(len(sudoku6.rbs.net.connections))
-
 
 data = {}
 def getData(population):
@@ -89,6 +86,6 @@ for n in neurons:
 for t in assertionTimes:
     print "{} - {}".format(t,assertionTimes[t])
 
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+logging.info("End")
 
 sim.end()

@@ -32,10 +32,10 @@ class Sudoku6_CanBe:
 
     def __init__(self):
         if(os.path.exists("sudoku6_canBe.rbs")):
-            self.rbs = RBS(fromFile="sudoku6_canBe.rbs")
+            self.rbs = RBS(fromFile="sudoku6_canBe.rbs",debug=True)
         else:
 
-            self.rbs = RBS()
+            self.rbs = RBS(debug=True)
 
             self.setupBoard()
 
@@ -312,7 +312,6 @@ class Sudoku6_CanBe:
                     f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)))
                     if f.ca not in self.rbs.net.activations:
                         self.rbs.net.activations.append(f.ca)
-                print "{} {} - Done".format(x, y)
                         
         self.rbs.exe.apply()
         self.rbs.net.save("sudoku6_canBe.rbs")
