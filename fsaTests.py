@@ -8,7 +8,7 @@ elif (nealParams.simulator=="nest"):
 from stateMachineClass import FSAHelperFunctions
 fsa = FSAHelperFunctions(nealParams.simulator)
 
-
+runtime = 500
 
 def createNeurons():
     ca = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "CA")
@@ -38,7 +38,7 @@ def stateToState():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
     
@@ -62,7 +62,7 @@ def stateToNeuron():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n1.get_data().segments[0].spiketrains[0]) > 0
 
@@ -88,7 +88,7 @@ def twoStateToState():
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca3.get_data().segments[0].spiketrains[0]) > 0
 
@@ -117,7 +117,7 @@ def twoStateToState_Half():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
 
@@ -147,7 +147,7 @@ def twoStateToNeuron():
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n1.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
@@ -175,7 +175,7 @@ def twoStateToNeuron_Half():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n1.get_data().segments[0].spiketrains[0]) == 0
     if(not success):
@@ -204,7 +204,7 @@ def neuronToState():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
@@ -225,7 +225,7 @@ def neuronToState():
 def neuronToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
 
     fsa.oneNeuronTurnsOnOneNeuron(n1,0,n2,0)
@@ -234,7 +234,7 @@ def neuronToNeuron():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n2.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
@@ -256,7 +256,7 @@ def twoNeuronToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
     fsa.stateTurnsOnOneNeuron(ca,0,n2,0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca2,0)
@@ -267,7 +267,7 @@ def twoNeuronToState():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
 
@@ -294,7 +294,7 @@ def twoNeuronToState_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
     
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca2,0)
     fsa.oneNeuronHalfTurnsOnState(n2,0,ca2,0)
@@ -303,7 +303,7 @@ def twoNeuronToState_Half():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca2.get_data().segments[0].spiketrains[0]) == 0
     if (not success):
@@ -330,7 +330,7 @@ def twoNeuronToNeuron():
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
     fsa.stateTurnsOnOneNeuron(ca,0,n2,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n3,0)
     fsa.oneNeuronHalfTurnsOnOneNeuron(n2,0,n3,0)
@@ -339,7 +339,7 @@ def twoNeuronToNeuron():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n3.get_data().segments[0].spiketrains[0]) > 0
     if (not success):
@@ -365,7 +365,7 @@ def twoNeuronToNeuron_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
     
     fsa.oneNeuronHalfTurnsOnState(n1,0,n3,0)
     fsa.oneNeuronHalfTurnsOnState(n2,0,n3,0)
@@ -374,7 +374,7 @@ def twoNeuronToNeuron_Half():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n3.get_data().segments[0].spiketrains[0]) == 0
     if(not success):
@@ -399,7 +399,7 @@ def twoNeuronToNeuron_Half():
 def neruonAndStateToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
@@ -409,7 +409,7 @@ def neruonAndStateToState():
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca3.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
@@ -434,7 +434,7 @@ def neruonAndStateToState():
 def neruonAndStateToState_NotNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
@@ -443,7 +443,7 @@ def neruonAndStateToState_NotNeuron():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
 
@@ -469,7 +469,7 @@ def neruonAndStateToState_NotNeuron():
 def neruonAndStateToState_NotState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
@@ -478,7 +478,7 @@ def neruonAndStateToState_NotState():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
     if not success:
@@ -503,7 +503,7 @@ def neruonAndStateToState_NotState():
 def neuronAndStateToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
@@ -513,7 +513,7 @@ def neuronAndStateToNeuron():
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n2.get_data().segments[0].spiketrains[0]) > 0
     if not success:
@@ -539,7 +539,7 @@ def neuronAndStateToNeuron():
 def neuronAndStateToNeuron_NotNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
@@ -549,7 +549,7 @@ def neuronAndStateToNeuron_NotNeuron():
     
     fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n2.get_data().segments[0].spiketrains[0]) == 0
     if not success:
@@ -576,7 +576,7 @@ def neuronAndStateToNeuron_NotNeuron():
 def neuronAndStateToNeuron_NotState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
-    fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
+    #fsa.oneNeuronTurnsOffState(n1, 0, ca, 0)
 
     fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
@@ -585,7 +585,7 @@ def neuronAndStateToNeuron_NotState():
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
 
-    sim.run(200)
+    sim.run(runtime)
 
     success = len(n2.get_data().segments[0].spiketrains[0]) == 0
     if not success:

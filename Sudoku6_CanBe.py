@@ -22,13 +22,16 @@ class Sudoku6_CanBe:
 
     def setupBoard(self):
         for i in range(1,7):
-            self.rbs.addFact(("Number",(i,)))
-            self.rbs.addFact(("X-Axis",(i,)))
-            self.rbs.addFact(("Y-Axis",(i,)))
+            self.rbs.addFact(("Number",(i,)), apply=False)
+            self.rbs.addFact(("X-Axis",(i,)), apply=False)
+            self.rbs.addFact(("Y-Axis",(i,)), apply=False)
 
             for y in range(1,7):
                 boxIndex = self.getBoxIndex(i, y)
-                self.rbs.addFact(("Box", (i, y, boxIndex)))
+                self.rbs.addFact(("Box", (i, y, boxIndex)), apply=False)
+                for n in range(1,7):
+                    self.rbs.addFact(("Item", (i, y, n, boxIndex)), False, False)
+                    self.rbs.addFact(("CantBe", (i, y, n)), False, False)
 
     def __init__(self):
         if(os.path.exists("sudoku6_canBe.rbs")):
@@ -68,7 +71,8 @@ class Sudoku6_CanBe:
                         ("assert", ("CantBe", ("?x6", "?y1", "?1")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -100,7 +104,8 @@ class Sudoku6_CanBe:
                         ("assert", ("CantBe", ("?x1", "?y6", "?1")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -114,7 +119,8 @@ class Sudoku6_CanBe:
                         (True, "Box", ("?x1", "?y2", "?b"), "4"),
                         (True, "Box", ("?x2", "?y2", "?b"), "5"),
                         (True, "Box", ("?x3", "?y2", "?b"), "6"),
-                        ("Test", "<>", "?x1", "?x2"),
+
+                        ("Test", "<", "?x1", "?x2"),
                         ("Test", "<>", "?x1", "?x3"),
                         ("Test", "<>", "?x2", "?x3"),
                         ("Test", "<>", "?y1", "?y2"),
@@ -127,7 +133,8 @@ class Sudoku6_CanBe:
                         ("assert", ("CantBe", ("?x3", "?y2", "?1")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -142,27 +149,22 @@ class Sudoku6_CanBe:
                         (True, "CantBe", ("?x1","?y1", "?5"), "5"),
                         (True, "Box", ("?x1", "?y1", "?b"), "6"),
                         (True, "Number", ("?6",), "7"),
-                        ("Test", "<>", "?1", "?2"),
-                        ("Test", "<>", "?1", "?3"),
-                        ("Test", "<>", "?1", "?4"),
-                        ("Test", "<>", "?1", "?5"),
-                        ("Test", "<>", "?1", "?6"),
-                        ("Test", "<>", "?2", "?3"),
-                        ("Test", "<>", "?2", "?4"),
-                        ("Test", "<>", "?2", "?5"),
-                        ("Test", "<>", "?2", "?6"),
-                        ("Test", "<>", "?3", "?4"),
-                        ("Test", "<>", "?3", "?5"),
-                        ("Test", "<>", "?3", "?6"),
-                        ("Test", "<>", "?4", "?5"),
-                        ("Test", "<>", "?4", "?6"),
-                        ("Test", "<>", "?5", "?6"),                        
+                        ("Test", "<>", "?6", "?1"),
+                        ("Test", "<>", "?6", "?2"),
+                        ("Test", "<>", "?6", "?3"),
+                        ("Test", "<>", "?6", "?4"),
+                        ("Test", "<>", "?6", "?5"),
+                        ("Test", "<", "?1", "?2"),
+                        ("Test", "<", "?2", "?3"),
+                        ("Test", "<", "?3", "?4"),
+                        ("Test", "<", "?4", "?5"),                        
                     ],
                     [
                         ("assert", ("Item", ("?x1","?y1","?6", "?b")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -170,42 +172,29 @@ class Sudoku6_CanBe:
                 "BoxCellIs",
                 (
                     [
-                        (True, "CantBe", ("?x1","?y1", "?1"), "1"),
-                        (True, "CantBe", ("?x2","?y1", "?1"), "2"),
-                        (True, "CantBe", ("?x3","?y1", "?1"), "3"),
-                        (True, "CantBe", ("?x1","?y2", "?1"), "4"),
-                        (True, "CantBe", ("?x2","?y2", "?1"), "5"),
                         (True, "Box", ("?x1", "?y1", "?b"), "6"),
                         (True, "Box", ("?x2", "?y1", "?b"), "7"),
                         (True, "Box", ("?x3", "?y1", "?b"), "8"),
                         (True, "Box", ("?x1", "?y2", "?b"), "9"),
                         (True, "Box", ("?x2", "?y2", "?b"), "10"),
-                        (True, "Box", ("?x3", "?y2", "?b"), "11"),
-                        ("Test", "<>", "?x1", "?x2"),
-                        ("Test", "<>", "?x1", "?x3"),
-                        ("Test", "<>", "?x2", "?x3"),
+
+                        (True, "CantBe", ("?x1","?y1", "?1"), "1"),
+                        (True, "CantBe", ("?x2","?y1", "?1"), "2"),
+                        (True, "CantBe", ("?x3","?y1", "?1"), "3"),
+                        (True, "CantBe", ("?x1","?y2", "?1"), "4"),
+                        (True, "CantBe", ("?x2","?y2", "?1"), "5"),
+
+                        ("Test", "<", "?x1", "?x2"),
+                        ("Test", "<>", "?x3", "?x1"),
+                        ("Test", "<>", "?x3", "?x2"),
                         ("Test", "<>", "?y1", "?y2"),
-                        ("Test", "<>", "?1", "?2"),
-                        ("Test", "<>", "?1", "?3"),
-                        ("Test", "<>", "?1", "?4"),
-                        ("Test", "<>", "?1", "?5"),
-                        ("Test", "<>", "?1", "?6"),
-                        ("Test", "<>", "?2", "?3"),
-                        ("Test", "<>", "?2", "?4"),
-                        ("Test", "<>", "?2", "?5"),
-                        ("Test", "<>", "?2", "?6"),
-                        ("Test", "<>", "?3", "?4"),
-                        ("Test", "<>", "?3", "?5"),
-                        ("Test", "<>", "?3", "?6"),
-                        ("Test", "<>", "?4", "?5"),
-                        ("Test", "<>", "?4", "?6"),
-                        ("Test", "<>", "?5", "?6"),
                     ],
                     [
                         ("assert", ("Item", ("?x3","?y2","?1", "?b")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -233,7 +222,8 @@ class Sudoku6_CanBe:
                         ("assert", ("Item", ("?x6", "?y1", "?1", "?b")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -261,7 +251,8 @@ class Sudoku6_CanBe:
                         ("assert", ("Item", ("?x1", "?y6", "?1", "?b")))
                     ]
                 )
-            )
+            ),
+            False
             )
 
             self.rbs.addRule(
@@ -271,25 +262,19 @@ class Sudoku6_CanBe:
                     [
                         (True, "Item", ("?x1","?y1", "?1", "?b"), "1"),
                         (True, "Number", ("?2",), "2"),
-                        (True, "Number", ("?3",), "2"),
-                        (True, "Number", ("?4",), "2"),
-                        (True, "Number", ("?5",), "2"),
-                        (True, "Number", ("?6",), "2"),
+                        (True, "Number", ("?3",), "3"),
+                        (True, "Number", ("?4",), "4"),
+                        (True, "Number", ("?5",), "5"),
+                        (True, "Number", ("?6",), "6"),
                         ("Test","<>","?1","?2"),
                         ("Test","<>","?1","?3"),
                         ("Test","<>","?1","?4"),
                         ("Test","<>","?1","?5"),
                         ("Test","<>","?1","?6"),
-                        ("Test","<>","?2","?3"),
-                        ("Test","<>","?2","?4"),
-                        ("Test","<>","?2","?5"),
-                        ("Test","<>","?2","?6"),
-                        ("Test","<>","?3","?4"),
-                        ("Test","<>","?3","?5"),
-                        ("Test","<>","?3","?6"),
-                        ("Test","<>","?4","?5"),
-                        ("Test","<>","?4","?6"),
-                        ("Test","<>","?5","?6")
+                        ("Test","<","?2","?3"),
+                        ("Test","<","?3","?4"),
+                        ("Test","<","?4","?5"),
+                        ("Test","<","?5","?6")
                     ],
                     [
                         ("assert", ("CantBe", ("?x1", "?y1", "?2"))),
@@ -299,19 +284,20 @@ class Sudoku6_CanBe:
                         ("assert", ("CantBe", ("?x1", "?y1", "?6")))
                     ]
                 )
-            )
-            )
+            ),False)
 
+
+            self.rbs.net.applyRulesToFacts()
             self.rbs.net.save("sudoku6_canBe.rbs")
-    
+            self.rbs.exe.apply()
+
     def solve(self, sudoku):
         for y,s in enumerate(sudoku):
             for x,i in enumerate(s):
                 if (i <> None):
                     boxIndex = self.getBoxIndex(x+1, y+1)
-                    f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)))
+                    f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)), apply=False)
                     if f.ca not in self.rbs.net.activations:
                         self.rbs.net.activations.append(f.ca)
-                        
+        
         self.rbs.exe.apply()
-        self.rbs.net.save("sudoku6_canBe.rbs")

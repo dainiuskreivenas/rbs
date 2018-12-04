@@ -57,6 +57,16 @@ class MatchTree:
     def __init__(self, variables, matches):
         self.variables = variables
         self.matches = matches
+        self.label = ""
+        indexes = []
+        for i,m in enumerate(matches):
+            indexes.append(m[0].index)
+
+        for i,m in enumerate(indexes):
+            if(i == 0):
+                self.label += "{}".format(m)
+            else:
+                self.label += "-{}".format(m)
 
 class SequentialRuleGenerator:
 
@@ -106,7 +116,9 @@ class ParallelRuleGenerator:
                 index = index + 1
 
 class RbsNetwork:
-    def __init__(self, ruleGenerator = "sequential", fromFile = None):        
+    def __init__(self, ruleGenerator = "sequential", fromFile = None, debug = False):
+        self.debug = debug
+
         if(fromFile != None):
             net = pickle.load(open(fromFile))
             self.facts = net.facts
@@ -229,7 +241,7 @@ class RbsNetwork:
             self.facts[name] = group
         return group
 
-    def addFact(self, fact, active = True):
+    def addFact(self, fact, active = True, applyRules = True):
         group = self.getGroup(fact.group)
         fact.ca = self.addCA()
         self.factIndex += 1
@@ -239,11 +251,12 @@ class RbsNetwork:
         if(active):
             self.activations.append(fact.ca)
 
-        self.applyRulesToFacts()
+        if(applyRules):
+            self.applyRulesToFacts()
 
         return fact
 
-    def getFact(self, fact):
+    def getFact(self, fact, applyRules = True):
         group = self.getGroup(fact.group)
 
         found = None
@@ -257,13 +270,14 @@ class RbsNetwork:
                 found = f
         
         if(found == None):
-            found = self.addFact(fact, active = False)
+            found = self.addFact(fact, False, applyRules)
         
         return found
 
-    def addRule(self, rule):
+    def addRule(self, rule, apply = True):
         self.rules[rule.name] = rule
-        self.applyRulesToFacts() 
+        if(apply):
+            self.applyRulesToFacts() 
 
     def getSearchExpression(self, item, variables):
         params = []            
@@ -363,15 +377,16 @@ class RbsNetwork:
             return left > right
         elif(op == "<"):
             return left < right
-        elif(op == "="):
+        elif(op == "=" or op == "=="):
             return left == right
-        elif(op == "<>"):
+        elif(op == "<>" or op == "!="):
             return left != right
         else:
             return False
 
     def buildFounds(self, matches, condition, tests):
         newTree = []
+        existing = []
              
         for f in matches:
             search = self.getSearchExpression(condition, f.variables)
@@ -385,6 +400,8 @@ class RbsNetwork:
                 var = self.extractVariables(var, found, condition[2])
 
                 treeItem = MatchTree(var, f.matches + [(found, condition[3])])
+                if(treeItem.label in existing):
+                    continue
 
                 testPass = True
                 for test in tests:
@@ -395,17 +412,54 @@ class RbsNetwork:
                 if(testPass == False):
                     continue
 
+                existing.append(treeItem.label)
+
                 newTree.append(treeItem)
 
         return newTree
 
-    def createRule(self, ma):
+    def createRule(self, ma, assertions, retractions):
         label = ""
-        for i,m in enumerate(ma.matches):
+
+        indexes = []
+        for m in ma.matches:
+            indexes.append(m[0].index)
+        indexes.sort()
+
+        for i,m in enumerate(indexes):
             if(i == 0):
-                label = "{}".format(m[0].index)
+                label = "{}".format(m)
             else:
-                label = "{} and {}".format(label, m[0].index)
+                label = "{} and {}".format(label, m)
+
+        if(len(assertions) > 0):
+            label += " => "
+            variables = ma.variables
+
+            for i,a in enumerate(assertions):
+                properties = a[1]
+                newProps = []
+
+                for p in properties:
+                    prop = self.extractValue(p, variables)
+                    newProps.append(prop)
+
+                if(i == 0):
+                    label += "{}".format((a[0],tuple(newProps)))
+                else:
+                    label += " and {}".format((a[0],tuple(newProps)))
+
+        if(len(retractions) > 0):
+            label += " <= "
+            for i,a in enumerate(retractions):
+                f = None
+                for m in ma.matches:
+                    if m[1] == a:
+                        f = m[0]
+                if(i == 0):
+                    label += "({}, {})".format(f.group, f.attributes)
+                else:
+                    label += " and ({}, {})".format(f.group, f.attributes)
 
         if(label in self.assertions):
             return None
@@ -432,7 +486,7 @@ class RbsNetwork:
 
     def addRetractions(self, retractions, match, ruleCa):
         for retraction in retractions:
-            for m in match.matches: 
+            for m in match.matches:
                 if m[1] == retraction:
                     turnOfCa = m[0].ca
                     break
@@ -440,6 +494,9 @@ class RbsNetwork:
 
     def applyRulesToFacts(self):
         for key in self.rules:
+            
+            self.writeDebug("Applying Rule: {}".format(key))
+
             rule = self.rules[key]
             
             conditions,tests,assertions,retractions = rule.extract()
@@ -450,8 +507,10 @@ class RbsNetwork:
                 if(len(matches) == 0):
                     break 
 
+            self.writeDebug("Found {} Matches for Rule: {}".format(len(matches), key))
+
             for ma in matches:
-                ruleCa = self.createRule(ma)
+                ruleCa = self.createRule(ma, assertions, retractions)
                 if(ruleCa == None):
                     continue
 
@@ -462,14 +521,13 @@ class RbsNetwork:
 
                 self.ruleGenerator.setupActivations(self, ma.matches, ruleCa)
             
+
+    def writeDebug(self, msg):
+        if(self.debug):
+            logging.info(msg)
+
     def save(self, fileName):
         pickle.dump(self, open(fileName, "wb"))
-
-class RbsNetWrapper:
-    def __init__(self, net):
-        self.net = net
-        self.population = None
-        self.neurons = net.neuron
 
 class RbsPopulation:
     def __init__(self, neurons, fromIndex):
@@ -531,6 +589,7 @@ class RbsExecutor:
             self.neuron += addNeurons
 
         if(addNeurons > 0):
+            self.writeDebug("New Neurons: {}".format(addNeurons))
             population = RbsPopulation(addNeurons, self.neuron - addNeurons)
             self.populations.append(population)
 
@@ -545,7 +604,7 @@ class RbsExecutor:
             self.connections += len(connections)
 
         if(len(connections) > 0):
-
+            self.writeDebug("New Connections: {}".format(len(connections)))
             allC = [self.getConnection(c) for c in connections]
             allC.sort(key=itemgetter(0,1,3))
             groups = groupby(allC,key=itemgetter(0,1,3))
@@ -567,6 +626,7 @@ class RbsExecutor:
             activate = self.net.activations[self.actived:]
 
         if(len(activate) > 0):
+            self.writeDebug("Activation CA's: {}".format(len(activate)))
             spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
             spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
             for a in activate:
@@ -593,24 +653,27 @@ class RbsExecutor:
         
 class RBS:
     def __init__(self, ruleGenerator = "sequential", fromFile = None, debug = False):
-        self.net = RbsNetwork(ruleGenerator = ruleGenerator, fromFile=fromFile)
+        self.net = RbsNetwork(ruleGenerator = ruleGenerator, fromFile=fromFile, debug=debug)
         self.exe = RbsExecutor(self.net, debug=debug)
         if(fromFile != None):
             self.exe.apply()
 
-    def addFact(self, fact, active = True):
-        fact = self.net.addFact(Fact(fact[0],fact[1]),active)
-        self.exe.apply()
+    def addFact(self, fact, active = True, apply = True):
+        fact = self.net.addFact(Fact(fact[0],fact[1]), active, apply)
+        if(apply):
+            self.exe.apply()
         return fact
 
-    def getFact(self, fact):
-        fact = self.net.getFact(Fact(fact[0],fact[1]))
-        self.exe.apply()
+    def getFact(self, fact, apply = True):
+        fact = self.net.getFact(Fact(fact[0],fact[1]), apply)
+        if(apply):
+            self.exe.apply()
         return fact
 
-    def addRule(self, rule):
-        self.net.addRule(Rule(rule[0],rule[1][0],rule[1][1]))
-        self.exe.apply()
+    def addRule(self, rule, apply = True):
+        self.net.addRule(Rule(rule[0],rule[1][0],rule[1][1]), apply)
+        if(apply):
+            self.exe.apply()
 
     def get_population(self, index):
         for pop in self.exe.populations:

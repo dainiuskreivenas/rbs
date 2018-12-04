@@ -33,17 +33,16 @@ class FSAHelperFunctions:
         self.INTRA_CA_WEIGHT = 0.016 
         
         #---- STATE to ? WEIGHTS
-
         self.FULL_ON_WEIGHT = 0.01
         self.STATE_TO_ONE_WEIGHT = 0.01
 
         self.FULL_ON_WEIGHT_SLOW = 0.0015
         
         self.HALF_ON_WEIGHT = 0.0008
-        self.HALF_ON_ONE_WEIGHT = .001
+        self.HALF_ON_ONE_WEIGHT = .0008
 
         #---- NEURON to ? WEIGHTS
-        self.ONE_HALF_ON_WEIGHT = 0.03
+        self.ONE_HALF_ON_WEIGHT = 0.007
         self.ONE_HALF_ON_ONE_WEIGHT = 0.03
         
         if (nealParameters.simulator == 'nest'):

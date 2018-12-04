@@ -7,7 +7,7 @@
 #2 simulator = nest
 
 #Select the simulator by changing the import and simulator_name
-#simulator = "nest"
+simulator = "nest"
 simulator = "spinnaker"
 
 

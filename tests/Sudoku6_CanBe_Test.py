@@ -12,7 +12,7 @@ import numpy as np
 import datetime
 
 
-sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, time_scale_factor=5)
+sim.setup(timestep=2.0,min_delay=2.0,max_delay=2.0, time_scale_factor=40)
 
 logging.info("Setting up the Sudoku Board")
 
@@ -33,8 +33,9 @@ logging.info("Applying a puzzle")
 sudoku6.solve(sudoku)
 
 logging.info("Running Simulation")
-sim.run(200)
+sim.run(500)
 
+sudoku6.rbs.printSpikes()
 
 print "neuron - {}".format(sudoku6.rbs.net.neuron)
 print "synapses - {}".format(len(sudoku6.rbs.net.connections))
@@ -45,7 +46,7 @@ def getData(population):
         return data[population.pop.label]
     
     d = population.pop.get_data()
-    data[population.pop.lalbe] = d
+    data[population.pop.label] = d
 
     return d
     
@@ -54,8 +55,8 @@ for g in sudoku6.rbs.net.facts:
     for f in sudoku6.rbs.net.facts[g]:
         min = 10000
         pop = sudoku6.rbs.get_population(f.ca[0])
-        data = getData(pop)
-        st = data.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
+        d = getData(pop)
+        st = d.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
         if len(st) > 0:
             min = st.magnitude[0]
         hasSpiked = len(st) > 0
@@ -71,19 +72,22 @@ for l in sudoku6.rbs.net.assertions:
 
 for n in neurons:
     pop = sudoku6.rbs.get_population(n)
-    data = getData(pop)
+    d = getData(pop)
+    index = n - pop.fromIndex
 
-    for spikes in data.segments[0].spiketrains[n - pop.fromIndex]:
-        hasSpiked = len(spikes) > 0
-        if(hasSpiked):
-            t = spikes.magnitude[0]
-            if (t in assertionTimes):
-                assertionTimes[t] += 1
-            else:
-                assertionTimes[t] = 1
-        break
+    t = d.segments[0].spiketrains[index]
+    if(len(t.magnitude) > 0):
+        if (t.magnitude[0] in assertionTimes):
+            assertionTimes[t.magnitude[0]] += 1
+        else:
+            assertionTimes[t.magnitude[0]] = 1
 
+times = []
 for t in assertionTimes:
+    times.append(t)
+    
+times.sort()
+for t in times:
     print "{} - {}".format(t,assertionTimes[t])
 
 logging.info("End")

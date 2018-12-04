@@ -6,18 +6,15 @@ elif (nealParameters.simulator=="nest"):
     import pyNN.nest as sim
 
 from Sudoku9_CanBe import Sudoku9
+import logging
 import time
 import datetime
 
 
-sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
+sim.setup(timestep=2.0,min_delay=2.0,max_delay=2.0, time_scale_factor=40)
 
-
-print "Start"
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-
-
-sudoku9 = Sudoku9()
+logging.info("Setting up the Sudoku Board")
+sudoku9 = Sudoku9(True)
 
 
 """
@@ -50,18 +47,14 @@ sudoku = [[None,None,  7 ,         6 ,None,None,      None,None,  1 ],
           [  3 ,None,None,         4 ,  1 ,None,      None,None,None],
           [  5 ,  6 ,None,       None,None,None,      None,None,  9 ]]        
 
-print "Solve"
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-
+logging.info("Applying a puzzle")
 sudoku9.solve(sudoku)
+
+logging.info("Running Simulation")
 sim.run(500)
 
 print "neuron - {}".format(sudoku9.rbs.net.neuron)
 print "synapses - {}".format(len(sudoku9.rbs.net.connections))
-
-print "GetData"
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-
 
 data = {}
 def getData(population):
@@ -69,7 +62,7 @@ def getData(population):
         return data[population.pop.label]
     
     d = population.pop.get_data()
-    data[population.pop.lalbe] = d
+    data[population.pop.label] = d
 
     return d
     
@@ -78,8 +71,8 @@ for g in sudoku9.rbs.net.facts:
     for f in sudoku9.rbs.net.facts[g]:
         min = 10000
         pop = sudoku9.rbs.get_population(f.ca[0])
-        data = getData(pop)
-        st = data.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
+        d = getData(pop)
+        st = d.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
         if len(st) > 0:
             min = st.magnitude[0]
         hasSpiked = len(st) > 0
@@ -95,21 +88,23 @@ for l in sudoku9.rbs.net.assertions:
 
 for n in neurons:
     pop = sudoku9.rbs.get_population(n)
-    data = getData(pop)
+    d = getData(pop)
+    index = n - pop.fromIndex
 
-    for spikes in data.segments[0].spiketrains[n - pop.fromIndex]:
-        hasSpiked = len(spikes) > 0
-        if(hasSpiked):
-            t = spikes.magnitude[0]
-            if (t in assertionTimes):
-                assertionTimes[t] += 1
-            else:
-                assertionTimes[t] = 1
-        break
+    t = d.segments[0].spiketrains[index]
+    if (t.magnitude[0] in assertionTimes):
+        assertionTimes[t.magnitude[0]] += 1
+    else:
+        assertionTimes[t.magnitude[0]] = 1
 
+times = []
 for t in assertionTimes:
+    times.append(t)
+    
+times.sort()
+for t in times:
     print "{} - {}".format(t,assertionTimes[t])
 
-print datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+logging.info("End")
 
 sim.end()
