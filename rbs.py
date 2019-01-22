@@ -692,7 +692,7 @@ class RBS:
                 print "({})".format(a)
                 for s in st.magnitude:
                     print "{} {}".format(self.net.assertions[a], s)
-        for a in self.net.interns:
+        for a in self.net.interns:  
             pop = self.get_population(a)
             d = data[pop.pop.label]
             st = d.segments[0].spiketrains[a-pop.fromIndex]
@@ -710,6 +710,8 @@ class RBS:
                     if(len(st) > 0):
                         for s in st.magnitude:
                             print "{} {}".format(n, s)
+
+        return data
 
 
     def get_data(self):

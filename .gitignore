@@ -1,5 +1,7 @@
 *.pkl
+*.sp
 results/*
 *.pyc
+*.rbs
 reports/*
 application_generated_data_files/*

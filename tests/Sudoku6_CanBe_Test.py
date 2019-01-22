@@ -10,6 +10,7 @@ from Sudoku6_CanBe import Sudoku6_CanBe
 import logging
 import numpy as np
 import datetime
+from sudoku6_puzzles import puzzles
 
 
 sim.setup(timestep=2.0,min_delay=2.0,max_delay=2.0, time_scale_factor=40)
@@ -18,24 +19,14 @@ logging.info("Setting up the Sudoku Board")
 
 sudoku6 = Sudoku6_CanBe()
 
-sudoku = [[None,  6 ,None      ,None,None,  1 ],
-          [None,None,None      ,  4 ,  2 ,None],
-
-
-          [  1 ,None,None      ,None,None,None],
-          [None,None,None      ,None,None,  5 ],
-
-
-          [None,  4 ,  5       ,None,None,None],
-          [  3 ,None,None      ,None,  4 ,None]]
-
-logging.info("Applying a puzzle")
-sudoku6.solve(sudoku)
-
 logging.info("Running Simulation")
-sim.run(500)
+sudoku6.run(puzzles)
 
-sudoku6.rbs.printSpikes()
+sudoku6.printSpikes()
+
+"""
+Single puzzle spikes (useless for more than 1, 
+just use print spikes and interpolate results):
 
 print "neuron - {}".format(sudoku6.rbs.net.neuron)
 print "synapses - {}".format(len(sudoku6.rbs.net.connections))
@@ -89,6 +80,7 @@ for t in assertionTimes:
 times.sort()
 for t in times:
     print "{} - {}".format(t,assertionTimes[t])
+"""
 
 logging.info("End")
 

@@ -8,7 +8,7 @@
 
 #Select the simulator by changing the import and simulator_name
 simulator = "nest"
-simulator = "spinnaker"
+#simulator = "spinnaker"
 
 
 printSmall = False #True

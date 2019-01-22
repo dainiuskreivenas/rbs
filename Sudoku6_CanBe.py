@@ -1,5 +1,13 @@
 
 from rbs import RBS
+import nealParams
+from stateMachineClass import FSAHelperFunctions
+if (nealParams.simulator=="spinnaker"):
+    import pyNN.spiNNaker as sim
+elif (nealParams.simulator=="nest"):
+    import pyNN.nest as sim
+fsa = FSAHelperFunctions(nealParams.simulator)
+
 import os.path
 
 class Sudoku6_CanBe:
@@ -21,6 +29,8 @@ class Sudoku6_CanBe:
         return boxIndex
 
     def setupBoard(self):
+        self.resetNeuron = self.rbs.net.addNeuron()
+
         for i in range(1,7):
             self.rbs.addFact(("Number",(i,)), apply=False)
             self.rbs.addFact(("X-Axis",(i,)), apply=False)
@@ -30,12 +40,16 @@ class Sudoku6_CanBe:
                 boxIndex = self.getBoxIndex(i, y)
                 self.rbs.addFact(("Box", (i, y, boxIndex)), apply=False)
                 for n in range(1,7):
-                    self.rbs.addFact(("Item", (i, y, n, boxIndex)), False, False)
-                    self.rbs.addFact(("CantBe", (i, y, n)), False, False)
+                    item = self.rbs.addFact(("Item", (i, y, n, boxIndex)), False, False)
+                    cantbe = self.rbs.addFact(("CantBe", (i, y, n)), False, False)
+
+                    self.rbs.net.neuronToCa(self.resetNeuron, cantbe.ca, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+                    self.rbs.net.neuronToCa(self.resetNeuron, item.ca, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
     def __init__(self):
         if(os.path.exists("sudoku6_canBe.rbs")):
             self.rbs = RBS(fromFile="sudoku6_canBe.rbs",debug=True)
+            self.resetNeuron = 0
         else:
 
             self.rbs = RBS(debug=True)
@@ -285,19 +299,67 @@ class Sudoku6_CanBe:
                     ]
                 )
             ),False)
-
+            
 
             self.rbs.net.applyRulesToFacts()
+
+            for a in self.rbs.net.assertions:
+                assertion = self.rbs.net.assertions[a]
+                self.rbs.net.neuronToNeruon(self.resetNeuron, assertion, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+
+            for i in self.rbs.net.interns:
+                self.rbs.net.neuronToNeruon(self.resetNeuron, i, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+
             self.rbs.net.save("sudoku6_canBe.rbs")
             self.rbs.exe.apply()
 
-    def solve(self, sudoku):
-        for y,s in enumerate(sudoku):
-            for x,i in enumerate(s):
-                if (i <> None):
-                    boxIndex = self.getBoxIndex(x+1, y+1)
-                    f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)), apply=False)
-                    if f.ca not in self.rbs.net.activations:
-                        self.rbs.net.activations.append(f.ca)
+    def run(self, puzzles):
+        runtime = 0
+        resetTimes = []
+        for p in puzzles:
+            puzzleActivationTimes = {'spike_times': [[runtime+5]]}
+            puzzleSpikeGen = sim.Population(1, sim.SpikeSourceArray, puzzleActivationTimes)
+            for y,s in enumerate(p):
+                for x,i in enumerate(s):
+                    if (i <> None):
+                        boxIndex = self.getBoxIndex(x+1, y+1)
+                        f = self.rbs.getFact(("Item", (x+1, y+1, i, boxIndex)), apply=False)
+                        population = None
+                        for pop in self.rbs.exe.populations:
+                            if(pop.fromIndex <= f.ca[0] and pop.toIndex > f.ca[0]):
+                                population = pop
+                                break
+
+                        fsa.turnOnStateFromSpikeSource(puzzleSpikeGen, population.pop, f.ca[0]-population.fromIndex)
+                        
+            runtime += 600
+            resetTimes.append(runtime)
+            resetTimes.append(runtime+10)
+            runtime += 100
+
+        resetSpikeGen = sim.Population(1, sim.SpikeSourceArray, {'spike_times': [resetTimes]})
+
+        population = None
+        for pop in self.rbs.exe.populations:
+            if(pop.fromIndex <= self.resetNeuron and pop.toIndex > self.resetNeuron):
+                population = pop
+                break
         
-        self.rbs.exe.apply()
+        fsa.turnOnNeuronFromSpikeSource(resetSpikeGen, population.pop, self.resetNeuron-population.fromIndex)
+        
+        sim.run(runtime)
+
+    def printSpikes(self):
+        data = self.rbs.get_data()
+
+        for f in self.rbs.net.facts["Item"]:
+               pop = self.rbs.get_population(f.ca[0])
+               d = data[pop.pop.label]
+               st = d.segments[0].spiketrains[f.ca[0]-pop.fromIndex]
+               if(len(st) > 0):
+                   for s in st.magnitude:
+                       print "{} {} {}".format(f.attributes, f.ca[0]-pop.fromIndex, s)
+        
+        pop = self.rbs.get_population(self.resetNeuron)
+        d = data[pop.pop.label]
+        print "RESET AT: {}".format(d.segments[0].spiketrains[self.resetNeuron-pop.fromIndex])
