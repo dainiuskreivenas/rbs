@@ -92,10 +92,11 @@ for n in neurons:
     index = n - pop.fromIndex
 
     t = d.segments[0].spiketrains[index]
-    if (t.magnitude[0] in assertionTimes):
-        assertionTimes[t.magnitude[0]] += 1
-    else:
-        assertionTimes[t.magnitude[0]] = 1
+    if(len(t.magnitude) > 0):
+        if (t.magnitude[0] in assertionTimes):
+            assertionTimes[t.magnitude[0]] += 1
+        else:
+            assertionTimes[t.magnitude[0]] = 1
 
 times = []
 for t in assertionTimes:
