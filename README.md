@@ -1,38 +1,9 @@
 # Introduction 
 This is a RBS (Rule Based System). Build rules using facts that are cached to neurons and ran on NEST or SpiNNaker.
 
-# Getting Started
-1.	Installation process:
-    1. Clone the Repository
-2.	Software dependencies:
-    1. Nest
-    2. pyNN
-
-
 # How to Use It
 
-Main code is in the rbs.py file
-
-To use the system add the following imports to a new file:
-1. import nealParams as nealParameters
-2. import pyNN.nest as sim
-3. from rbs import RBS
-
-Start the sim:
-sim.setup(...)
-
-Construct new RBS
-rbs = RBS()
-
-To add facts call:
-rbs.addFact()
-
-To add rules:
-rbs.addRules()
-
-Run the sim:
-sim.run(...)
-
+View [Wiki](https://github.com/dainiuskreivenas/rbs/wiki) for more information
 
 #Examples
 
