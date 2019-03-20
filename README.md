@@ -5,9 +5,10 @@ This is a RBS (Rule Based System). Build rules using facts that are cached to ne
 
 View [Wiki](https://github.com/dainiuskreivenas/rbs/wiki) for more information
 
-#Examples
 
-##Monkey and Banana Problem
+# Examples
+
+## Monkey and Banana Problem
 
 The monkey and banana problems is a famous toy problem in artificial intelligence, particularly in logic programming and planning. 
 
@@ -22,7 +23,7 @@ To run the tests:
 
 The results will be printed out to ./monkeys/tests/results
 
-##Tower of Hanoi
+## Tower of Hanoi
 
 The Tower of Hanoi is a mathematical game or puzzle. It consists of three rods and a number of disks of different sizes, which can slide onto any rod. The puzzle starts with the disks in a neat stack in ascending order of size on one rod, the smallest at the top, thus making a conical shape. 
 
@@ -35,7 +36,7 @@ To run the tests:
 
 The results will be printed out to ./toh/tests/results
 
-##Sudoku
+## Sudoku
 
 Sudoku is a logic-based, combinatorial number-placement puzzle. The objective is to fill a 9×9 grid with digits so that each column, each row, and each of the nine 3×3 subgrids that compose the grid (also called "boxes", "blocks", or "regions") contain all of the digits from 1 to 9. The puzzle setter provides a partially completed grid, which for a well-posed puzzle has a single solution.
 
