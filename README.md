@@ -34,69 +34,52 @@ Run the sim:
 sim.run(...)
 
 
-#Test
+#Examples
 
-Run the runRBSTests.sh in bash. This will generete a results folder each of it will contain a .sp file with spikes from each test
+##Monkey and Banana Problem
 
-Run the runTowerOfHanoi.sh in bash. This will generete a spike data for the Tower Of Hanoi problems.
+The monkey and banana problems is a famous toy problem in artificial intelligence, particularly in logic programming and planning. 
 
-#Facts
+A monkey is in a room. Suspended from the ceiling is a bunch of bananas, beyond the monkey's reach. However, in the room there are also a chair and a stick. The ceiling is just the right height so that a monkey standing on a chair could knock the bananas down with the stick. The monkey knows how to move around, carry other things around, reach for the bananas.
 
-Facts are constructed in the following syntax:
+Monkey problem code is located at the ./monkeys folder.
 
-'("{name}",{properties})'
+To run the tests:
 
-- {name} - is the name of the fact group
-- {properties} - is a tuple (e.g. ("banana",0) )
+1. Open terminal at root of the Repository
+2. type ./monkeys/run.sh
 
-#Rules
+The results will be printed out to ./monkeys/tests/results
 
-Rules are consturcted in the following sytanx:
+##Tower of Hanoi
 
-'("{name}",({conditions},{operations}))'
+The Tower of Hanoi is a mathematical game or puzzle. It consists of three rods and a number of disks of different sizes, which can slide onto any rod. The puzzle starts with the disks in a neat stack in ascending order of size on one rod, the smallest at the top, thus making a conical shape. 
 
-- {name} - is the name of the rule
-- {conditions} - is an array of conditions for the rule:
-    - condition syntax: ({positive}, "{name}", {properties}, {binding)
-        - {positive} - bool determines if the conditons has to be true or false
-        - {name} - name of the fact group
-        - {properties} - is a tuple of fact properties
-            - can be any value
-            - "?" - symbol matches any value
-            - "?var" - matches any value, keeps it for operations under the same name
-        - {binding} - used for retractions to specify which fact to retract (see below)
-    - contions can be Tests:
-        - ("Test", ({operator},{leftValue},{rightValue}))
-            - {operator} - <,>,=,<>
-            - {leftValue} - left value of the test operation
-            - {rightValue} - right value of the test operation
-- {operations} - there 2 different operations:
-    - assert - turns on state, syntax: ("assert",("{name}",{properties})):
-        - {name} - name of the fact group
-        - {properties} - is a tuple of fact properties
-            - can be any value
-            - "?var" - will use a value found in preconditions
-    - retract - turns off state, syntax ("retract","{binding}")
-        - {binding} - name of the condition that matches the fact (see above)
+ToH code is located at the ./toh folder.
 
-#Operations
+To run the tests:
 
-+,-,/,* Operations can be perfomed in Test conditions and Asserting new items.
+1. Open terminal at root of the Repository
+2. type ./toh/run.sh
 
-Test Condtions Example:
+The results will be printed out to ./toh/tests/results
 
-("Test",({operator},({calcOperator}, {leftValue}, {rightValue1}),{rightValue2})) - this will pass as True
+##Sudoku
 
-- {operator} - <,>,=,<>
-- ({calcOperator}, {leftValue}, {rigthValue}) - left value of Test operation
-    - {calcOperator} - +,-,/,*
-    - {leftValue} - left value of calculation
-    - {rightValue} - right value of calculation
-- {rightValue2} - right value of Test Operation
+Sudoku is a logic-based, combinatorial number-placement puzzle. The objective is to fill a 9×9 grid with digits so that each column, each row, and each of the nine 3×3 subgrids that compose the grid (also called "boxes", "blocks", or "regions") contain all of the digits from 1 to 9. The puzzle setter provides a partially completed grid, which for a well-posed puzzle has a single solution.
 
-Similary, the attribute values in the Assert statements can be calculated values:
+Sudoku code is located at the ./sudoku folder.
 
-("assert, ("factName", (("+",2,2),"Attribute2"))) - will assert a fact: ("factName", (4,"Attribute"))
+To run the 6x6 tests:
 
+1. Open terminal at root of the Repository
+2. Type: python ./sudoku/tests/Sudoku6_Test.py > ./sudoku/tests/results/sudoku6.txt
+3. Press enter
 
+To run the 9x9 tests:
 
+1. Open terminal at root of the Repository
+2. Type: python ./sudoku/tests/Sudoku9_Test.py > ./sudoku/tests/results/sudoku9.txt
+3. Press enter
+
+The results will be printed out to "./sudoku/tests/results" folder
