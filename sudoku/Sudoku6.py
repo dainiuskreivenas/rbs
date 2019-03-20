@@ -1,3 +1,7 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
 
 from rbs import RBS
 import nealParams
@@ -10,7 +14,7 @@ fsa = FSAHelperFunctions(nealParams.simulator)
 
 import os.path
 
-class Sudoku6_CanBe:
+class Sudoku6:
 
     def getBoxIndex(self, x, y):
         boxIndex = 0
@@ -47,8 +51,8 @@ class Sudoku6_CanBe:
                     self.rbs.net.neuronToCa(self.resetNeuron, item.ca, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
     def __init__(self):
-        if(os.path.exists("sudoku6_canBe.rbs")):
-            self.rbs = RBS(fromFile="sudoku6_canBe.rbs",debug=True)
+        if(os.path.exists("sudoku/sudoku6_canBe.rbs")):
+            self.rbs = RBS(fromFile="sudoku/sudoku6_canBe.rbs",debug=True)
             self.resetNeuron = 0
         else:
 
@@ -310,7 +314,7 @@ class Sudoku6_CanBe:
             for i in self.rbs.net.interns:
                 self.rbs.net.neuronToNeruon(self.resetNeuron, i, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
-            self.rbs.net.save("sudoku6_canBe.rbs")
+            self.rbs.net.save("sudoku/sudoku6_canBe.rbs")
             self.rbs.exe.apply()
 
     def run(self, puzzles):

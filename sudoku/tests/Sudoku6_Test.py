@@ -1,3 +1,8 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
+
 
 import nealParams
 
@@ -6,7 +11,7 @@ if (nealParams.simulator=="spinnaker"):
 elif (nealParams.simulator=="nest"):
     import pyNN.nest as sim
 
-from Sudoku6_CanBe import Sudoku6_CanBe
+from Sudoku6 import Sudoku6
 import logging
 import numpy as np
 import datetime
@@ -17,7 +22,7 @@ sim.setup(timestep=2.0,min_delay=2.0,max_delay=2.0, time_scale_factor=40)
 
 logging.info("Setting up the Sudoku Board")
 
-sudoku6 = Sudoku6_CanBe()
+sudoku6 = Sudoku6()
 
 logging.info("Running Simulation")
 sudoku6.run(puzzles)

@@ -1,3 +1,8 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
+
 
 import nealParams as nealParameters
 if (nealParameters.simulator=="spinnaker"):
@@ -5,7 +10,7 @@ if (nealParameters.simulator=="spinnaker"):
 elif (nealParameters.simulator=="nest"):
     import pyNN.nest as sim
 
-from Sudoku9_CanBe import Sudoku9
+from Sudoku9 import Sudoku9
 import logging
 import time
 import datetime

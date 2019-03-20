@@ -1,3 +1,8 @@
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir) 
+
 from rbs import RBS
 import os.path
 
@@ -38,8 +43,8 @@ class Sudoku9:
 
 
     def __init__(self, debug = True):
-        if(os.path.exists("sudoku9_canBe.rbs")):
-            self.rbs = RBS(fromFile="sudoku9_canBe.rbs", debug = debug)
+        if(os.path.exists("sudoku/sudoku9_canBe.rbs")):
+            self.rbs = RBS(fromFile="sudoku/sudoku9_canBe.rbs", debug = debug)
         else:
             self.rbs = RBS(debug = debug)
 
@@ -373,7 +378,7 @@ class Sudoku9:
             )
 
             self.rbs.net.applyRulesToFacts()
-            self.rbs.net.save("sudoku9_canBe.rbs")
+            self.rbs.net.save("sudoku/sudoku9_canBe.rbs")
             self.rbs.exe.apply()
     
     def solve(self, sudoku):
