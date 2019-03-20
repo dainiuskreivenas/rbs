@@ -1,5 +1,5 @@
 # Introduction 
-This is a N-ARC (Neural Architecture of Cognition). 
+This is a RBS (Rule Based System). Build rules using facts that are cached to neurons and ran on NEST or SpiNNaker.
 
 # Getting Started
 1.	Installation process:
