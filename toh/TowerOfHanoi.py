@@ -12,8 +12,8 @@ sys.path.insert(0, parent_dir)
 from rbs import RBS
 
 class TowerOfHanoi:
-    def __init__(self, discNum):
-        self.rbs = RBS()
+    def __init__(self, sim, simulator, discNum):
+        self.rbs = RBS(sim, simulator)
 
         self.rbs.addRule(
             (

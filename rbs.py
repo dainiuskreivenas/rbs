@@ -5,17 +5,9 @@ import sys
 from operator import itemgetter
 from itertools import groupby
 
-import nealParams
 import logging
 
-
-if (nealParams.simulator=="spinnaker"):
-    import pyNN.spiNNaker as sim
-elif (nealParams.simulator=="nest"):
-    import pyNN.nest as sim
-
 from stateMachineClass import FSAHelperFunctions
-fsa = FSAHelperFunctions(nealParams.simulator)
 
 import pickle
 
@@ -116,7 +108,9 @@ class ParallelRuleGenerator:
                 index = index + 1
 
 class RbsNetwork:
-    def __init__(self, ruleGenerator = "sequential", fromFile = None, debug = False):
+    def __init__(self, sim, simulator, ruleGenerator, fromFile = None, debug = False):
+        self.fsa = FSAHelperFunctions(sim, simulator)
+
         self.debug = debug
 
         if(fromFile != None):
@@ -159,55 +153,55 @@ class RbsNetwork:
 
         connector = []
         #excitatory turn each other on
-        for fromNeuron in range (start,start+(fsa.CA_SIZE-fsa.CA_INHIBS)):
-            for toNeuron in range (start,start+(fsa.CA_SIZE-fsa.CA_INHIBS)):
+        for fromNeuron in range (start,start+(self.fsa.CA_SIZE-self.fsa.CA_INHIBS)):
+            for toNeuron in range (start,start+(self.fsa.CA_SIZE-self.fsa.CA_INHIBS)):
                 if (fromNeuron != toNeuron):
-                    connector = connector + [(fromNeuron,toNeuron,fsa.INTRA_CA_WEIGHT, 1.0)]
+                    connector = connector + [(fromNeuron,toNeuron,self.fsa.INTRA_CA_WEIGHT, 1.0)]
 
         #excitatory turn on inhibitory
-        for fromNeuron in range (start,start + fsa.CA_SIZE - fsa.CA_INHIBS):
-            for toNeuron in range (start + fsa.CA_SIZE - fsa.CA_INHIBS,start + fsa.CA_SIZE):
-                connector = connector + [(fromNeuron,toNeuron,fsa.INTRA_CA_TO_INHIB_WEIGHT, 1.0)]
+        for fromNeuron in range (start,start + self.fsa.CA_SIZE - self.fsa.CA_INHIBS):
+            for toNeuron in range (start + self.fsa.CA_SIZE - self.fsa.CA_INHIBS,start + self.fsa.CA_SIZE):
+                connector = connector + [(fromNeuron,toNeuron,self.fsa.INTRA_CA_TO_INHIB_WEIGHT, 1.0)]
 
         #inhibitory slows excitatory 
-        for fromNeuron in range (start + fsa.CA_SIZE - fsa.CA_INHIBS, start + fsa.CA_SIZE):
-            for toNeuron in range (start,start+fsa.CA_SIZE-fsa.CA_INHIBS):
-                connector = connector + [(fromNeuron,toNeuron,fsa.INTRA_CA_FROM_INHIB_WEIGHT, 1.0)]
+        for fromNeuron in range (start + self.fsa.CA_SIZE - self.fsa.CA_INHIBS, start + self.fsa.CA_SIZE):
+            for toNeuron in range (start,start+self.fsa.CA_SIZE-self.fsa.CA_INHIBS):
+                connector = connector + [(fromNeuron,toNeuron,self.fsa.INTRA_CA_FROM_INHIB_WEIGHT, 1.0)]
 
         self.connections += connector
 
         return range(start, self.neuron+1)
 
     def neuronToCa(self, neuron, ca, weight):
-        for n in range(ca[0], ca[10-fsa.CA_INHIBS]):
+        for n in range(ca[0], ca[10-self.fsa.CA_INHIBS]):
             self.connections.append((neuron,n,weight,1.0))
 
     def neuronToNeruon(self, fromNeruon, toNeuron, weight):
         self.connections.append((fromNeruon,toNeuron,weight,1.0))
 
     def caToNeuron(self, ca, neuron, weight):
-        for n in range(ca[0], ca[10-fsa.CA_INHIBS]):
+        for n in range(ca[0], ca[10-self.fsa.CA_INHIBS]):
             self.connections.append((n,neuron,weight,1.0))
 
     def caToCa(self, fromCa, toCa, weight):
-        for n in range(fromCa[0], fromCa[10-fsa.CA_INHIBS]):
-            for m in range(toCa[0], toCa[10-fsa.CA_INHIBS]):
+        for n in range(fromCa[0], fromCa[10-self.fsa.CA_INHIBS]):
+            for m in range(toCa[0], toCa[10-self.fsa.CA_INHIBS]):
                 self.connections.append((n,m,weight,1.0))
 
     def neuronTurnsOffCa(self, fromNeuron, toCa):
-        self.neuronToCa(fromNeuron, toCa, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+        self.neuronToCa(fromNeuron, toCa, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
     def neuronTurnsOnCa(self, fromNeuron, toCa):
-        self.neuronToCa(fromNeuron, toCa, fsa.ONE_NEURON_STARTS_CA_WEIGHT)
+        self.neuronToCa(fromNeuron, toCa, self.fsa.ONE_NEURON_STARTS_CA_WEIGHT)
 
     def neuronHalfTurnOnCa(self, fromNeuron, toNeuron):
-        self.neuronToNeruon(fromNeuron, toNeuron, fsa.ONE_HALF_ON_ONE_WEIGHT)
+        self.neuronToNeruon(fromNeuron, toNeuron, self.fsa.ONE_HALF_ON_ONE_WEIGHT)
 
     def caTurnsOnNeuron(self, fromCa, toNeuron):
-        self.caToNeuron(fromCa, toNeuron, fsa.STATE_TO_ONE_WEIGHT)
+        self.caToNeuron(fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT)
 
     def caHalfTurnsOnNeuron(self, fromCa, toNeuron):
-        self.caToNeuron(fromCa, toNeuron, fsa.HALF_ON_ONE_WEIGHT)
+        self.caToNeuron(fromCa, toNeuron, self.fsa.HALF_ON_ONE_WEIGHT)
 
     def twoCaTurnOnNeuron(self, fromOne, fromTwo, toNeuron):
         self.caHalfTurnsOnNeuron(fromOne, toNeuron)
@@ -530,14 +524,17 @@ class RbsNetwork:
         pickle.dump(self, open(fileName, "wb"))
 
 class RbsPopulation:
-    def __init__(self, neurons, fromIndex):
+    def __init__(self, sim, fsa, neurons, fromIndex):
         self.pop = sim.Population(neurons, sim.IF_cond_exp, fsa.CELL_PARAMS)
         self.pop.record("spikes")
         self.fromIndex = fromIndex
         self.toIndex = fromIndex + neurons
 
 class RbsExecutor:
-    def __init__(self, net, debug = False):
+    def __init__(self, sim, simulator, net, debug = False):
+        self.simulator = simulator
+        self.fsa = FSAHelperFunctions(sim, simulator)
+        self.sim = sim
         self.net = net
         self.connections = 0
         self.populations = []
@@ -569,7 +566,7 @@ class RbsExecutor:
         
         if(conn[2] < 0):
             connType = "inhibitory"
-            if(nealParams.simulator == "spinnaker"):
+            if(self.simulator == "spinnaker"):
                 connector = (conn[0],conn[1],conn[2]*-1,conn[3])
         
         return (
@@ -590,7 +587,7 @@ class RbsExecutor:
 
         if(addNeurons > 0):
             self.writeDebug("New Neurons: {}".format(addNeurons))
-            population = RbsPopulation(addNeurons, self.neuron - addNeurons)
+            population = RbsPopulation(self.sim, self.fsa, addNeurons, self.neuron - addNeurons)
             self.populations.append(population)
 
     def connect(self):
@@ -611,12 +608,12 @@ class RbsExecutor:
             
             for key,data in groups:
                 items = [item[2] for item in data]
-                if(nealParams.simulator == "nest" or key[2] == "excitatory"):
-                    conn = sim.FromListConnector(items)
-                    sim.Projection(key[0],key[1], conn, receptor_type="excitatory")
+                if(self.simulator == "nest" or key[2] == "excitatory"):
+                    conn = self.sim.FromListConnector(items)
+                    self.sim.Projection(key[0],key[1], conn, receptor_type="excitatory")
                 else:
-                    conn = sim.FromListConnector(items)
-                    sim.Projection(key[0],key[1], conn, receptor_type="inhibitory")   
+                    conn = self.sim.FromListConnector(items)
+                    self.sim.Projection(key[0],key[1], conn, receptor_type="inhibitory")   
 
     def activate(self):
         activate = []
@@ -627,8 +624,8 @@ class RbsExecutor:
 
         if(len(activate) > 0):
             self.writeDebug("Activation CA's: {}".format(len(activate)))
-            spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
-            spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
+            spikeTimes = {'spike_times': [[self.sim.get_current_time()+5]]}
+            spikeGen = self.sim.Population(1, self.sim.SpikeSourceArray, spikeTimes)
             for a in activate:
                 population = None
                 for pop in self.populations:
@@ -636,7 +633,7 @@ class RbsExecutor:
                         population = pop
                         break
 
-                fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
+                self.fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
                 self.actived += 1
 
     def writeDebug(self, msg):
@@ -652,9 +649,9 @@ class RbsExecutor:
         self.activate()
         
 class RBS:
-    def __init__(self, ruleGenerator = "sequential", fromFile = None, debug = False):
-        self.net = RbsNetwork(ruleGenerator = ruleGenerator, fromFile=fromFile, debug=debug)
-        self.exe = RbsExecutor(self.net, debug=debug)
+    def __init__(self, sim, simulator = "nest", ruleGenerator = "sequential", fromFile = None, debug = False):
+        self.net = RbsNetwork(sim, simulator, ruleGenerator = ruleGenerator, fromFile=fromFile, debug=debug)
+        self.exe = RbsExecutor(sim, simulator, self.net, debug=debug)
         if(fromFile != None):
             self.exe.apply()
 

@@ -4,6 +4,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
 
 from rbs import RBS
+from stateMachineClass import FSAHelperFunctions
 import os.path
 
 class Sudoku9:
@@ -41,15 +42,16 @@ class Sudoku9:
                     self.rbs.addFact(("Item", (i, y, n, boxIndex)), False, False)
                     self.rbs.addFact(("CantBe", (i, y, n)), False, False)
 
+    def __init__(self, sim, simulator, debug = True):
+        self.sim = sim
+        self.fsa = FSAHelperFunctions(sim, simulator)
 
-    def __init__(self, debug = True):
         if(os.path.exists("sudoku/sudoku9_canBe.rbs")):
-            self.rbs = RBS(fromFile="sudoku/sudoku9_canBe.rbs", debug = debug)
+            self.rbs = RBS(sim, simulator, fromFile="sudoku/sudoku9_canBe.rbs", debug = debug)
         else:
-            self.rbs = RBS(debug = debug)
+            self.rbs = RBS(sim, simulator, debug = debug)
 
             self.setupBoard()
-
 
             self.rbs.addRule(
             (

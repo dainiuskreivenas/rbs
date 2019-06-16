@@ -4,14 +4,7 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
 
 from rbs import RBS
-import nealParams
 from stateMachineClass import FSAHelperFunctions
-if (nealParams.simulator=="spinnaker"):
-    import pyNN.spiNNaker as sim
-elif (nealParams.simulator=="nest"):
-    import pyNN.nest as sim
-fsa = FSAHelperFunctions(nealParams.simulator)
-
 import os.path
 
 class Sudoku6:
@@ -47,16 +40,19 @@ class Sudoku6:
                     item = self.rbs.addFact(("Item", (i, y, n, boxIndex)), False, False)
                     cantbe = self.rbs.addFact(("CantBe", (i, y, n)), False, False)
 
-                    self.rbs.net.neuronToCa(self.resetNeuron, cantbe.ca, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
-                    self.rbs.net.neuronToCa(self.resetNeuron, item.ca, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+                    self.rbs.net.neuronToCa(self.resetNeuron, cantbe.ca, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+                    self.rbs.net.neuronToCa(self.resetNeuron, item.ca, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
-    def __init__(self):
+    def __init__(self, sim, simulator):
+        self.sim = sim
+        self.fsa = FSAHelperFunctions(sim, simulator)
+    
         if(os.path.exists("sudoku/sudoku6_canBe.rbs")):
-            self.rbs = RBS(fromFile="sudoku/sudoku6_canBe.rbs",debug=True)
+            self.rbs = RBS(sim, simulator=simulator, fromFile="sudoku/sudoku6_canBe.rbs", debug=True)
             self.resetNeuron = 0
         else:
 
-            self.rbs = RBS(debug=True)
+            self.rbs = RBS(sim, simulator=simulator, debug=True)
 
             self.setupBoard()
 
@@ -309,10 +305,10 @@ class Sudoku6:
 
             for a in self.rbs.net.assertions:
                 assertion = self.rbs.net.assertions[a]
-                self.rbs.net.neuronToNeruon(self.resetNeuron, assertion, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+                self.rbs.net.neuronToNeruon(self.resetNeuron, assertion, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
             for i in self.rbs.net.interns:
-                self.rbs.net.neuronToNeruon(self.resetNeuron, i, fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+                self.rbs.net.neuronToNeruon(self.resetNeuron, i, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
             self.rbs.net.save("sudoku/sudoku6_canBe.rbs")
             self.rbs.exe.apply()
@@ -322,7 +318,7 @@ class Sudoku6:
         resetTimes = []
         for p in puzzles:
             puzzleActivationTimes = {'spike_times': [[runtime+5]]}
-            puzzleSpikeGen = sim.Population(1, sim.SpikeSourceArray, puzzleActivationTimes)
+            puzzleSpikeGen = self.sim.Population(1, self.sim.SpikeSourceArray, puzzleActivationTimes)
             for y,s in enumerate(p):
                 for x,i in enumerate(s):
                     if (i <> None):
@@ -334,14 +330,14 @@ class Sudoku6:
                                 population = pop
                                 break
 
-                        fsa.turnOnStateFromSpikeSource(puzzleSpikeGen, population.pop, f.ca[0]-population.fromIndex)
+                        self.fsa.turnOnStateFromSpikeSource(puzzleSpikeGen, population.pop, f.ca[0]-population.fromIndex)
                         
             runtime += 600
             resetTimes.append(runtime)
             resetTimes.append(runtime+10)
             runtime += 100
 
-        resetSpikeGen = sim.Population(1, sim.SpikeSourceArray, {'spike_times': [resetTimes]})
+        resetSpikeGen = self.sim.Population(1, self.sim.SpikeSourceArray, {'spike_times': [resetTimes]})
 
         population = None
         for pop in self.rbs.exe.populations:
@@ -349,9 +345,9 @@ class Sudoku6:
                 population = pop
                 break
         
-        fsa.turnOnNeuronFromSpikeSource(resetSpikeGen, population.pop, self.resetNeuron-population.fromIndex)
+        self.fsa.turnOnNeuronFromSpikeSource(resetSpikeGen, population.pop, self.resetNeuron-population.fromIndex)
         
-        sim.run(runtime)
+        self.sim.run(runtime)
 
     def printSpikes(self):
         data = self.rbs.get_data()

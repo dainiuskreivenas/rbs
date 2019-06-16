@@ -14,22 +14,19 @@ Chair:
 
 """
 
-import nealParams as nealParameters
-if (nealParameters.simulator=="spinnaker"):
-    import pyNN.spiNNaker as sim
-elif (nealParameters.simulator=="nest"):
-    import pyNN.nest as sim
+import pyNN.nest as sim
 from monkeyProblem import MonekyProblem
 
-sim.setup(timestep=nealParameters.DELAY,min_delay=nealParameters.DELAY,max_delay=nealParameters.DELAY, debug=0)
+sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 
-mp = MonekyProblem()
+#mp = MonekyProblem(sim, "spinnaker")
+mp = MonekyProblem(sim, "nest")
 
 mp.rbs.addFact(("chairAt", (2,)))
 mp.rbs.addFact(("fruit",("banana",0)))
 mp.rbs.addFact(("fruit",("apple",0)))
 
-sim.run(nealParameters.SIM_LENGTH)
+sim.run(200)
 
 mp.printSpikes("Monkey_TwoPlaceFruits")
 

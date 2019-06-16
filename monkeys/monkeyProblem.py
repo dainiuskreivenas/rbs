@@ -7,8 +7,8 @@ from rbs import RBS
 
 class MonekyProblem:
 
-    def __init__(self):
-        self.rbs = RBS()
+    def __init__(self, sim, simulator):
+        self.rbs = RBS(sim, simulator)
         self.rbs.addRule(
             (
                 "eatFruit",

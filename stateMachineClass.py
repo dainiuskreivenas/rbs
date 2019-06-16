@@ -5,14 +5,13 @@
 #Note that to externally activate a CA State, you should only send
 #excitatory connections to the first 8 neurons.
 
-import nealParams as nealParameters
 import numpy as np
 from nealCoverClass import NealCoverFunctions
 
 class FSAHelperFunctions:
-    def __init__(self, simName):
+    def __init__(self, sim, simName):
         self.simulator = simName
-        self.neal = NealCoverFunctions(self.simulator)
+        self.neal = NealCoverFunctions(sim, self.simulator)
         self.initParams()
 
     #FSA Parmaeters
@@ -45,12 +44,12 @@ class FSAHelperFunctions:
         self.ONE_HALF_ON_WEIGHT = 0.007
         self.ONE_HALF_ON_ONE_WEIGHT = 0.008
         
-        if (nealParameters.simulator == 'nest'):
+        if (self.simulator == 'nest'):
             self.CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0,
                                 'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
                                 'tau_syn_I': 5.0, #bug2 fix
                                 'v_rest' : -65.0,'i_offset':0.0}
-        elif (nealParameters.simulator == 'spinnaker'):
+        elif (self.simulator == 'spinnaker'):
             self.CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0,
                                 'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
                                 'tau_syn_I': 5.0, #bug2 fix
@@ -67,7 +66,7 @@ class FSAHelperFunctions:
                 toNeuron = toOffset + (CA*self.CA_SIZE)
                 if (toNeuron != fromNeuron):
                     connector = connector + [(fromNeuron,toNeuron,
-                        self.INTRA_CA_WEIGHT, nealParameters.DELAY)]
+                        self.INTRA_CA_WEIGHT, 1.0)]
 
         self.neal.nealProjection(neurons,neurons,connector,'excitatory')
 
@@ -78,7 +77,7 @@ class FSAHelperFunctions:
             for toOffset in range (self.CA_SIZE-self.CA_INHIBS,self.CA_SIZE):
                 toNeuron = toOffset + (CA*self.CA_SIZE)
                 connector = connector + [(fromNeuron,toNeuron,
-                        self.INTRA_CA_TO_INHIB_WEIGHT, nealParameters.DELAY)]
+                        self.INTRA_CA_TO_INHIB_WEIGHT, 1.0)]
 
         self.neal.nealProjection(neurons,neurons,connector,'excitatory')
 
@@ -91,7 +90,7 @@ class FSAHelperFunctions:
                 w = self.INTRA_CA_FROM_INHIB_WEIGHT
                 if(self.simulator == "spinnaker"):
                     w = w*-1
-                connector = connector + [(fromNeuron,toNeuron, w, nealParameters.DELAY)]
+                connector = connector + [(fromNeuron,toNeuron, w, 1.0)]
         
         self.neal.nealProjection(neurons,neurons,connector,'inhibitory')
 
@@ -104,11 +103,11 @@ class FSAHelperFunctions:
         connector = []
         for toNeuron in range (toCA,toCA+self.CA_SIZE-self.CA_INHIBS):
             connector = connector + [(0,toNeuron,self.INPUT_WEIGHT,
-                                      nealParameters.DELAY)]
+                                      1.0)]
         self.neal.nealProjection(spikeSource, toNeurons, connector, 'excitatory')
     
     def turnOnNeuronFromSpikeSource(self, spikeSource, toNeurons, toNeuron):
-        connector = [(0,toNeuron,self.INPUT_WEIGHT,nealParameters.DELAY)]
+        connector = [(0,toNeuron,self.INPUT_WEIGHT,1.0)]
         self.neal.nealProjection(spikeSource, toNeurons, connector, 'excitatory')
         
 
@@ -116,12 +115,12 @@ class FSAHelperFunctions:
     def oneNeuronStimulatesState(self,fromNeurons, fromNeuron, toNeurons, toCA, weight):
         connector = []
         for toNeuron in range (0,self.CA_SIZE-self.CA_INHIBS):
-            connector = connector + [(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+            connector = connector + [(fromNeuron,toNeuron,weight,1.0)]
 
         self.neal.nealProjection(fromNeurons, toNeurons, connector,'excitatory')
 
     def oneNueronStimulatesNeuron(self, fromNeurons,fromCA,toNeurons,toCA,weight):
-        connector = [(fromCA, toCA, weight, nealParameters.DELAY)]
+        connector = [(fromCA, toCA, weight, 1.0)]
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
 
     #-------- ONE TURNS ON ?
@@ -145,7 +144,7 @@ class FSAHelperFunctions:
             w = self.ONE_NEURON_STOPS_CA_WEIGHT
             if(self.simulator == "spinnaker"):
                 w = w*-1
-            connector = connector + [(fromNeuron,toNeuron,w,nealParameters.DELAY)]
+            connector = connector + [(fromNeuron,toNeuron,w,1.0)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 
@@ -154,7 +153,7 @@ class FSAHelperFunctions:
         connector = []
         for fromNeuron in range (fromCA, fromCA+self.CA_SIZE-self.CA_INHIBS):
             for toNeuron in range (toCA, toCA+self.CA_SIZE-self.CA_INHIBS):
-                connector=connector+[(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+                connector=connector+[(fromNeuron,toNeuron,weight,1.0)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
 
@@ -165,14 +164,14 @@ class FSAHelperFunctions:
                 w = weight
                 if(self.simulator == "spinnaker"):
                     w = w*-1
-                connector=connector+[(fromNeuron,toNeuron,w,nealParameters.DELAY)]
+                connector=connector+[(fromNeuron,toNeuron,w,1.0)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 
     def stateStimulatesNeuron(self,fromNeurons,fromCA,toNeurons,toNeuron,weight):
         connector = []
         for fromNeuron in range (0,self.CA_SIZE-self.CA_INHIBS):
-            connector=connector+[(fromNeuron,toNeuron,weight,nealParameters.DELAY)]
+            connector=connector+[(fromNeuron,toNeuron,weight,1.0)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
 

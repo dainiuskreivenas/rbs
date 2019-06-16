@@ -1,13 +1,9 @@
-import nealParams
-
-if (nealParams.simulator=="spinnaker"):
-    import pyNN.spiNNaker as sim
-elif (nealParams.simulator=="nest"):
-    import pyNN.nest as sim
-
+#import pyNN.spiNNaker as sim
+import pyNN.nest as sim
 from stateMachineClass import FSAHelperFunctions
-fsa = FSAHelperFunctions(nealParams.simulator)
 
+#fsa = FSAHelperFunctions(sim, "spinnaker")
+fsa = FSAHelperFunctions(sim, "nest")
 runtime = 1000
 
 def createNeurons():

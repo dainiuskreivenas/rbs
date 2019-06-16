@@ -3,13 +3,8 @@ current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfra
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir) 
 
-
-import nealParams
-
-if (nealParams.simulator=="spinnaker"):
-    import pyNN.spiNNaker as sim
-elif (nealParams.simulator=="nest"):
-    import pyNN.nest as sim
+#import pyNN.spiNNaker as sim
+import pyNN.nest as sim
 
 from Sudoku6 import Sudoku6
 import logging
@@ -22,7 +17,8 @@ sim.setup(timestep=2.0,min_delay=2.0,max_delay=2.0, time_scale_factor=40)
 
 logging.info("Setting up the Sudoku Board")
 
-sudoku6 = Sudoku6()
+#sudoku6 = Sudoku6(sim, "spinnaker")
+sudoku6 = Sudoku6(sim, "nest")
 
 logging.info("Running Simulation")
 sudoku6.run(puzzles)

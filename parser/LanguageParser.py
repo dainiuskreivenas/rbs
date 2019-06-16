@@ -184,8 +184,8 @@ class LanguageParser:
         self.addNoun("Dog")
         self.addNoun("Cat")
 
-    def __init__(self):
-        self.rbs = RBS()
+    def __init__(self, sim, simulator):
+        self.rbs = RBS(sim, simulator)
         self.addGrammerRules()
         self.addLexicon()
         
