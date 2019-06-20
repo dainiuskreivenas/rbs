@@ -9,8 +9,11 @@ from network.contracts.population import Population
 from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
 from network.executor import Executor
 
-class RBS:
-    def __init__(self, sim, simulator = "nest", ruleGenerator = SequentialRuleGenerator(), fromFile = None, debug = False):
+class RuleBasedSystem:
+    def __init__(self, sim, simulator, ruleGenerator = SequentialRuleGenerator(), fromFile = None, debug = False):
+        if(simulator not in ["nest", "spinnaker"]):
+            raise Exception("simulator type: '{}' is invalid. Use one of the following: nest, spinnaker.".format(simulator)) 
+
         fsa = FSAHelperFunctions(sim, simulator)
         self.net = Network(fsa, ruleGenerator, fromFile=fromFile, debug=debug)
         self.exe = Executor(sim, simulator, fsa, self.net, debug=debug)

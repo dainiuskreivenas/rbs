@@ -6,7 +6,7 @@ Test for numerical Decrement within Test condition
 
 #import pyNN.spiNNaker as sim
 import pyNN.nest as sim
-from rbs import RBS
+from rbs import RuleBasedSystem as RBS
 
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 

@@ -2,6 +2,7 @@ import dill
 import logging
 from contracts.matchTree import MatchTree
 from contracts.fact import Fact
+from helpers.connectivityHelper import *
 
 class Network:
     def __init__(self, fsa, ruleGenerator, fromFile = None, debug = False):
@@ -40,57 +41,31 @@ class Network:
         start = self.neuron + 1
         self.neuron += 10
 
-        connector = []
-        #excitatory turn each other on
-        for fromNeuron in range (start,start+(self.fsa.CA_SIZE-self.fsa.CA_INHIBS)):
-            for toNeuron in range (start,start+(self.fsa.CA_SIZE-self.fsa.CA_INHIBS)):
-                if (fromNeuron != toNeuron):
-                    connector = connector + [(fromNeuron,toNeuron,self.fsa.INTRA_CA_WEIGHT, 1.0)]
-
-        #excitatory turn on inhibitory
-        for fromNeuron in range (start,start + self.fsa.CA_SIZE - self.fsa.CA_INHIBS):
-            for toNeuron in range (start + self.fsa.CA_SIZE - self.fsa.CA_INHIBS,start + self.fsa.CA_SIZE):
-                connector = connector + [(fromNeuron,toNeuron,self.fsa.INTRA_CA_TO_INHIB_WEIGHT, 1.0)]
-
-        #inhibitory slows excitatory 
-        for fromNeuron in range (start + self.fsa.CA_SIZE - self.fsa.CA_INHIBS, start + self.fsa.CA_SIZE):
-            for toNeuron in range (start,start+self.fsa.CA_SIZE-self.fsa.CA_INHIBS):
-                connector = connector + [(fromNeuron,toNeuron,self.fsa.INTRA_CA_FROM_INHIB_WEIGHT, 1.0)]
-
-        self.connections += connector
+        makeCA(
+            self.connections,
+            self.fsa.CA_SIZE, 
+            self.fsa.CA_INHIBS,
+            start,
+            self.fsa.INTRA_CA_WEIGHT,
+            self.fsa.INTRA_CA_TO_INHIB_WEIGHT,
+            self.fsa.INTRA_CA_FROM_INHIB_WEIGHT)
 
         return range(start, self.neuron+1)
 
-    def neuronToCa(self, neuron, ca, weight):
-        for n in range(ca[0], ca[10-self.fsa.CA_INHIBS]):
-            self.connections.append((neuron,n,weight,1.0))
-
-    def neuronToNeruon(self, fromNeruon, toNeuron, weight):
-        self.connections.append((fromNeruon,toNeuron,weight,1.0))
-
-    def caToNeuron(self, ca, neuron, weight):
-        for n in range(ca[0], ca[10-self.fsa.CA_INHIBS]):
-            self.connections.append((n,neuron,weight,1.0))
-
-    def caToCa(self, fromCa, toCa, weight):
-        for n in range(fromCa[0], fromCa[10-self.fsa.CA_INHIBS]):
-            for m in range(toCa[0], toCa[10-self.fsa.CA_INHIBS]):
-                self.connections.append((n,m,weight,1.0))
-
     def neuronTurnsOffCa(self, fromNeuron, toCa):
-        self.neuronToCa(fromNeuron, toCa, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
 
     def neuronTurnsOnCa(self, fromNeuron, toCa):
-        self.neuronToCa(fromNeuron, toCa, self.fsa.ONE_NEURON_STARTS_CA_WEIGHT)
+        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STARTS_CA_WEIGHT)
 
     def neuronHalfTurnOnCa(self, fromNeuron, toNeuron):
-        self.neuronToNeruon(fromNeuron, toNeuron, self.fsa.ONE_HALF_ON_ONE_WEIGHT)
+        neuronToNeruon(self.connections, fromNeuron, toNeuron, self.fsa.ONE_HALF_ON_ONE_WEIGHT)
 
     def caTurnsOnNeuron(self, fromCa, toNeuron):
-        self.caToNeuron(fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT)
+        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT)
 
     def caHalfTurnsOnNeuron(self, fromCa, toNeuron):
-        self.caToNeuron(fromCa, toNeuron, self.fsa.HALF_ON_ONE_WEIGHT)
+        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.HALF_ON_ONE_WEIGHT)
 
     def twoCaTurnOnNeuron(self, fromOne, fromTwo, toNeuron):
         self.caHalfTurnsOnNeuron(fromOne, toNeuron)
@@ -404,7 +379,6 @@ class Network:
 
                 self.ruleGenerator.setupActivations(self, ma.matches, ruleCa)
             
-
     def writeDebug(self, msg):
         if(self.debug):
             logging.info(msg)
