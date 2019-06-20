@@ -1,4 +1,4 @@
-import pickle
+import dill
 import logging
 from contracts.matchTree import MatchTree
 from contracts.fact import Fact
@@ -10,7 +10,7 @@ class Network:
         self.debug = debug
 
         if(fromFile != None):
-            net = pickle.load(open(fromFile))
+            net = dill.load(open(fromFile))
             self.facts = net.facts
             self.rules = net.rules
             self.assertions = net.assertions
@@ -410,4 +410,4 @@ class Network:
             logging.info(msg)
 
     def save(self, fileName):
-        pickle.dump(self, open(fileName, "wb"))
+        dill.dump(self, open(fileName, "wb"))
