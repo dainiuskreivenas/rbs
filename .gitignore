@@ -4,4 +4,5 @@ results/*
 *.pyc
 *.rbs
 reports/*
+.vscode/*
 application_generated_data_files/*
