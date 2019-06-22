@@ -5,25 +5,24 @@ from contracts.fact import Fact
 from helpers.connectivityHelper import *
 
 class Network:
-    def __init__(self, fsa, ruleGenerator, fromFile = None, debug = False):
+    def __init__(self, fsa, ruleGenerator, debug = False):
         self.fsa = fsa
-        self.ruleGenerator = ruleGenerator
+        self.generator = ruleGenerator
         self.debug = debug
+        self.fromFile = None
 
-        if(fromFile != None):
-            net = dill.load(open(fromFile))
-            self.facts = net.facts
-            self.rules = net.rules
-            self.assertions = net.assertions
-            self.interns = net.interns
-            self.neuron = net.neuron
-            self.factIndex = net.factIndex
-            self.connections = net.connections
-            self.activations = net.activations
-            self.generator = net.generator
-            ruleGenerator = net.generator
+    def useStorageFile(self, file):
+        self.fromFile = file
+        return self
+
+    def useInheritanceStructure(self, inheritanceStructure):
+        self.inheritanceStructure = inheritanceStructure
+        return self
+
+    def build(self):
+        if(self.fromFile != None):
+            return dill.load(open(self.fromFile))
         else:
-            self.generator = ruleGenerator
             self.facts = {}
             self.rules = {}
             self.assertions = {}
@@ -32,6 +31,7 @@ class Network:
             self.factIndex = 0
             self.connections = []
             self.activations = []
+            return self
 
     def addNeuron(self):
         self.neuron += 1
@@ -52,38 +52,38 @@ class Network:
 
         return range(start, self.neuron+1)
 
-    def neuronTurnsOffCa(self, fromNeuron, toCa):
-        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT)
+    def neuronTurnsOffCa(self, fromNeuron, toCa, connectionType):
+        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STOPS_CA_WEIGHT, connectionType)
 
-    def neuronTurnsOnCa(self, fromNeuron, toCa):
-        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STARTS_CA_WEIGHT)
+    def neuronTurnsOnCa(self, fromNeuron, toCa, connectionType):
+        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STARTS_CA_WEIGHT, connectionType)
 
-    def neuronHalfTurnOnCa(self, fromNeuron, toNeuron):
-        neuronToNeruon(self.connections, fromNeuron, toNeuron, self.fsa.ONE_HALF_ON_ONE_WEIGHT)
+    def neuronHalfTurnOnCa(self, fromNeuron, toNeuron, connectionType):
+        neuronToNeruon(self.connections, fromNeuron, toNeuron, self.fsa.ONE_HALF_ON_ONE_WEIGHT, connectionType)
 
-    def caTurnsOnNeuron(self, fromCa, toNeuron):
-        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT)
+    def caTurnsOnNeuron(self, fromCa, toNeuron, connectionType):
+        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT, connectionType)
 
-    def caHalfTurnsOnNeuron(self, fromCa, toNeuron):
-        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.HALF_ON_ONE_WEIGHT)
+    def caHalfTurnsOnNeuron(self, fromCa, toNeuron, connectionType):
+        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.HALF_ON_ONE_WEIGHT, connectionType)
 
-    def twoCaTurnOnNeuron(self, fromOne, fromTwo, toNeuron):
-        self.caHalfTurnsOnNeuron(fromOne, toNeuron)
-        self.caHalfTurnsOnNeuron(fromTwo, toNeuron)
+    def twoCaTurnOnNeuron(self, fromOne, fromTwo, toNeuron, firstConnectionType, secondConnectionType):
+        self.caHalfTurnsOnNeuron(fromOne, toNeuron, firstConnectionType)
+        self.caHalfTurnsOnNeuron(fromTwo, toNeuron, secondConnectionType)
 
-    def neuronAndCaTurnOnNeuron(self, fromNeuron, fromCa, toNeuron):
-        self.neuronHalfTurnOnCa(fromNeuron,toNeuron)
-        self.caHalfTurnsOnNeuron(fromCa,toNeuron)
+    def neuronAndCaTurnOnNeuron(self, fromNeuron, fromCa, toNeuron, neuronConnectionType, caConnectionType):
+        self.neuronHalfTurnOnCa(fromNeuron,toNeuron, neuronConnectionType)
+        self.caHalfTurnsOnNeuron(fromCa,toNeuron, caConnectionType)
 
-    def addTwoStateIntermediate(self, pop1, pop2):
+    def addTwoStateIntermediate(self, pop1, pop2, firstConnectionType, secondConnectionType):
         intermediate = self.addNeuron()
-        self.twoCaTurnOnNeuron(pop1,pop2,intermediate)
+        self.twoCaTurnOnNeuron(pop1,pop2,intermediate, firstConnectionType, secondConnectionType)
         self.interns.append(intermediate)
         return intermediate
 
-    def addNeuronAndStateIntermediate(self, pop1, pop2):
+    def addNeuronAndStateIntermediate(self, pop1, pop2, neuronConnectionType, caConnectionType):
         intermediate = self.addNeuron()
-        self.neuronAndCaTurnOnNeuron(pop1, pop2, intermediate)
+        self.neuronAndCaTurnOnNeuron(pop1, pop2, intermediate, neuronConnectionType, caConnectionType)
         self.interns.append(intermediate)
         return intermediate
 
@@ -242,9 +242,14 @@ class Network:
         else:
             return False
 
-    def buildFounds(self, matches, condition, tests):
+    def buildFounds(self, matches, condition, tests, isAs):
         newTree = []
         existing = []
+
+        if(self.inheritanceStructure):
+            for isA in isAs:
+                if(not self.inheritanceStructure.inUnits(isA[1])):
+                    return newTree
              
         for f in matches:
             search = self.getSearchExpression(condition, f.variables)
@@ -269,7 +274,7 @@ class Network:
 
                 if(testPass == False):
                     continue
-
+                
                 existing.append(treeItem.label)
 
                 newTree.append(treeItem)
@@ -340,7 +345,7 @@ class Network:
             fact = Fact(assertion[0],tuple(newProps))
             fact = self.getFact(fact)
 
-            self.neuronTurnsOnCa(rulePop, fact.ca)
+            self.neuronTurnsOnCa(rulePop, fact.ca, 0)
 
     def addRetractions(self, retractions, match, ruleCa):
         for retraction in retractions:
@@ -348,7 +353,7 @@ class Network:
                 if m[1] == retraction:
                     turnOfCa = m[0].ca
                     break
-            self.neuronTurnsOffCa(ruleCa, turnOfCa)
+            self.neuronTurnsOffCa(ruleCa, turnOfCa, 0)
 
     def applyRulesToFacts(self):
         for key in self.rules:
@@ -357,13 +362,13 @@ class Network:
 
             rule = self.rules[key]
             
-            conditions,tests,assertions,retractions = rule.extract()
+            conditions,tests,isAs,assertions,retractions = rule.extract()
 
             matches = [MatchTree({},[])]
             for c in conditions:
-                matches = self.buildFounds(matches, c, tests)
+                matches = self.buildFounds(matches, c, tests, isAs)
                 if(len(matches) == 0):
-                    break 
+                    break
 
             self.writeDebug("Found {} Matches for Rule: {}".format(len(matches), key))
 
@@ -377,7 +382,7 @@ class Network:
                 if(len(retractions) > 0):
                     self.addRetractions(retractions, ma, ruleCa)
 
-                self.ruleGenerator.setupActivations(self, ma.matches, ruleCa)
+                self.generator.setupActivations(self, ma.matches, isAs, ruleCa)
             
     def writeDebug(self, msg):
         if(self.debug):

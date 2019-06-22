@@ -9,11 +9,18 @@ class Executor:
         self.fsa = fsa
         self.sim = sim
         self.net = net
+        self.debug = debug
+
+    def useAssociationTopology(self, topology):
+        self.neuralHierarchyTopology = topology
+        return self
+
+    def build(self):
         self.connections = 0
         self.populations = []
         self.neuron = 0
         self.actived = 0
-        self.debug = debug
+        return self
 
     def getConnection(self, conn):
         fromPop = None
@@ -21,20 +28,36 @@ class Executor:
 
         fromN = conn[0]
         toN = conn[1]
-
+        mode = conn[4]
 
         for pop in self.populations:
             rng = range(pop.fromIndex, pop.toIndex)
-            if(fromN in rng):
+            if(fromN in rng and (mode in [0, 1])):
                 fromPop = pop
                 if(toPop != None):
                     break
-            if(toN in rng):
+            if(toN in rng and (mode in [0, 2])):
                 toPop = pop
                 if(fromPop != None):
                     break
         
-        connector = (conn[0]-fromPop.fromIndex,conn[1]-toPop.fromIndex,conn[2],conn[3])
+        if(mode == 0): # Within Network
+            pFrom = fromPop.pop
+            pTo = toPop.pop
+            connector = (conn[0]-fromPop.fromIndex,conn[1]-toPop.fromIndex,conn[2],conn[3])
+        elif(mode == 1): # From Network to Inheritance
+            pFrom = fromPop.pop
+            pTo = self.neuralHierarchyTopology.cells
+            connector = (conn[0]-fromPop.fromIndex,conn[1],conn[2],conn[3])
+        elif(mode == 2): # From Inheritance to Network
+            pFrom = self.neuralHierarchyTopology.cells
+            pTo = toPop.pop
+            connector = (conn[0],conn[1]-toPop.fromIndex,conn[2],conn[3])
+        else: # Within Inheritance
+            pFrom = self.neuralHierarchyTopology.cells
+            pTo = self.neuralHierarchyTopology.cells
+            connector = (conn[0],conn[1],conn[2],conn[3])
+
         connType = "excitatory"
         
         if(conn[2] < 0):
@@ -43,8 +66,8 @@ class Executor:
                 connector = (conn[0],conn[1],conn[2]*-1,conn[3])
         
         return (
-            fromPop.pop,
-            toPop.pop,
+            pFrom,
+            pTo,
             connector,
             connType
         )
@@ -79,7 +102,7 @@ class Executor:
             allC.sort(key=itemgetter(0,1,3))
             groups = groupby(allC,key=itemgetter(0,1,3))
             
-            for key,data in groups:
+            for key,data in groups:               
                 items = [item[2] for item in data]
                 if(self.simulator == "nest" or key[2] == "excitatory"):
                     conn = self.sim.FromListConnector(items)

@@ -8,18 +8,59 @@ from network.contracts.rule import Rule
 from network.contracts.population import Population
 from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
 from network.executor import Executor
+from assocciation.association import Association
 
 class RuleBasedSystem:
-    def __init__(self, sim, simulator, ruleGenerator = SequentialRuleGenerator(), fromFile = None, debug = False):
+    def __init__(self, sim, simulator, spinnakerVersion = -1, debug = False):
         if(simulator not in ["nest", "spinnaker"]):
             raise Exception("simulator type: '{}' is invalid. Use one of the following: nest, spinnaker.".format(simulator)) 
+        self.sim = sim
+        self.simulator = simulator
+        self.debug = debug
+        self.spinnakerVersion = spinnakerVersion
+        self.generator = SequentialRuleGenerator()
+        self.fromFile = None
 
-        fsa = FSAHelperFunctions(sim, simulator)
-        self.net = Network(fsa, ruleGenerator, fromFile=fromFile, debug=debug)
-        self.exe = Executor(sim, simulator, fsa, self.net, debug=debug)
-        if(fromFile != None):
+    def useRuleGenerator(self, generator):
+        self.generator = generator
+        return self
+
+    def useStorageFile(self, file):
+        self.fromFile = file
+        return self
+
+    def useBases(self, baseFile):
+        self.basesFile = baseFile
+        return self
+
+    def build(self, runTime):
+        self.runTime = runTime
+        self.fsa = FSAHelperFunctions(self.sim, self.simulator)
+
+        if(self.basesFile):
+            self.association = \
+                Association(self.sim, self.simulator, self.spinnakerVersion) \
+                    .useBases(self.basesFile) \
+                    .build(self.runTime)
+
+        self.net = \
+            self.net = \
+                Network(self.fsa, self.generator, self.debug) \
+                    .useStorageFile(self.fromFile) \
+                    .useInheritanceStructure(self.association.inheritance) \
+                    .build()
+
+        self.exe = \
+            self.exe = \
+                Executor(self.sim, self.simulator, self.fsa, self.net, self.debug) \
+                    .useAssociationTopology(self.association.topology.neuralHierarchyTopology) \
+                    .build()
+
+        if(self.fromFile != None):
             self.exe.apply()
 
+        return self
+    
     def addFact(self, fact, active = True, apply = True):
         fact = self.net.addFact(Fact(fact[0],fact[1]), active, apply)
         if(apply):
@@ -50,16 +91,16 @@ class RuleBasedSystem:
             pop = self.get_population(self.net.assertions[a])
             d = data[pop.pop.label]            
             st = d.segments[0].spiketrains[self.net.assertions[a]-pop.fromIndex]
+            print "({})".format(a)
             if(len(st) > 0):
-                print "({})".format(a)
                 for s in st.magnitude:
                     print "{} {}".format(self.net.assertions[a], s)
         for a in self.net.interns:  
             pop = self.get_population(a)
             d = data[pop.pop.label]
             st = d.segments[0].spiketrains[a-pop.fromIndex]
+            print "({})".format(a)
             if(len(st) > 0):
-                print "({})".format(a)
                 for s in st.magnitude:
                     print "{} {}".format(a, s)
         for g in self.net.facts:
@@ -74,7 +115,6 @@ class RuleBasedSystem:
                             print "{} {}".format(n, s)
 
         return data
-
 
     def get_data(self):
         data = {}
