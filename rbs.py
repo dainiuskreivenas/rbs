@@ -5,9 +5,8 @@ from stateMachineClass import FSAHelperFunctions
 from network.network import Network
 from network.contracts.fact import Fact
 from network.contracts.rule import Rule
-from network.contracts.population import Population
 from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
-from network.executor import Executor
+from executor.executor import Executor
 from assocciation.association import Association
 
 class RuleBasedSystem:
