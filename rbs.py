@@ -20,6 +20,8 @@ class RuleBasedSystem:
         self.spinnakerVersion = spinnakerVersion
         self.generator = SequentialRuleGenerator()
         self.fromFile = None
+        self.basesFile = None
+        self.association = None
 
     def useRuleGenerator(self, generator):
         self.generator = generator
@@ -33,31 +35,48 @@ class RuleBasedSystem:
         self.basesFile = baseFile
         return self
 
-    def build(self, runTime):
-        self.runTime = runTime
-        self.fsa = FSAHelperFunctions(self.sim, self.simulator)
-
+    def buildBases(self):
         if(self.basesFile):
             self.association = \
                 Association(self.sim, self.simulator, self.spinnakerVersion) \
                     .useBases(self.basesFile) \
                     .build(self.runTime)
 
+    def buildNet(self):
         self.net = \
             self.net = \
                 Network(self.fsa, self.generator, self.debug) \
                     .useStorageFile(self.fromFile) \
-                    .useInheritanceStructure(self.association.inheritance) \
-                    .build()
 
+        if(self.association):
+            self.net = \
+                self.net \
+                    .useInheritanceStructure(self.association.inheritance)
+        
+        self.net = self.net.build()
+
+    def buildExe(self):
         self.exe = \
             self.exe = \
-                Executor(self.sim, self.simulator, self.fsa, self.net, self.debug) \
-                    .useAssociationTopology(self.association.topology.neuralHierarchyTopology) \
-                    .build()
+                Executor(self.sim, self.simulator, self.fsa, self.net, self.debug)
+        
+        if(self.association):
+            self.exe = \
+                self.exe \
+                    .useAssociationTopology(self.association.topology.neuralHierarchyTopology)
+        
+        self.exe = self.exe.build()
 
         if(self.fromFile != None):
             self.exe.apply()
+
+    def build(self, runTime):
+        self.runTime = runTime
+        self.fsa = FSAHelperFunctions(self.sim, self.simulator)
+
+        self.buildBases()
+        self.buildNet()
+        self.buildExe()
 
         return self
     

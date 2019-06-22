@@ -10,6 +10,7 @@ class Network:
         self.generator = ruleGenerator
         self.debug = debug
         self.fromFile = None
+        self.inheritanceStructure = None
 
     def useStorageFile(self, file):
         self.fromFile = file
