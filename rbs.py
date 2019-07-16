@@ -7,7 +7,7 @@ from network.contracts.fact import Fact
 from network.contracts.rule import Rule
 from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
 from executor.executor import Executor
-from assocciation.association import Association
+from association.association import Association
 
 class RuleBasedSystem:
     def __init__(self, sim, simulator, spinnakerVersion = -1, debug = False):
