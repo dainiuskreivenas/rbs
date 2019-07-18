@@ -1,4 +1,4 @@
-#Find a group of facts that are valid for a rule.
+#Find a group of facts that are valid for a rule. Hmm
 class MatchTree:
     def __init__(self, variables, matches):
         self.variables = variables
