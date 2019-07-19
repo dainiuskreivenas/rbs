@@ -13,10 +13,21 @@ class Association:
         self.bases = bases
         return self
 
-    def init(self):
+    #Initialize the associative memory properly (assuming there is
+    #a memory), but reading in the data.  This probably should be
+    #called with both an instantiated NEAL and an FSA, but for
+    #compatibility, we can create them here if necessary.  
+    def init(self, NEAL = None, FSA = None):
         if(self.bases):
-            self.neal = NealCoverFunctions(self.simulator, self.sim, self.spinnakerVersion)
-            self.fsa = FSAHelperFunctions(self.simulator, self.sim, self.neal, self.spinnakerVersion)
+            if NEAL is None:
+                self.neal = NealCoverFunctions(self.simulator, self.sim, self.spinnakerVersion)
+            else:
+                self.neal = NEAL
+            if FSA is None:
+                self.fsa = FSAHelperFunctions(self.simulator, self.sim, self.neal, self.spinnakerVersion)
+            else:
+                self.fsa = FSA
+
             self.inheritance = InheritanceReaderClass()
             self.inheritance.readInheritanceFile(self.bases)
             self.topology = NeuralThreeAssocClass(self.simulator, self.sim, self.neal, self.spinnakerVersion, self.fsa)
@@ -33,8 +44,8 @@ class Association:
             num = self.inheritance.getUnitNumber(u)
             self.fsa.halfTurnOnStateFromSpikeSource(generator, self.topology.neuralHierarchyTopology.cells, num)
 
-    def build(self, runTime):
-        self.init()
+    def build(self, runTime,NEAL=None,FSA=None):
+        self.init(NEAL,FSA)
         self.setActivation(runTime)
         self.neal.nealApplyProjections()
         return self
