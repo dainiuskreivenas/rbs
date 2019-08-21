@@ -2,6 +2,7 @@ import dill
 import logging
 from contracts.matchTree import MatchTree
 from contracts.fact import Fact
+from generators.constants import *
 from helpers.connectivityHelper import *
 
 class Network:
@@ -28,6 +29,7 @@ class Network:
             self.rules = {}
             self.assertions = {}
             self.interns = []
+            self.bases = {}
             self.neuron = -1
             self.factIndex = 0
             self.connections = []
@@ -243,13 +245,13 @@ class Network:
         else:
             return False
 
-    def buildFounds(self, matches, condition, tests, isAs):
+    def buildFounds(self, matches, condition, tests, bases):
         newTree = []
         existing = []
 
         if(self.inheritanceStructure):
-            for isA in isAs:
-                if(not self.inheritanceStructure.inUnits(isA[1])):
+            for base in bases:
+                if(not self.inheritanceStructure.inUnits(base[1])):
                     return newTree
              
         for f in matches:
@@ -356,6 +358,38 @@ class Network:
                     break
             self.neuronTurnsOffCa(ruleCa, turnOfCa, 0)
 
+    def caFromUnit(self, unit):
+        unit = self.inheritanceStructure.getUnitNumber(unit)
+        start = (unit * self.fsa.CA_SIZE)
+        return range(start, start + 10)
+
+    def getCas(self, match, bases):
+        cas = []
+        for m in match:
+            cas.append(m[0].ca)
+        
+        for a in bases:
+
+            amCa = self.caFromUnit(a[1])
+            if(a[1] in self.bases):
+                ca = self.bases[a[1]]
+            else:
+                ca = self.addCA()
+                self.bases[a[1]] = ca
+
+            if(a[2] == "amToFact"):
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCa, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
+            elif(a[2] == "factToAm"):
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+            elif(a[2] == "correlated"):
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCa, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
+            else:
+                raise "Invalid link type: '{}'. Available values: 'amToFact', 'factToAm' and 'correlated'." 
+
+            cas.append(ca)
+        return cas
+
     def applyRulesToFacts(self):
         for key in self.rules:
             
@@ -363,11 +397,11 @@ class Network:
 
             rule = self.rules[key]
             
-            conditions,tests,isAs,assertions,retractions = rule.extract()
+            conditions,tests,bases,assertions,retractions = rule.extract()
 
             matches = [MatchTree({},[])]
             for c in conditions:
-                matches = self.buildFounds(matches, c, tests, isAs)
+                matches = self.buildFounds(matches, c, tests, bases)
                 if(len(matches) == 0):
                     break
 
@@ -383,7 +417,8 @@ class Network:
                 if(len(retractions) > 0):
                     self.addRetractions(retractions, ma, ruleCa)
 
-                self.generator.setupActivations(self, ma.matches, isAs, ruleCa)
+                ca = self.getCas(ma.matches, bases)
+                self.generator.setupActivations(self, ca, ruleCa)
             
     def writeDebug(self, msg):
         if(self.debug):

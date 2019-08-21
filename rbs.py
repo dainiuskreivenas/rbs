@@ -70,20 +70,20 @@ class RuleBasedSystem:
 
         return self
     
-    def addFact(self, fact, active = True, apply = True):
-        fact = self.net.addFact(Fact(fact[0],fact[1]), active, apply)
+    def addFact(self, name, attributes, active = True, apply = True):
+        fact = self.net.addFact(Fact(name, attributes), active, apply)
         if(apply):
             self.exe.apply()
         return fact
 
-    def getFact(self, fact, apply = True):
-        fact = self.net.getFact(Fact(fact[0],fact[1]), apply)
+    def getFact(self, group, attributes, apply = True):
+        fact = self.net.getFact(Fact(group, attributes), apply)
         if(apply):
             self.exe.apply()
         return fact
 
-    def addRule(self, rule, apply = True):
-        self.net.addRule(Rule(rule[0],rule[1][0],rule[1][1]), apply)
+    def addRule(self, name, ifs, thens, apply = True):
+        self.net.addRule(Rule(name, ifs, thens), apply)
         if(apply):
             self.exe.apply()
 

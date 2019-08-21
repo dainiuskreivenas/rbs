@@ -8,7 +8,7 @@ class Rule:
         assertions = []
         retractions = []
         tests = []
-        isAs = []
+        bases = []
         conditions = []
 
         for t in self.thens:
@@ -21,9 +21,9 @@ class Rule:
         for f in self.ifs:
             if(f[0] == "Test"):
                 tests.append(f)
-            elif(f[0] == "IsA"):
-                isAs.append(f)
+            elif(f[0] == "Base"):
+                bases.append(f)
             else:
                 conditions.append(f)
         
-        return conditions,tests,isAs,assertions,retractions
+        return conditions,tests,bases,assertions,retractions
