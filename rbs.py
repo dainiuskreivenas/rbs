@@ -20,7 +20,6 @@ class RuleBasedSystem:
         self.spinnakerVersion = spinnakerVersion
         self.generator = SequentialRuleGenerator()
         self.fromFile = None
-        self.basesFile = None
         self.association = None
 
     def useRuleGenerator(self, generator):
@@ -31,16 +30,9 @@ class RuleBasedSystem:
         self.fromFile = file
         return self
 
-    def useBases(self, baseFile):
-        self.basesFile = baseFile
+    def useAssociation(self, association):
+        self.association = association
         return self
-
-    def buildBases(self):
-        if(self.basesFile):
-            self.association = \
-                Association(self.sim, self.simulator, self.spinnakerVersion) \
-                    .useBases(self.basesFile) \
-                    .build(self.runTime)
 
     def buildNet(self):
         self.net = \
@@ -70,11 +62,9 @@ class RuleBasedSystem:
         if(self.fromFile != None):
             self.exe.apply()
 
-    def build(self, runTime):
-        self.runTime = runTime
+    def build(self):
         self.fsa = FSAHelperFunctions(self.sim, self.simulator)
 
-        self.buildBases()
         self.buildNet()
         self.buildExe()
 
