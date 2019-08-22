@@ -22,20 +22,9 @@ class Association:
             self.topology = NeuralThreeAssocClass(self.simulator, self.sim, self.neal, self.spinnakerVersion, self.fsa)
             self.topology.createBaseNet(self.inheritance)
 
-    def setActivation(self, runTime):
-        primeTimes = []
-        for t in range(0, runTime / 50):
-            primeTimes.append(t*50+5)
-        primeArray = {'spike_times': [primeTimes]}
-        generator = self.sim.Population(1, self.sim.SpikeSourceArray, primeArray)
 
-        for u in self.inheritance.units:
-            num = self.inheritance.getUnitNumber(u)
-            self.fsa.halfTurnOnStateFromSpikeSource(generator, self.topology.neuralHierarchyTopology.cells, num)
-
-    def build(self, runTime):
+    def build(self):
         self.init()
-        self.setActivation(runTime)
         self.neal.nealApplyProjections()
         return self
 
