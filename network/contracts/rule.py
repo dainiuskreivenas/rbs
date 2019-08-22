@@ -5,6 +5,7 @@ class Rule:
         self.thens = thens
 
     def extract(self):
+        baseAssertions = []
         assertions = []
         retractions = []
         tests = []
@@ -13,6 +14,8 @@ class Rule:
 
         for t in self.thens:
             option,item = t
+            if(option == "Base"):
+                baseAssertions.append(item)
             if(option == "assert"):
                 assertions.append(item)
             elif(option == "retract"):
@@ -26,4 +29,4 @@ class Rule:
             else:
                 conditions.append(f)
         
-        return conditions,tests,bases,assertions,retractions
+        return conditions,tests,bases,assertions,retractions,baseAssertions

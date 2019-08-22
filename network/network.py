@@ -284,7 +284,7 @@ class Network:
 
         return newTree
 
-    def createRule(self, ma, assertions, retractions):
+    def createRule(self, ma, assertions, retractions, bases):
         label = ""
 
         indexes = []
@@ -322,10 +322,20 @@ class Network:
                 for m in ma.matches:
                     if m[1] == a:
                         f = m[0]
-                if(i == 0):
-                    label += "({}, {})".format(f.group, f.attributes)
+                        break
+                
+                if(f == None):
+                    for b in bases:
+                        if(b[3] == a):
+                            text = "({}, {}, {})".format(b[0], b[1], b[2])
+                            break
                 else:
-                    label += " and ({}, {})".format(f.group, f.attributes)
+                    text = "({}, {})".format(f.group, f.attributes)
+
+                if(i == 0):
+                    label += text
+                else:
+                    label += " and {}".format(text)
 
         if(label in self.assertions):
             return None
@@ -348,20 +358,60 @@ class Network:
             fact = Fact(assertion[0],tuple(newProps))
             fact = self.getFact(fact)
 
-            self.neuronTurnsOnCa(rulePop, fact.ca, 0)
+            self.neuronTurnsOnCa(rulePop, fact.ca, CONNECTION_NETWORK)
 
-    def addRetractions(self, retractions, match, ruleCa):
+    def addRetractions(self, retractions, match, ruleCa, bases):
         for retraction in retractions:
+            applied = False
+
             for m in match.matches:
                 if m[1] == retraction:
-                    turnOfCa = m[0].ca
+                    self.neuronTurnsOffCa(ruleCa, m[0].ca, CONNECTION_NETWORK)
+                    applied = True
                     break
-            self.neuronTurnsOffCa(ruleCa, turnOfCa, 0)
+
+            if(applied == False):
+                for b in bases:
+                    if(b[3] == retraction):
+                        if(b[2] == "amToFact"):
+                            self.neuronTurnsOffCa(ruleCa, self.getBase(b[1]), CONNECTION_NETWORK)
+                        elif(b[2] == "factToAm"):
+                            self.neuronTurnsOffCa(ruleCa, self.caFromUnit(b[1]), CONNECTION_NETWORK_INHERITANCE)
+                        elif(b[2] == "correlated"):
+                            self.neuronTurnsOffCa(ruleCa, self.getBase(b[1]), CONNECTION_NETWORK)
+                            self.neuronTurnsOffCa(ruleCa, self.caFromUnit(b[1]), CONNECTION_NETWORK_INHERITANCE)
+                        else:
+                            raise "Invalid link type: '{}'. Available values: 'amToFact', 'factToAm' and 'correlated'.".format(b[2])
+
+                        break
+
+    def addBaseAssertions(self, baseAssertions, ruleCa):
+        for assertion in baseAssertions:
+            assertionType = assertion[1]
+
+            if(assertionType == "am"):
+                ca = self.inheritanceStructure.caFromUnit(assertion[0])
+                connType = CONNECTION_NETWORK_INHERITANCE
+            elif(assertionType == "fact"):
+                ca = self.getBase(assertion[0])
+                connType = CONNECTION_NETWORK
+            else:
+                raise "Base assertion type: '{}' is invalid.".format(assertionType)
+            
+            self.neuronTurnsOnCa(ruleCa, ca, connType)
 
     def caFromUnit(self, unit):
         unit = self.inheritanceStructure.getUnitNumber(unit)
         start = (unit * self.fsa.CA_SIZE)
         return range(start, start + 10)
+
+    def getBase(self, unit):
+        if(unit in self.bases):
+            ca = self.bases[unit]
+        else:
+            ca = self.addCA()
+            self.bases[unit] = ca
+        return ca
 
     def getCas(self, match, bases):
         cas = []
@@ -371,11 +421,7 @@ class Network:
         for a in bases:
 
             amCa = self.caFromUnit(a[1])
-            if(a[1] in self.bases):
-                ca = self.bases[a[1]]
-            else:
-                ca = self.addCA()
-                self.bases[a[1]] = ca
+            ca = self.getBase(a[1])
 
             if(a[2] == "amToFact"):
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCa, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
@@ -385,7 +431,7 @@ class Network:
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCa, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
             else:
-                raise "Invalid link type: '{}'. Available values: 'amToFact', 'factToAm' and 'correlated'." 
+                raise "Invalid link type: '{}'. Available values: 'amToFact', 'factToAm' and 'correlated'.".format(a[2])
 
             cas.append(ca)
         return cas
@@ -397,7 +443,7 @@ class Network:
 
             rule = self.rules[key]
             
-            conditions,tests,bases,assertions,retractions = rule.extract()
+            conditions,tests,bases,assertions,retractions,baseAssertions = rule.extract()
 
             matches = [MatchTree({},[])]
             for c in conditions:
@@ -408,14 +454,16 @@ class Network:
             self.writeDebug("Found {} Matches for Rule: {}".format(len(matches), key))
 
             for ma in matches:
-                ruleCa = self.createRule(ma, assertions, retractions)
+                ruleCa = self.createRule(ma, assertions, retractions, bases)
                 if(ruleCa == None):
                     continue
 
                 if(len(assertions) > 0):
                     self.addAssertions(assertions, ma, ruleCa)
                 if(len(retractions) > 0):
-                    self.addRetractions(retractions, ma, ruleCa)
+                    self.addRetractions(retractions, ma, ruleCa, bases)
+                if(len(baseAssertions) > 0):
+                    self.addBaseAssertions(baseAssertions, ruleCa)
 
                 ca = self.getCas(ma.matches, bases)
                 self.generator.setupActivations(self, ca, ruleCa)

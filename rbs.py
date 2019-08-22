@@ -103,6 +103,18 @@ class RuleBasedSystem:
             if(len(st) > 0):
                 for s in st.magnitude:
                     print "{} {}".format(self.net.assertions[a], s)
+
+        for b in self.net.bases:
+            bases = self.net.bases[b]
+            print "(Base: {})".format(b)
+            for n in bases:
+                pop = self.get_population(n)
+                d = data[pop.pop.label]
+                st = d.segments[0].spiketrains[n-pop.fromIndex]
+                if(len(st) > 0):
+                    for s in st.magnitude:
+                        print "{} {}".format(n, s)
+
         for a in self.net.interns:  
             pop = self.get_population(a)
             d = data[pop.pop.label]
@@ -121,6 +133,8 @@ class RuleBasedSystem:
                     if(len(st) > 0):
                         for s in st.magnitude:
                             print "{} {}".format(n, s)
+        
+
 
         return data
 
