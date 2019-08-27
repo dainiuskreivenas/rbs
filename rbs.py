@@ -95,11 +95,11 @@ class RuleBasedSystem:
     def printSpikes(self):
         data = self.get_data()
 
-        for a in self.exe.net.assertions:
+        for a in self.net.assertions:
             pop = self.get_population(self.net.assertions[a])
             d = data[pop.pop.label]            
             st = d.segments[0].spiketrains[self.net.assertions[a]-pop.fromIndex]
-            print "({})".format(a)
+            print "(Assertion: {})".format(a)
             if(len(st) > 0):
                 for s in st.magnitude:
                     print "{} {}".format(self.net.assertions[a], s)
@@ -113,11 +113,25 @@ class RuleBasedSystem:
                 if(len(st) > 0):
                     for s in st.magnitude:
                         print "{} {}".format(n, s)
+        for linkTo in self.net.links:
+            linkGroup = self.net.links[linkTo]
+            for linkType in linkGroup:
+                linkTypes = linkGroup[linkType]
+                for unit in linkTypes:
+                    link = linkTypes[unit]
+                    print "(Link: {}, {}, {})".format(linkTo, unit, linkType)
+                    for n in link:
+                        pop = self.get_population(n)
+                        d = data[pop.pop.label]
+                        st = d.segments[0].spiketrains[n-pop.fromIndex]
+                        if(len(st) > 0):
+                            for s in st.magnitude:
+                                print "{} {}".format(n, s)
         for a in self.net.interns:  
             pop = self.get_population(a)
             d = data[pop.pop.label]
             st = d.segments[0].spiketrains[a-pop.fromIndex]
-            print "({})".format(a)
+            print "(Intern: {})".format(a)
             if(len(st) > 0):
                 for s in st.magnitude:
                     print "{} {}".format(a, s)
@@ -132,7 +146,16 @@ class RuleBasedSystem:
                         for s in st.magnitude:
                             print "{} {}".format(n, s)
         
-
+        inheritanceData = self.association.topology.neuralHierarchyTopology.cells.get_data()
+        if(self.association):
+            for u in self.association.inheritance.units:
+                print "(Base: {})".format(u)
+                index = self.association.inheritance.getUnitNumber(u)
+                for n in range(index*10,(index*10)+10):
+                    st = inheritanceData.segments[0].spiketrains[n]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
 
         return data
 

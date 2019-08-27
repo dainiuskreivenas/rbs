@@ -44,13 +44,7 @@ class FSAHelperFunctions:
         self.ONE_HALF_ON_WEIGHT = 0.007
         self.ONE_HALF_ON_ONE_WEIGHT = 0.008
         
-        if (self.simulator == 'nest'):
-            self.CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0,
-                                'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
-                                'tau_syn_I': 5.0, #bug2 fix
-                                'v_rest' : -65.0,'i_offset':0.0}
-        elif (self.simulator == 'spinnaker'):
-            self.CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0,
+        self.CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0,
                                 'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
                                 'tau_syn_I': 5.0, #bug2 fix
                                 'v_rest' : -65.0,'i_offset':0.0}

@@ -280,7 +280,7 @@ class Network:
 
         return newTree
 
-    def createRule(self, ma, assertions, retractions, bases, primes, links):
+    def createRule(self, ma, rule):
         label = ""
 
         indexes = []
@@ -294,8 +294,20 @@ class Network:
             else:
                 label = "{} and {}".format(label, m)
 
+        assertions = rule.assertions
+        baseAssertions = rule.baseAssertions
+        primeAssertions = rule.primeAssertions
+        linkAssertions = rule.linkAssertions
+
+        retractions = rule.retractions
+        bases = rule.bases
+        primes = rule.primes
+        links = rule.links
+
+        index = 0
+        text = ""
         if(len(assertions) > 0):
-            label += " => "
+            text += " => "
             variables = ma.variables
 
             for i,a in enumerate(assertions):
@@ -306,40 +318,73 @@ class Network:
                     prop = self.extractValue(p, variables)
                     newProps.append(prop)
 
-                if(i == 0):
-                    label += "{}".format((a[0],tuple(newProps)))
+                if(index == 0):
+                    text += "{}".format((a[0],tuple(newProps)))
                 else:
-                    label += " and {}".format((a[0],tuple(newProps)))
+                    text += " and {}".format((a[0],tuple(newProps)))
+                index += 1
 
+        # TODO: Ensure to extract variables
+        if(len(baseAssertions) > 0):
+            if(text == ""):
+                text += " => "
+            for a in baseAssertions:
+                lbl = "{}".format(("base", a))
+                if(index == 0):
+                    text += "{}".format(lbl)
+                else:
+                    text += " and {}".format(lbl)
+                index += 1
+        
+        if(len(primeAssertions) > 0):
+            if(text == ""):
+                text += " => "
+            for p in primeAssertions:
+                lbl = "{}".format(("prime", p))
+                if(index == 0):
+                    text += "{}".format(lbl)
+                else:
+                    text += " and {}".format(lbl)
+                index += 1
+
+        if(len(linkAssertions) > 0):
+            if(text == ""):
+                text += " => "
+            for l in linkAssertions:
+                lbl = "(link, {})".format(l)
+                if(index == 0):
+                    text += "{}".format(lbl)
+                else:
+                    text += " and {}".format(lbl)
+                index += 1
+
+        label += text
+        
         if(len(retractions) > 0):
             label += " <= "
             for i,a in enumerate(retractions):
-                f = None
                 for m in ma.matches:
                     if m[1] == a:
-                        f = m[0]
+                        text = "({}, {})".format(m[0].group, m[0].attributes)
                         break
                 
-                text = None
-                if(f == None):
+                if(text == None):
                     for b in bases:
                         if(b[2] == a):
                             text = "({}, {})".format(b[0], b[1])
                             break
 
-                    if(text == None):
-                        for p in primes:
-                            if(p[2] == a):
-                                text = "({}, {})".format(p[0], p[1])
-                                break
-                            
-                    if(text == None):
-                        for l in links:
-                            if(l[2] == a):
-                                text = "({}, {})".format(l[0], l[1])
-                                break
-                else:
-                    text = "({}, {})".format(f.group, f.attributes)
+                if(text == None):
+                    for p in primes:
+                        if(p[2] == a):
+                            text = "({}, {})".format(p[0], p[1])
+                            break
+                        
+                if(text == None):
+                    for l in links:
+                        if(l[2] == a):
+                            text = "({}, {})".format(l[0], l[1])
+                            break
 
                 if(i == 0):
                     label += text
@@ -442,7 +487,7 @@ class Network:
             amCA = self.caFromUnit(unit)
             
             if(linkType == "correlate"):
-                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCA, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCA, self.association.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
             elif(linkType == "query"):
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
@@ -459,7 +504,7 @@ class Network:
             self.primes[prime] = ca
             for u in self.association.inheritance.units:
                 amCa = self.caFromUnit(u)
-                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.association.fsa.HALF_INPUT_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.association.fsa.HALF_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
 
         return ca
 
@@ -520,7 +565,7 @@ class Network:
             self.writeDebug("Found {} Matches for Rule: {}".format(len(matches), key))
 
             for ma in matches:
-                ruleCa = self.createRule(ma, rule.assertions, rule.retractions, rule.bases, rule.primes, rule.links)
+                ruleCa = self.createRule(ma, rule)
                 if(ruleCa == None):
                     continue
 

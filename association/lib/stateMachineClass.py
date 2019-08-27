@@ -25,38 +25,32 @@ class FSAHelperFunctions:
                      #different sized CA.
         self.CA_INHIBS = 2
 
-        self.INPUT_WEIGHT = 0.12
-        self.HALF_INPUT_WEIGHT = 0.08
-        self.INTRA_CA_TO_INHIB_WEIGHT = 0.002
+        self.INPUT_WEIGHT = 0.1
+        self.HALF_INPUT_WEIGHT = 0.007
+        self.INTRA_CA_TO_INHIB_WEIGHT = 0.001
         #if (self.simName=="spinnaker"):
             #if you over inhib on my spinnaker, it fires.
-        self.INTRA_CA_FROM_INHIB_WEIGHT = 0.15 
-        self.CA_STOPS_CA_WEIGHT = 0.15
-        self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0
+        self.INTRA_CA_FROM_INHIB_WEIGHT = -0.15 
+        self.CA_STOPS_CA_WEIGHT = -0.15
+        self.ONE_NEURON_STOPS_CA_WEIGHT = -1.5
         #elif (self.simName=="nest"): Nov 2018
         #    self.INTRA_CA_FROM_INHIB_WEIGHT = -0.15 
         #    self.CA_STOPS_CA_WEIGHT = -0.15
         #    self.ONE_NEURON_STOPS_CA_WEIGHT = -1.0
 
-        if (self.simName =="spinnaker"):
-            self.INTRA_CA_WEIGHT = 0.025
-        elif (self.simName == "nest"):
-            self.INTRA_CA_WEIGHT = 0.022 
+
+        self.INTRA_CA_WEIGHT = 0.016 
+
         self.FULL_ON_WEIGHT = 0.01 
-        self.FULL_ON_WEIGHT_SLOW = 0.0022
-        self.HALF_ON_WEIGHT = 0.0012
+        self.FULL_ON_WEIGHT_SLOW = 0.0015
+        self.HALF_ON_WEIGHT = 0.0008
         self.STATE_TO_ONE_WEIGHT = .01
 
-        if (self.simName == 'nest'):
-            self.CELL_PARAMS = {'v_thresh':-48.0, 'v_reset' : -70.0, 
-                                'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
-                                'tau_syn_I' : 5.0, 
-                                'v_rest' : -65.0,'i_offset':0.0}
-        elif (self.simName == 'spinnaker'):
-            self.CELL_PARAMS = {'v_thresh':-48.0, 'v_reset' : -70.0, 
+        self.CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0,
                                 'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
                                 'tau_syn_I': 5.0, #bug2 fix
                                 'v_rest' : -65.0,'i_offset':0.0}
+
 
 
 
