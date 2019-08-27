@@ -30,16 +30,16 @@ class Executor:
         toN = conn[1]
         mode = conn[4]
 
-        for pop in self.populations:
-            rng = range(pop.fromIndex, pop.toIndex)
-            if(fromN in rng and (mode in [0, 1])):
-                fromPop = pop
-                if(toPop != None):
-                    break
-            if(toN in rng and (mode in [0, 2])):
-                toPop = pop
-                if(fromPop != None):
-                    break
+        if(mode in [0, 1, 2]):
+            for pop in self.populations:
+                if(fromN >= pop.fromIndex and fromN < pop.toIndex and (mode in [0, 1])):
+                    fromPop = pop
+                    if(toPop != None):
+                        break
+                if(toN >= pop.fromIndex and toN < pop.toIndex and (mode in [0, 2])):
+                    toPop = pop
+                    if(fromPop != None):
+                        break
         
         if(mode == 0): # Within Network
             pFrom = fromPop.pop

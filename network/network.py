@@ -246,7 +246,25 @@ class Network:
         else:
             return False
 
-    def buildFounds(self, matches, condition, tests):
+    def testBase(self, base, var):
+        unit = base
+        if(unit[0] == "?"):
+            if(unit not in var):
+                return True
+            else:
+                unit = var[base]
+        return self.association.inheritance.inUnits(unit)
+
+    def validateLinks(self, link, var):
+        unit = link[1][1]
+        if(unit[0] == "?"):
+            if(unit not in var):
+                return True
+            else:
+                unit = var[unit]
+        return self.association.inheritance.inUnits(unit)
+
+    def buildFounds(self, matches, condition, rule):
         newTree = []
         existing = []
              
@@ -266,7 +284,15 @@ class Network:
                     continue
 
                 testPass = True
-                for test in tests:
+                for base in rule.bases:
+                    testPass = self.testBase(base[1], var)
+                    if(testPass == False):
+                        break
+
+                if(testPass == False):
+                    continue
+
+                for test in rule.tests:
                     testPass = self.testVariables(test, var)
                     if(testPass == False):
                         break
@@ -427,7 +453,10 @@ class Network:
             if(applied == False):
                 for b in bases:
                     if(b[2] == retraction):
-                        ca = self.caFromUnit(b[1])
+                        unit = b[1]
+                        if(unit[0] == "?"):
+                            unit = self.extractValue(unit, match.variables)
+                        ca = self.caFromUnit(unit)
                         self.neuronTurnsOffCa(ruleCa, ca, CONNECTION_NETWORK_INHERITANCE)                
                         applied = True     
                         break
@@ -444,13 +473,18 @@ class Network:
                 for l in links:
                     if(l[2] == retraction):
                         linkTo, unit, linkType = l[1]
+                        if(unit[0] == "?"):
+                            unit = self.extractValue(unit, match.variables)
                         ca = self.getLink(linkTo, unit, linkType)
                         self.neuronTurnsOffCa(ruleCa, ca, CONNECTION_NETWORK)
 
-
-    def addBaseAssertions(self, baseAssertions, ruleCa):       
+    def addBaseAssertions(self, baseAssertions, match, ruleCa):       
         for assertion in baseAssertions:
-            ca = self.caFromUnit(assertion)
+            unit = assertion
+            if(unit[0] == "?"):
+                variables = match.variables
+                unit = self.extractValue(unit, variables)
+            ca = self.caFromUnit(unit)
             self.neuronTurnsOnCa(ruleCa, ca, CONNECTION_NETWORK_INHERITANCE)
 
     def addPrimeAssertions(self, primeAssertions, ruleCa):
@@ -458,9 +492,12 @@ class Network:
             ca = self.getPrime(assertion)
             self.neuronTurnsOnCa(ruleCa, ca, CONNECTION_NETWORK)
 
-    def addLinkAssertions(self, linkAssertions, ruleCa):
+    def addLinkAssertions(self, linkAssertions, match, ruleCa):
         for assertion in linkAssertions:
             linkTo, unit, linkType = assertion
+            if(unit[0] == "?"):
+                variables = match.variables
+                unit = self.extractValue(unit, variables)
             ca = self.getLink(linkTo, unit, linkType)
             self.neuronTurnsOnCa(ruleCa, ca, CONNECTION_NETWORK)
 
@@ -515,11 +552,14 @@ class Network:
 
     def getCas(self, match, bases, primes, links):
         cas = []
-        for m in match:
+        for m in match.matches:
             cas.append(m[0].ca)
         
         for a in bases:
-            ca = self.caFromUnit(a[1])
+            unit = a[1]
+            if(unit[0] == "?"):
+                unit = self.extractValue(unit, match.variables)
+            ca = self.caFromUnit(unit)
             cas.append(ca)
         
         for p in primes:
@@ -528,37 +568,21 @@ class Network:
 
         for l in links:
             linkTo, unit, linkType = l[1]
+            if(unit[0] == "?"):
+                unit = self.extractValue(unit, match.variables)
             ca = self.getLink(linkTo, unit, linkType)
             cas.append(ca)
 
         return cas
-
-    def validateBases(self, bases):
-        if(self.association):
-            # Check if all bases exist in AM
-            for base in bases:
-                if(not self.association.inheritance.inUnits(base[1])):
-                    raise Exception("Base: '{}' does not exist.".format(base[1]))
-
-    def validateLinks(self, links):
-        if(self.association):
-            # Check if all links have a ca in AM
-            for link in links:
-                if(not self.association.inheritance.inUnits(link[1][1])):
-                    raise Exception("Base: '{}' does not exist.".format(link[1][1]))
         
     def applyRulesToFacts(self):
         for key in self.rules:
             self.writeDebug("Applying Rule: {}".format(key))
             rule = self.rules[key]
 
-            # If at least one base is missing rule cannot be applied
-            self.validateBases(rule.bases)
-            self.validateLinks(rule.links)
-
             matches = [MatchTree({},[])]
             for c in rule.conditions:
-                matches = self.buildFounds(matches, c, rule.tests)
+                matches = self.buildFounds(matches, c, rule)
                 if(len(matches) == 0):
                     break
 
@@ -570,12 +594,12 @@ class Network:
                     continue
 
                 self.addAssertions(rule.assertions, ma, ruleCa)
-                self.addBaseAssertions(rule.baseAssertions, ruleCa)
+                self.addBaseAssertions(rule.baseAssertions, ma, ruleCa)
                 self.addPrimeAssertions(rule.primeAssertions, ruleCa)
                 self.addRetractions(rule.retractions, ma, ruleCa, rule.bases, rule.primes, rule.links)
-                self.addLinkAssertions(rule.linkAssertions, ruleCa)
+                self.addLinkAssertions(rule.linkAssertions, ma, ruleCa)
 
-                ca = self.getCas(ma.matches, rule.bases, rule.primes, rule.links)
+                ca = self.getCas(ma, rule.bases, rule.primes, rule.links)
                 self.generator.setupActivations(self, ca, ruleCa)
             
     def writeDebug(self, msg):
