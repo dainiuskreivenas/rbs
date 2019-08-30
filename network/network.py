@@ -355,7 +355,12 @@ class Network:
             if(text == ""):
                 text += " => "
             for a in baseAssertions:
-                lbl = "{}".format(("base", a))
+                
+                val = a
+                if(val[0] == "?"):
+                    val = ma.variables[a]                
+
+                lbl = "{}".format(("base", val))
                 if(index == 0):
                     text += "{}".format(lbl)
                 else:
@@ -377,7 +382,12 @@ class Network:
             if(text == ""):
                 text += " => "
             for l in linkAssertions:
-                lbl = "(link, {})".format(l)
+                
+                val = l
+                if(val[1][0] == "?"):
+                    val = (val[0],ma.variables[val[1]],val[2])
+
+                lbl = "(link, {})".format(val)
                 if(index == 0):
                     text += "{}".format(lbl)
                 else:
@@ -389,6 +399,8 @@ class Network:
         if(len(retractions) > 0):
             label += " <= "
             for i,a in enumerate(retractions):
+                text = None
+
                 for m in ma.matches:
                     if m[1] == a:
                         text = "({}, {})".format(m[0].group, m[0].attributes)
@@ -397,7 +409,10 @@ class Network:
                 if(text == None):
                     for b in bases:
                         if(b[2] == a):
-                            text = "({}, {})".format(b[0], b[1])
+                            val = b[1]
+                            if(val[0] == "?"):
+                                val = ma.variables[val]
+                            text = "({}, {})".format(b[0], val)
                             break
 
                 if(text == None):
@@ -409,7 +424,12 @@ class Network:
                 if(text == None):
                     for l in links:
                         if(l[2] == a):
-                            text = "({}, {})".format(l[0], l[1])
+                            
+                            val = l[1]
+                            if(val[1][0] == "?"):
+                                val = (val[0], ma.variables[val[1]], val[2])
+
+                            text = "({}, {})".format(l[0], val)
                             break
 
                 if(i == 0):
@@ -475,7 +495,7 @@ class Network:
                         linkTo, unit, linkType = l[1]
                         if(unit[0] == "?"):
                             unit = self.extractValue(unit, match.variables)
-                        ca = self.getLink(linkTo, unit, linkType)
+                        ca = self.addOrGetLink(linkTo, unit, linkType)
                         self.neuronTurnsOffCa(ruleCa, ca, CONNECTION_NETWORK)
 
     def addBaseAssertions(self, baseAssertions, match, ruleCa):       
@@ -498,10 +518,9 @@ class Network:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = self.extractValue(unit, variables)
-            ca = self.getLink(linkTo, unit, linkType)
-            self.neuronTurnsOnCa(ruleCa, ca, CONNECTION_NETWORK)
+            self.addOrGetLink(linkTo, unit, linkType)
 
-    def getLink(self, linkTo, unit, linkType):
+    def addOrGetLink(self, linkTo, unit, linkType):
         # get or add link to group
         if(linkTo in self.links):
             linkGroup = self.links[linkTo]
@@ -530,7 +549,7 @@ class Network:
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
             else:
                 raise Exception("Invalid Link Type: {}. Supported values: correlate, query".format(linkType))
- 
+
             return ca
 
     def getPrime(self, prime):
@@ -541,7 +560,7 @@ class Network:
             self.primes[prime] = ca
             for u in self.association.inheritance.units:
                 amCa = self.caFromUnit(u)
-                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.association.fsa.HALF_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCa, self.fsa.HALF_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
 
         return ca
 
@@ -553,25 +572,25 @@ class Network:
     def getCas(self, match, bases, primes, links):
         cas = []
         for m in match.matches:
-            cas.append(m[0].ca)
+            cas.append((m[0].ca,CONNECTION_NETWORK))
         
         for a in bases:
             unit = a[1]
             if(unit[0] == "?"):
                 unit = self.extractValue(unit, match.variables)
             ca = self.caFromUnit(unit)
-            cas.append(ca)
+            cas.append((ca,CONNECTION_INHERITANCE_NETWORK))
         
         for p in primes:
             ca = self.getPrime(p[1])
-            cas.append(ca)
+            cas.append((ca,CONNECTION_NETWORK))
 
         for l in links:
             linkTo, unit, linkType = l[1]
             if(unit[0] == "?"):
                 unit = self.extractValue(unit, match.variables)
-            ca = self.getLink(linkTo, unit, linkType)
-            cas.append(ca)
+            ca = self.addOrGetLink(linkTo, unit, linkType)
+            cas.append((ca,CONNECTION_NETWORK))
 
         return cas
         
