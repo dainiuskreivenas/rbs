@@ -5,18 +5,21 @@
 #Note that to externally activate a CA State, you should only send
 #excitatory connections to the first 8 neurons.
 #Using the nealNRPCover so no nealParams
-#import nealParams as nealParameters
 
 import numpy as np
 
 from nealCoverClass import NealCoverFunctions
 
 class FSAHelperFunctions:
-    def __init__(self, simName,sim,neal,spinnVersion):
+    def __init__(self, simName, sim, neal,spinnVersion = None):
         self.simName = simName
+        print simName, spinnVersion
         self.sim = sim
         self.neal = neal
-        self.spinnVersion = spinnVersion
+        if spinnVersion is None:
+            self.spinnVersion = -1
+        else:
+            self.spinnVersion = spinnVersion
         self.initParams()
 
     #FSA Parmaeters
@@ -25,40 +28,38 @@ class FSAHelperFunctions:
                      #different sized CA.
         self.CA_INHIBS = 2
 
+        #weights for the rbs
+        self.ONE_HALF_ON_ONE_WEIGHT = 0.008
+
+        #normal weights
         self.INPUT_WEIGHT = 0.12
         self.HALF_INPUT_WEIGHT = 0.08
         self.INTRA_CA_TO_INHIB_WEIGHT = 0.002
-        #if (self.simName=="spinnaker"):
-            #if you over inhib on my spinnaker, it fires.
+        #if you over inhib on my spinnaker, it fires.
         self.INTRA_CA_FROM_INHIB_WEIGHT = 0.15 
         self.CA_STOPS_CA_WEIGHT = 0.15
         self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0
-        #elif (self.simName=="nest"): Nov 2018
-        #    self.INTRA_CA_FROM_INHIB_WEIGHT = -0.15 
-        #    self.CA_STOPS_CA_WEIGHT = -0.15
-        #    self.ONE_NEURON_STOPS_CA_WEIGHT = -1.0
 
         if (self.simName =="spinnaker"):
             self.INTRA_CA_WEIGHT = 0.025
         elif (self.simName == "nest"):
             self.INTRA_CA_WEIGHT = 0.022 
+        else:
+            self.INTRA_CA_WEIGHT = 0.022 
+        #undone make these weight names reasonable
         self.FULL_ON_WEIGHT = 0.01 
         self.FULL_ON_WEIGHT_SLOW = 0.0022
         self.HALF_ON_WEIGHT = 0.0012
+        self.ONE_HALF_ON_WEIGHT = 0.007
         self.STATE_TO_ONE_WEIGHT = .01
+        self.ONE_NEURON_STARTS_CA_WEIGHT = 0.08
+        self.HALF_ON_ONE_WEIGHT = .00088
+        #self.HALF_ON_ONE_WEIGHT = .0012 #.001 .005
 
-        if (self.simName == 'nest'):
-            self.CELL_PARAMS = {'v_thresh':-48.0, 'v_reset' : -70.0, 
+        self.CELL_PARAMS = {'v_thresh':-48.0, 'v_reset' : -70.0, 
                                 'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
                                 'tau_syn_I' : 5.0, 
                                 'v_rest' : -65.0,'i_offset':0.0}
-        elif (self.simName == 'spinnaker'):
-            self.CELL_PARAMS = {'v_thresh':-48.0, 'v_reset' : -70.0, 
-                                'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
-                                'tau_syn_I': 5.0, #bug2 fix
-                                'v_rest' : -65.0,'i_offset':0.0}
-
-
 
     #--------Finite State Automata Functions ------------
     #states can be turned and off by a spikeSource, and can be stimulate or
@@ -84,8 +85,6 @@ class FSAHelperFunctions:
                                       self.neal.DELAY)]
         self.neal.nealProjection(spikeSource, toNeurons, connector,'excitatory')
 
-    #undone new for cogmap on January 30th 2019.  Need to add to tests and
-    #propagate through.  (This should be seemless as it's unused elsewhere)
     def halfTurnOnStateFromSpikeSource(self,spikeSource, toNeurons, toCA):
         connector = []
         for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
@@ -118,9 +117,13 @@ class FSAHelperFunctions:
                                       self.neal.DELAY)]
         self.neal.nealProjection(spikeSource, toNeurons, connector,'inhibitory')
 
-    #---states can be turned on and off by a neuron, and can stimulate or 
-    #inhibit one.
-    #def turnOnStateFromOneNeuron(self,fromNeurons,fromNeuron, toNeurons, toCA):
+    def turnOnOneNeuronFromSpikeSource(self,spikeSource, toNeurons, toNeuron):
+        connector = []
+        connector = connector + [(0,toNeuron,self.INPUT_WEIGHT,self.neal.DELAY)]
+        self.neal.nealProjection(spikeSource, toNeurons, connector,'excitatory')
+
+    #---states can be turned on and off by a neuron, can stimulate or 
+    #inhibit one, and can half turn on one.
     def oneNeuronTurnsOnState(self,fromNeurons,fromNeuron, toNeurons, toCA):
         connector = []
         for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
@@ -147,6 +150,24 @@ class FSAHelperFunctions:
             connector = connector + [(fromNeuron,toNeuron,weight,
                                       self.neal.DELAY)]
         self.neal.nealProjection(fromNeurons, toNeurons, connector,'excitatory')
+
+
+    #the rbs has these, but they're not accurate weights for what they
+    #say they do.  So, leave them out for now.
+    #def oneNeuronHalfTurnsOnState(self,fromNeurons,fromNeuron,toNeurons,toCA):
+    #def oneNeuronHalfTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toCA):
+    #def stateHalfTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toNeuron):
+
+    #Neurons can also directly interact with each other.
+    def oneNeuronStimulatesOneNeuron(self,fromNeurons,fromNeuron, toNeurons, 
+                                     toNeuron,weight):
+        connector = []
+        connector = connector + [(fromNeuron,toNeuron,weight,self.neal.DELAY)]
+        self.neal.nealProjection(fromNeurons, toNeurons, connector,'excitatory')
+
+    def oneNeuronTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toCA):
+        self.oneNeuronStimulatesOneNeuron(fromNeurons,fromCA,toNeurons,toCA, 
+                                       self.INPUT_WEIGHT)
 
     def oneNeuronInhibitsState(self,fromNeurons,fromNeuron, toNeurons, toCA, 
                                weight):
@@ -190,6 +211,7 @@ class FSAHelperFunctions:
                                   self.neal.DELAY)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
+
 
     #states can be turned on and off by a state, and can stimulate or inhibit
                     #them.  States can also slow turn on other states, and
@@ -404,4 +426,6 @@ class FSAHelperFunctions:
             simCells.printSpikes('temp.pkl')
         elif ((self.neal.simulator == 'spinnaker') and (self.neal.spinnVersion == 7)):
             simCells.printSpikes('temp.sp')
+
+
 
