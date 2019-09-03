@@ -1,13 +1,14 @@
 """
 Rule Based System using Nest Simulator
 """
+from nealCoverClass import NealCoverFunctions
 from stateMachineClass import FSAHelperFunctions
+
 from network.network import Network
 from network.contracts.fact import Fact
 from network.contracts.rule import Rule
 from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
 from executor.executor import Executor
-from association.association import Association
 
 class RuleBasedSystem:
     def __init__(self, sim, simulator, spinnakerVersion = -1, debug = False):
@@ -20,7 +21,6 @@ class RuleBasedSystem:
         self.generator = SequentialRuleGenerator()
         self.fromFile = None
         self.basesFile = None
-        self.association = None
 
     def useRuleGenerator(self, generator):
         self.generator = generator
@@ -34,35 +34,18 @@ class RuleBasedSystem:
         self.basesFile = baseFile
         return self
 
-    def buildBases(self):
-        if(self.basesFile):
-            self.association = \
-                Association(self.sim, self.simulator, self.spinnakerVersion) \
-                    .useBases(self.basesFile) \
-                    .build(self.runTime)
-
     def buildNet(self):
         self.net = \
             self.net = \
                 Network(self.fsa, self.generator, self.debug) \
                     .useStorageFile(self.fromFile) \
 
-        if(self.association):
-            self.net = \
-                self.net \
-                    .useInheritanceStructure(self.association.inheritance)
-        
         self.net = self.net.build()
 
     def buildExe(self):
         self.exe = \
             self.exe = \
                 Executor(self.sim, self.simulator, self.fsa, self.net, self.debug)
-        
-        if(self.association):
-            self.exe = \
-                self.exe \
-                    .useAssociationTopology(self.association.topology.neuralHierarchyTopology)
         
         self.exe = self.exe.build()
 
@@ -71,9 +54,11 @@ class RuleBasedSystem:
 
     def build(self, runTime):
         self.runTime = runTime
-        self.fsa = FSAHelperFunctions(self.sim, self.simulator)
+        spinnVersion = -1
 
-        self.buildBases()
+        self.neal = NealCoverFunctions(self.simulator, self.sim, spinnVersion)
+        self.fsa = FSAHelperFunctions(self.simulator, self.sim,self.neal)
+
         self.buildNet()
         self.buildExe()
 
@@ -139,3 +124,10 @@ class RuleBasedSystem:
         for pop in self.exe.populations:
             data[pop.pop.label] = pop.pop.get_data()
         return data
+
+    def printAllSpikes(self):
+        index = 0
+        for pop in self.exe.populations:
+            outFile = "temp" + str(index) + ".pkl"
+            pop.pop.printSpikes(outFile)
+            index = index + 1

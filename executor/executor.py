@@ -129,7 +129,8 @@ class Executor:
                         population = pop
                         break
 
-                self.fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
+                #self.fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
+                self.fsa.stimulateStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex,0.1)
                 self.actived += 1
 
     def writeDebug(self, msg):
