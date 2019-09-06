@@ -35,7 +35,12 @@ class FSAHelperFunctions:
         #if you over inhib on my spinnaker, it fires.
         self.INTRA_CA_FROM_INHIB_WEIGHT = 0.15 
         self.CA_STOPS_CA_WEIGHT = 0.15
-        self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0
+        self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0 
+
+        #undone RBS problems
+        #I think the RBS requires inhibitory synaptic weights to be negative
+        self.RBS_ONE_NEURON_STOPS_CA_WEIGHT = -1.0
+        self.RBS_ONE_NEURON_HALF_CA_WEIGHT = 0.02
 
         if (self.simName =="spinnaker"):
             self.INTRA_CA_WEIGHT = 0.025
@@ -44,32 +49,14 @@ class FSAHelperFunctions:
         else:
             self.INTRA_CA_WEIGHT = 0.022 
 
-        #The RBS is working with an old state machine, so needs
-        #some different weights.  These should go away in a newer version.
-        self.RBS_INTRA_CA_WEIGHT = 0.016
-        self.RBS_INTRA_CA_TO_INHIB_WEIGHT = 0.001
-        self.RBS_INTRA_CA_FROM_INHIB_WEIGHT = -0.1
-        self.RBS_ONE_NEURON_STOPS_CA_WEIGHT = -1.5
-        self.RBS_INPUT_WEIGHT = 0.1
-        self.RBS_HALF_ON_WEIGHT = 0.0008
-        #weights for the rbs
-        self.ONE_HALF_ON_ONE_WEIGHT = 0.008
-        self.STATE_TO_ONE_WEIGHT = .01
-        self.HALF_ON_ONE_WEIGHT = .00088
-
-        #undone make these weight names reasonable
         self.FULL_ON_WEIGHT = 0.01 
         self.FULL_ON_WEIGHT_SLOW = 0.0022
         self.HALF_ON_WEIGHT = 0.0012
-        self.ONE_HALF_ON_WEIGHT = 0.007
-        self.ONE_NEURON_STARTS_CA_WEIGHT = 0.08
+        self.STATE_TO_ONE_WEIGHT = .01
+        #self.ONE_NEURON_STARTS_CA_WEIGHT = self.INPUT_WEIGHT
+
 
         self.CELL_PARAMS = {'v_thresh':-48.0, 'v_reset' : -70.0, 
-                                'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
-                                'tau_syn_I' : 5.0, 
-                                'v_rest' : -65.0,'i_offset':0.0}
-
-        self.RBS_CELL_PARAMS = {'v_thresh':-55.0, 'v_reset' : -70.0, 
                                 'tau_refrac': 2.0 , 'tau_syn_E': 5.0,  
                                 'tau_syn_I' : 5.0, 
                                 'v_rest' : -65.0,'i_offset':0.0}
@@ -340,8 +327,7 @@ class FSAHelperFunctions:
     #---Create a CA that will persistently fire.
     #-- Assumes neurons in the same population
     #-- Uses INTRA_CA_WEIGHT
-    def makeCA(self,neurons, CA):
-        #print 'makeCA
+    def getCAConnectors(self, CA):
         connector = []
         #excitatory turn each other on
         for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
@@ -352,10 +338,7 @@ class FSAHelperFunctions:
                     connector = connector + [(fromNeuron,toNeuron,
                         self.INTRA_CA_WEIGHT, self.neal.DELAY)]
 
-        self.neal.nealProjection(neurons,neurons,connector,'excitatory')
-
         #excitatory turn on inhibitory
-        connector = []
         for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
             fromNeuron = fromOffset + (CA*self.CA_SIZE)
             for toOffset in range (self.CA_SIZE-self.CA_INHIBS,self.CA_SIZE):
@@ -363,18 +346,23 @@ class FSAHelperFunctions:
                 connector = connector + [(fromNeuron,toNeuron,
                         self.INTRA_CA_TO_INHIB_WEIGHT, self.neal.DELAY)]
 
-        self.neal.nealProjection(neurons,neurons,connector,'excitatory')
 
         #inhibitory slows excitatory 
-        connector = []
+        inhConnector = []
         for fromOffset in range (self.CA_SIZE-self.CA_INHIBS,self.CA_SIZE):
             fromNeuron = fromOffset + (CA*self.CA_SIZE)
             for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
                 toNeuron = toOffset + (CA*self.CA_SIZE)
-                connector = connector + [(fromNeuron,toNeuron,
+                inhConnector = inhConnector + [(fromNeuron,toNeuron,
                         self.INTRA_CA_FROM_INHIB_WEIGHT, self.neal.DELAY)]
 
-        self.neal.nealProjection(neurons,neurons,connector,'inhibitory')
+        return[connector,inhConnector]
+
+    def makeCA(self,neurons, CA):
+        #print 'makeCA
+        connectors = self.getCAConnectors(CA)
+        self.neal.nealProjection(neurons,neurons,connectors[0],'excitatory')
+        self.neal.nealProjection(neurons,neurons,connectors[1],'inhibitory')
 
     def nopMakeCA(self,neurons, CA):
         connector = []

@@ -47,9 +47,9 @@ class Network:
             self.fsa.CA_SIZE, 
             self.fsa.CA_INHIBS,
             start,
-            self.fsa.RBS_INTRA_CA_WEIGHT,
-            self.fsa.RBS_INTRA_CA_TO_INHIB_WEIGHT,
-            self.fsa.RBS_INTRA_CA_FROM_INHIB_WEIGHT)
+            self.fsa.INTRA_CA_WEIGHT,
+            self.fsa.INTRA_CA_TO_INHIB_WEIGHT,
+            self.fsa.INTRA_CA_FROM_INHIB_WEIGHT)
 
         return range(start, self.neuron+1)
 
@@ -57,16 +57,16 @@ class Network:
         neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.RBS_ONE_NEURON_STOPS_CA_WEIGHT, connectionType)
 
     def neuronTurnsOnCa(self, fromNeuron, toCa, connectionType):
-        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.ONE_NEURON_STARTS_CA_WEIGHT, connectionType)
+        neuronToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromNeuron, toCa, self.fsa.INPUT_WEIGHT, connectionType)
 
     def neuronHalfTurnOnCa(self, fromNeuron, toNeuron, connectionType):
-        neuronToNeruon(self.connections, fromNeuron, toNeuron, self.fsa.ONE_HALF_ON_ONE_WEIGHT, connectionType)
+        neuronToNeruon(self.connections, fromNeuron, toNeuron, self.fsa.HALF_ON_WEIGHT, connectionType)
 
     def caTurnsOnNeuron(self, fromCa, toNeuron, connectionType):
         caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT, connectionType)
 
     def caHalfTurnsOnNeuron(self, fromCa, toNeuron, connectionType):
-        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.HALF_ON_ONE_WEIGHT, connectionType)
+        caToNeuron(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, fromCa, toNeuron, self.fsa.HALF_ON_WEIGHT, connectionType)
 
     def twoCaTurnOnNeuron(self, fromOne, fromTwo, toNeuron, firstConnectionType, secondConnectionType):
         self.caHalfTurnsOnNeuron(fromOne, toNeuron, firstConnectionType)

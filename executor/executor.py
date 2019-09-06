@@ -4,8 +4,9 @@ from itertools import groupby
 from contracts.population import Population
 
 class Executor:
-    def __init__(self, sim, simulator, fsa, net, debug = False):
+    def __init__(self, sim, simulator, fsa, net, spinnVersion,debug = False):
         self.simulator = simulator
+        self.spinnVersion = spinnVersion
         self.fsa = fsa
         self.sim = sim
         self.net = net
@@ -106,10 +107,18 @@ class Executor:
                 items = [item[2] for item in data]
                 if(self.simulator == "nest" or key[2] == "excitatory"):
                     conn = self.sim.FromListConnector(items)
-                    self.sim.Projection(key[0],key[1], conn, receptor_type="excitatory")
+                    if ((self.simulator=="spinnaker") and (self.spinnVersion==7)):
+                        self.sim.Projection(key[0],key[1], conn, target=inhExc)
+                    elif ((self.simulator=="nest") or
+                          ((self.simulator=="spinnaker") and (self.spinnVersion==8))):
+                        self.sim.Projection(key[0],key[1], conn, receptor_type="excitatory")
                 else:
                     conn = self.sim.FromListConnector(items)
-                    self.sim.Projection(key[0],key[1], conn, receptor_type="inhibitory")   
+                    if ((self.simulator=="spinnaker")and(self.spinnVersion==7)):
+                        self.sim.Projection(key[0],key[1], conn, target=inhExc)
+                    elif ((self.simulator=="nest") or
+                          ((self.simulator=="spinnaker") and (self.spinnVersion==8))):
+                        self.sim.Projection(key[0],key[1], conn, receptor_type="inhibitory")   
 
     def activate(self):
         activate = []
@@ -129,8 +138,7 @@ class Executor:
                         population = pop
                         break
 
-                #self.fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
-                self.fsa.stimulateStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex,0.1)
+                self.fsa.turnOnStateFromSpikeSource(spikeGen, population.pop, a[0]-population.fromIndex)
                 self.actived += 1
 
     def writeDebug(self, msg):

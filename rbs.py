@@ -11,13 +11,13 @@ from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
 from executor.executor import Executor
 
 class RuleBasedSystem:
-    def __init__(self, sim, simulator, spinnakerVersion = -1, debug = False):
+    def __init__(self, sim, simulator, spinnVersion = -1, debug = False):
         if(simulator not in ["nest", "spinnaker"]):
             raise Exception("simulator type: '{}' is invalid. Use one of the following: nest, spinnaker.".format(simulator)) 
         self.sim = sim
         self.simulator = simulator
         self.debug = debug
-        self.spinnakerVersion = spinnakerVersion
+        self.spinnVersion = spinnVersion
         self.generator = SequentialRuleGenerator()
         self.fromFile = None
         self.basesFile = None
@@ -54,16 +54,16 @@ class RuleBasedSystem:
 
     def build(self, runTime):
         self.runTime = runTime
-        spinnVersion = -1
 
-        self.neal = NealCoverFunctions(self.simulator, self.sim, spinnVersion)
+        self.neal = NealCoverFunctions(self.simulator, self.sim, 
+                                       self.spinnVersion)
         self.fsa = FSAHelperFunctions(self.simulator, self.sim,self.neal)
 
         self.buildNet()
         self.buildExe()
 
         return self
-    
+     
     def addFact(self, fact, active = True, apply = True):
         fact = self.net.addFact(Fact(fact[0],fact[1]), active, apply)
         if(apply):
@@ -88,8 +88,11 @@ class RuleBasedSystem:
         return None
 
     def printSpikes(self):
-        data = self.get_data()
-
+      data = self.get_data()
+      if ((self.simulator=="spinnaker")and(self.spinnVersion==7)):
+          print data
+      elif ((self.simulator=="nest") or
+                          ((self.simulator=="spinnaker") and (self.spinnVersion==8))):
         for a in self.exe.net.assertions:
             pop = self.get_population(self.net.assertions[a])
             d = data[pop.pop.label]            
@@ -122,7 +125,11 @@ class RuleBasedSystem:
     def get_data(self):
         data = {}
         for pop in self.exe.populations:
-            data[pop.pop.label] = pop.pop.get_data()
+            if ((self.simulator=="spinnaker")and(self.spinnVersion==7)):
+                data[pop.pop.label] = pop.pop.getSpikes()
+            elif ((self.simulator=="nest") or
+                          ((self.simulator=="spinnaker") and (self.spinnVersion==8))):
+                data[pop.pop.label] = pop.pop.get_data()
         return data
 
     def printAllSpikes(self):

@@ -2,9 +2,10 @@ from rbs import RuleBasedSystem as RBS
 
 class MonekyProblem:
 
-    def __init__(self, sim, simulator):
+    def __init__(self, sim, simulator,spinnVersion = -1):
+        print "init2 "
         self.rbs = \
-            RBS(sim, simulator) \
+            RBS(sim, simulator,spinnVersion) \
                 .build(200)
 
         self.rbs.addRule(

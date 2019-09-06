@@ -10,15 +10,15 @@ fsa = FSAHelperFunctions("nest",sim,neal)
 runtime = 1000
 
 def createNeurons():
-    ca = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.RBS_CELL_PARAMS, label = "CA")
+    ca = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "CA")
     fsa.makeCA(ca, 0)
-    ca2 = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.RBS_CELL_PARAMS, label = "CA 2")
+    ca2 = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "CA 2")
     fsa.makeCA(ca2, 0)
-    ca3 = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.RBS_CELL_PARAMS, label = "CA 3")
+    ca3 = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "CA 3")
     fsa.makeCA(ca3, 0) 
-    n1 = sim.Population(1, sim.IF_cond_exp, fsa.RBS_CELL_PARAMS, label = "Neuron 1")
-    n2 = sim.Population(1, sim.IF_cond_exp, fsa.RBS_CELL_PARAMS, label = "Neuron 2")
-    n3 = sim.Population(1, sim.IF_cond_exp, fsa.RBS_CELL_PARAMS, label = "Neuron 3")
+    n1 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "Neuron 1")
+    n2 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "Neuron 2")
+    n3 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "Neuron 3")
     n1.record("spikes")
     n2.record("spikes")
     n3.record("spikes")
@@ -114,13 +114,13 @@ def twoStateToState_Half():
 
     #fsa.stateHalfTurnsOnState(ca,0,ca3,0)
     #fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
-    fsa.stateStimulatesState(ca,0,ca3,0,fsa.RBS_HALF_ON_WEIGHT)
-    fsa.stateStimulatesState(ca2,0,ca3,0,fsa.RBS_HALF_ON_WEIGHT)
+    fsa.stateStimulatesState(ca,0,ca3,0,fsa.HALF_ON_WEIGHT)
+    fsa.stateStimulatesState(ca2,0,ca3,0,fsa.HALF_ON_WEIGHT)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     #fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
-    fsa.stimulateStateFromSpikeSource(spikeGen,ca,0,fsa.RBS_INPUT_WEIGHT)
+    fsa.stimulateStateFromSpikeSource(spikeGen,ca,0,fsa.INPUT_WEIGHT)
 
     neal.nealApplyProjections()
     sim.run(runtime)
@@ -148,15 +148,15 @@ def twoStateToNeuron():
 
     #fsa.stateHalfTurnsOnOneNueron(ca,0,n1,0)
     #fsa.stateHalfTurnsOnOneNueron(ca2,0,n1,0)
-    fsa.stateStimulatesOneNeuron(ca,0,n1,0,fsa.HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca2,0,n1,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca,0,n1,0,fsa.HALF_ON_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,n1,0,fsa.HALF_ON_WEIGHT)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]} 
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     #fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
     #fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
-    fsa.stimulateStateFromSpikeSource(spikeGen,ca,0,fsa.RBS_INPUT_WEIGHT)
-    fsa.stimulateStateFromSpikeSource(spikeGen,ca2,0,fsa.RBS_INPUT_WEIGHT)
+    fsa.stimulateStateFromSpikeSource(spikeGen,ca,0,fsa.INPUT_WEIGHT)
+    fsa.stimulateStateFromSpikeSource(spikeGen,ca2,0,fsa.INPUT_WEIGHT)
 
     neal.nealApplyProjections()
     sim.run(runtime)
@@ -180,8 +180,8 @@ def twoStateToNeuron():
 def twoStateToNeuron_Half():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
-    fsa.stateStimulatesOneNeuron(ca,0,n1,0,fsa.HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca2,0,n1,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca,0,n1,0,fsa.HALF_ON_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,n1,0,fsa.HALF_ON_WEIGHT)
     #fsa.stateHalfTurnsOnOneNueron(ca,0,n1,0)
     #fsa.stateHalfTurnsOnOneNueron(ca2,0,n1,0)
 
@@ -275,8 +275,8 @@ def twoNeuronToState():
 
     #fsa.oneNeuronHalfTurnsOnState(n1,0,ca2,0)
     #fsa.oneNeuronHalfTurnsOnState(n2,0,ca2,0)
-    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.oneNeuronStimulatesState(n2,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
+    fsa.oneNeuronStimulatesState(n2,0,ca2,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
 
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
@@ -312,8 +312,8 @@ def twoNeuronToState_Half():
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
     
-    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.oneNeuronStimulatesState(n2,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
+    fsa.oneNeuronStimulatesState(n2,0,ca2,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnState(n1,0,ca2,0)
     #fsa.oneNeuronHalfTurnsOnState(n2,0,ca2,0)
 
@@ -352,8 +352,8 @@ def twoNeuronToNeuron():
 
     #fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n3,0)
     #fsa.oneNeuronHalfTurnsOnOneNeuron(n2,0,n3,0)
-    fsa.oneNeuronStimulatesOneNeuron(n1,0,n3,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.oneNeuronStimulatesOneNeuron(n2,0,n3,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesOneNeuron(n1,0,n3,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
+    fsa.oneNeuronStimulatesOneNeuron(n2,0,n3,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
@@ -383,8 +383,8 @@ def twoNeuronToNeuron_Half():
 
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
     
-    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.oneNeuronStimulatesState(n2,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.HALF_ON_WEIGHT)
+    fsa.oneNeuronStimulatesState(n2,0,ca2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnState(n1,0,n3,0)
     #fsa.oneNeuronHalfTurnsOnState(n2,0,n3,0)
 
@@ -419,7 +419,7 @@ def neruonAndStateToState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
-    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesState(n1,0,ca3,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
 
@@ -455,15 +455,15 @@ def neruonAndStateToState_NotNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
-    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     #fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
-    fsa.stateStimulatesOneNeuron(ca2,0,ca3,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,ca3,0,fsa.HALF_ON_WEIGHT)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     #fsa.turnOnStateFromSpikeSource(spikeGen,ca2,0)
-    fsa.stimulateStateFromSpikeSource(spikeGen,ca2,0,fsa.RBS_INPUT_WEIGHT)
+    fsa.stimulateStateFromSpikeSource(spikeGen,ca2,0,fsa.INPUT_WEIGHT)
 
     neal.nealApplyProjections()
     sim.run(runtime)
@@ -493,7 +493,7 @@ def neruonAndStateToState_NotState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
-    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesState(n1,0,ca2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnState(n1,0,ca3,0)
     fsa.stateHalfTurnsOnState(ca2,0,ca3,0)
 
@@ -528,8 +528,8 @@ def neuronAndStateToNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
-    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca2,0,n2,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,n2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     #fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
 
@@ -566,8 +566,8 @@ def neuronAndStateToNeuron_NotNeuron():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
-    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca2,0,n2,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.HALF_ON_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,n2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     #fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
 
@@ -605,8 +605,8 @@ def neuronAndStateToNeuron_NotState():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
     fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
-    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca2,0,n2,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.HALF_ON_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,n2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     #fsa.stateHalfTurnsOnOneNueron(ca2,0,n2,0)
 
@@ -651,13 +651,13 @@ def threeStateRule():
 
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
 
-    fsa.stateStimulatesOneNeuron(ca,0,n1,0,fsa.HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca2,0,n1,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca,0,n1,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca2,0,n1,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
     #fsa.stateHalfTurnsOnOneNueron(ca,0,n1,0)
     #fsa.stateHalfTurnsOnOneNueron(ca2,0,n1,0)
 
-    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.ONE_HALF_ON_ONE_WEIGHT)
-    fsa.stateStimulatesOneNeuron(ca3,0,n2,0,fsa.HALF_ON_ONE_WEIGHT)
+    fsa.oneNeuronStimulatesOneNeuron(n1,0,n2,0,fsa.RBS_ONE_NEURON_HALF_CA_WEIGHT)
+    fsa.stateStimulatesOneNeuron(ca3,0,n2,0,fsa.HALF_ON_WEIGHT)
     #fsa.oneNeuronHalfTurnsOnOneNeuron(n1,0,n2,0)
     #fsa.stateHalfTurnsOnOneNueron(ca3,0,n2,0)
 
@@ -701,13 +701,14 @@ def threeStateRule():
 
 def oneNeuronStopsCA():
     ca,ca2,ca3,n1,n2,n3 = createNeurons()
-    fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
+    #fsa.stateTurnsOnOneNeuron(ca,0,n1,0)
 
     fsa.oneNeuronTurnsOffState(n1,0,ca,0)
 
     spikeTimes = {'spike_times': [[sim.get_current_time()+5]]}
     spikeGen = sim.Population(1, sim.SpikeSourceArray, spikeTimes)
     fsa.turnOnStateFromSpikeSource(spikeGen,ca,0)
+    fsa.turnOnOneNeuronFromSpikeSource(spikeGen,n1,0)
 
     neal.nealApplyProjections()
     sim.run(runtime)
