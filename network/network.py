@@ -350,7 +350,6 @@ class Network:
                     text += " and {}".format((a[0],tuple(newProps)))
                 index += 1
 
-        # TODO: Ensure to extract variables
         if(len(baseAssertions) > 0):
             if(text == ""):
                 text += " => "
@@ -518,7 +517,9 @@ class Network:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = self.extractValue(unit, variables)
-            self.addOrGetLink(linkTo, unit, linkType)
+            ca = self.addOrGetLink(linkTo, unit, linkType)
+            if(linkType == "correlate" or linkType == "stimulate"):
+                self.neuronTurnsOnCa(ruleCa, ca, CONNECTION_NETWORK)
 
     def addOrGetLink(self, linkTo, unit, linkType):
         # get or add link to group
@@ -547,8 +548,10 @@ class Network:
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
             elif(linkType == "query"):
                 caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
+            elif(linkType == "stimulate"):
+                caToCa(self.connections, self.fsa.CA_SIZE, self.fsa.CA_INHIBS, ca, amCA, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
             else:
-                raise Exception("Invalid Link Type: {}. Supported values: correlate, query".format(linkType))
+                raise Exception("Invalid Link Type: {}. Supported values: correlate, query and stimulate.".format(linkType))
 
             return ca
 
