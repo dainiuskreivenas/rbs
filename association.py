@@ -29,7 +29,26 @@ class Association:
         self.associations = associations
         return self
 
-    def init(self):
+    def build(self):
+        self.__init()
+        self.neal.nealApplyProjections()
+        return self
+
+    def caFromUnit(self, unit):
+        unit = self.inheritance.getUnitNumber(unit)
+        start = (unit * self.fsa.CA_SIZE)
+        return range(start, start + 10)
+
+    def testBase(self, base, variables):
+        unit = base
+        if(unit[0] == "?"):
+            if(unit not in variables):
+                return True
+            else:
+                unit = variables[base]
+        return self.inheritance.inUnits(unit)
+
+    def __init(self):
         self.neal = NealCoverFunctions(self.simulator, self.sim, self.spinnakerVersion)
         self.fsa = FSAHelperFunctions(self.simulator, self.sim, self.neal, self.spinnakerVersion)
         self.topology = NeuralThreeAssocClass(self.simulator, self.sim, self.neal, self.spinnakerVersion, self.fsa)
@@ -48,10 +67,5 @@ class Association:
             self.associationStructure.readAssocFile(self.associations)
             self.topology.createAssociationTopology(self.propertyStructure, self.relationshipStructure)
             self.topology.addAssociations(self.associationStructure)
-        
-    def build(self):
-        self.init()
-        self.neal.nealApplyProjections()
-        return self
 
 

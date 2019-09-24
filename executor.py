@@ -4,11 +4,20 @@ from itertools import groupby
 from contracts.population import Population
 
 class Executor:
-    def __init__(self, sim, simulator, fsa, net, debug = False):
+    def __init__(self, 
+        sim, 
+        simulator, 
+        fsa, 
+        neuronRepository, 
+        connectionsRepository, 
+        activationsRepository,
+        debug = False):
         self.simulator = simulator
         self.fsa = fsa
         self.sim = sim
-        self.net = net
+        self.neuronRepository = neuronRepository
+        self.connectionsRepository = connectionsRepository
+        self.activationsRepository = activationsRepository
         self.debug = debug
 
     def useAssociationTopology(self, topology):
@@ -74,11 +83,13 @@ class Executor:
 
     def populate(self):
         addNeurons = 0
+        neuron = self.neuronRepository.getNeuron() + 1
+
         if(self.neuron == 0):
-            self.neuron += self.net.neuron + 1
+            self.neuron += neuron
             addNeurons = self.neuron
         else:
-            addNeurons = self.net.neuron + 1 - self.neuron
+            addNeurons = neuron - self.neuron
             self.neuron += addNeurons
 
         if(addNeurons > 0):
@@ -88,12 +99,15 @@ class Executor:
 
     def connect(self):
         connections = None
+
+        allConnections = self.connectionsRepository.getConnections()
+
         if(self.connections == 0):
-            connections = self.net.connections[:]
+            connections = allConnections[:]
             self.connections = len(connections)
         else:
             start = self.connections-1
-            connections = self.net.connections[start:]
+            connections = allConnections[start:]
             self.connections += len(connections)
 
         if(len(connections) > 0):
@@ -113,10 +127,13 @@ class Executor:
 
     def activate(self):
         activate = []
+
+        allActivations = self.activationsRepository.get()
+
         if(self.actived == 0):
-            activate = self.net.activations
+            activate = allActivations
         else:
-            activate = self.net.activations[self.actived:]
+            activate = allActivations[self.actived:]
 
         if(len(activate) > 0):
             self.writeDebug("Activation CA's: {}".format(len(activate)))
