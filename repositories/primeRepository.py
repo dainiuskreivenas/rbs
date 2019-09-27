@@ -11,9 +11,22 @@ class PrimeRepository:
         else:
             ca = self.neuronRepository.addCA()
             self.primes[prime] = ca
-            for u in self.association.inheritance.units:
-                amCa = self.association.caFromUnit(u)
-                self.connectionsService.connectPrimeToAssociationCA(ca, amCa)
+
+            if(prime == "base"):
+                baseService = self.association.getBaseService()
+                for u in baseService.getInheritance().units:
+                    amCa = baseService.caFromUnit(u)
+                    self.connectionsService.connectPrimeToAssociationCA(ca, amCa)
+            if(prime == "property"):
+                propertyService = self.association.getPropertyService()
+                for u in propertyService.getStructure().units:
+                    amCa = propertyService.caFromUnit(u)
+                    self.connectionsService.connectPrimeToAssociationCA(ca, amCa)
+            if(prime == "relationship"):
+                relationshipService = self.association.getRelationshipService()
+                for u in relationshipService.getStructure().units:
+                    amCa = relationshipService.caFromUnit(u)
+                    self.connectionsService.connectPrimeToAssociationCA(ca, amCa)
 
         return ca
 

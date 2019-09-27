@@ -1,3 +1,3 @@
 from stateMachineClass import FSAHelperFunctions
-from association import Association
+from associationBuilder import AssociationBuilder
 from rbsBuilder import RuleBasedSystemBuilder

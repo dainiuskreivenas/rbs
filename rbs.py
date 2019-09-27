@@ -109,10 +109,35 @@ class RuleBasedSystem:
         
         
         if(self.__association):
-            inheritanceData = self.__association.topology.neuralHierarchyTopology.cells.get_data()
-            for u in self.__association.inheritance.units:
+            inheritanceData = self.__association.getNeuralTopology().cells.get_data()
+            baseService = self.__association.getBaseService()
+            propertyService = self.__association.getPropertyService()
+            relationshipService = self.__association.getRelationshipService()
+
+            baseStructure = baseService.getInheritance()
+            for u in baseStructure.units:
                 print "(Base: {})".format(u)
-                index = self.__association.inheritance.getUnitNumber(u)
+                index = baseStructure.getUnitNumber(u)
+                for n in range(index*10,(index*10)+10):
+                    st = inheritanceData.segments[0].spiketrains[n]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
+
+            propertyStructure = propertyService.getStructure()
+            for u in propertyStructure.units:
+                print "(Property: {})".format(u)
+                index = propertyStructure.getUnitNumber(u)
+                for n in range(index*10,(index*10)+10):
+                    st = inheritanceData.segments[0].spiketrains[n]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
+
+            relationshipStructure = relationshipService.getStructure()
+            for u in relationshipStructure.units:
+                print "(Relationship: {})".format(u)
+                index = relationshipStructure.getUnitNumber(u)
                 for n in range(index*10,(index*10)+10):
                     st = inheritanceData.segments[0].spiketrains[n]
                     if(len(st) > 0):

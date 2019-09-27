@@ -71,7 +71,7 @@ class RuleBasedSystemBuilder:
             self.__logger)
         
         if(self.__association):
-            exeBuilder.useAssociationTopology(self.__association.topology.neuralHierarchyTopology)
+            exeBuilder.useAssociationTopology(self.__association.getNeuralTopology())
         
         return exeBuilder.build()
 

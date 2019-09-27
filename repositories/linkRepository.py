@@ -2,7 +2,7 @@ class LinkRepository:
     def __init__(self, neuronRepository, connectionsService, association):
         self.neuronRepository = neuronRepository
         self.connectionsService = connectionsService
-        self.association = association
+        self.__association = association
         self.links = {}
 
     def addOrGetLink(self, linkTo, unit, linkType):
@@ -25,7 +25,16 @@ class LinkRepository:
         else:
             ca = self.neuronRepository.addCA()
             linkGroup[unit] = ca
-            amCA = self.association.caFromUnit(unit)
+
+            if(linkTo == "base"):
+                baseService = self.__association.getBaseService()
+                amCA = baseService.caFromUnit(unit)
+            elif(linkTo == "property"):
+                propertyService = self.__association.getPropertyService()
+                amCA = propertyService.caFromUnit(unit)
+            elif(linkTo == "relationship"):
+                relationshipService = self.__association.getRelationshipService()
+                amCA = relationshipService.caFromUnit(unit)
             
             if(linkType == "correlate"):
                 self.connectionsService.connectCorrelatedLink(ca, amCA)
