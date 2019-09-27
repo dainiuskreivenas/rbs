@@ -1,9 +1,9 @@
-from lib.readInheritanceFile import InheritanceReaderClass
-from lib.stateMachineClass import FSAHelperFunctions
-from lib.nealCoverClass import NealCoverFunctions
-from lib.make3Assoc import NeuralThreeAssocClass
-from lib.readUnitFile import UnitReaderClass
-from lib.readAssocFile import AssocReaderClass
+from lib import InheritanceReaderClass
+from lib import FSAHelperFunctions
+from lib import NealCoverFunctions
+from lib import NeuralThreeAssocClass
+from lib import UnitReaderClass
+from lib import AssocReaderClass
 
 class Association:
     def __init__(self, sim, simulator, spinnakerVersion = -1):

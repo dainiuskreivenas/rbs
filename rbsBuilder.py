@@ -1,15 +1,8 @@
+from executorBuilder import ExecutorBuilder
 from rbs import RuleBasedSystem
-from network import Network
-from executor import Executor
-from generators.sequentialRuleGenerator import SequentialRuleGenerator
-from repositories.neuronRepository import NeuronRepository
-from repositories.connectionsRepository import ConnectionsRepository
-from repositories.factGroupRepository import FactGroupRepository
-from repositories.factRepository import FactRepository
-from repositories.activationsRepository import ActivationsRepository
-from repositories.linkRepository import LinkRepository
-from repositories.primeRepository import PrimeRepository
-from services.connectionsService import ConnectionsService
+from generators import SequentialRuleGenerator
+from repositories import *
+from services import *
 
 class RuleBasedSystemBuilder:
     def __init__(self, sim, simulator, fsa, spinnakerVersion = -1, debug = False):
@@ -21,32 +14,33 @@ class RuleBasedSystemBuilder:
         self.__debug = debug
         self.__spinnakerVersion = spinnakerVersion
         self.__association = None
+        self.__generatorType = None
         self.__generator = None
-
-    def useRuleGenerator(self, generator):
-        self.__generator = generator
-        return self
 
     def useAssociation(self, association):
         self.__association = association
         return self
 
     def build(self):
-
         self.__initDependencies()
-        net = self.__buildNet()
+
+        generator = self.__getGenerator()
         exe = self.__buildExe()
 
-        return RuleBasedSystem(net, 
-            exe, 
-            self.__association,
+        return RuleBasedSystem(exe,
+            self.__rulesService,
+            self.__rulesRepository,
             self.__neuronRepository,
             self.__factGroupRepository,
+            self.__factRepository,
+            self.__assertionRepository,
             self.__primeRepository,
-            self.__linkRepository)
-
+            self.__linkRepository,
+            generator,
+            self.__association)
     
-    def __initDependencies(self):
+    def __initDependencies(self):        
+        self.__logger = LoggerService(self.__debug)
         self.__connectionsRepository = ConnectionsRepository()
         self.__connectionsService = ConnectionsService(self.__fsa, self.__connectionsRepository)
         self.__neuronRepository = NeuronRepository(self.__connectionsService, self.__fsa)
@@ -55,38 +49,31 @@ class RuleBasedSystemBuilder:
         self.__activationsRepository = ActivationsRepository()
         self.__factRepository = FactRepository(self.__factGroupRepository, self.__neuronRepository, self.__activationsRepository)
         self.__primeRepository = PrimeRepository(self.__neuronRepository, self.__connectionsService, self.__association)
-
-    def __buildNet(self):
-        if(self.__generator == None):
-            generator = SequentialRuleGenerator(self.__connectionsService, self.__neuronRepository)
-        else:
-            generator = self.__generator
-
-        net = Network(self.__fsa, 
-            generator, 
-            self.__connectionsService, 
-            self.__neuronRepository, 
+        self.__assertionRepository = AssertionRepository(self.__neuronRepository)
+        self.__rulesRepository = RulesRepository()
+        self.__rulesService = RulesService(self.__rulesRepository, 
+            self.__primeRepository,
             self.__linkRepository,
             self.__factGroupRepository,
             self.__factRepository,
-            self.__primeRepository,
-            self.__debug)
-
-        if(self.__association):
-            net.useAssociation(self.__association)
-        
-        return net.build()
+            self.__assertionRepository,
+            self.__connectionsService,
+            self.__association,
+            self.__logger)
 
     def __buildExe(self):
-        exe = Executor(self.__sim, 
+        exeBuilder = ExecutorBuilder(self.__sim,
             self.__simulator, 
-            self.__fsa, 
+            self.__fsa,
             self.__neuronRepository,
             self.__connectionsRepository,
             self.__activationsRepository, 
-            self.__debug)
+            self.__logger)
         
         if(self.__association):
-            exe.useAssociationTopology(self.__association.topology.neuralHierarchyTopology)
+            exeBuilder.useAssociationTopology(self.__association.topology.neuralHierarchyTopology)
         
-        return exe.build()
+        return exeBuilder.build()
+
+    def __getGenerator(self):
+        return SequentialRuleGenerator(self.__connectionsService, self.__neuronRepository)

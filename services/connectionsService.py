@@ -1,31 +1,31 @@
-CONNECTION_NETWORK = 0
-CONNECTION_NETWORK_INHERITANCE = 1
-CONNECTION_INHERITANCE_NETWORK = 2
-CONNECTION_INHERITANCE = 3
-
 class ConnectionsService:
     def __init__(self, fsa, connectionsRepository):
         self.fsa = fsa
         self.connectionsRepository = connectionsRepository
+
+        self.CONNECTION_NETWORK = 0
+        self.CONNECTION_NETWORK_INHERITANCE = 1
+        self.CONNECTION_INHERITANCE_NETWORK = 2
+        self.CONNECTION_INHERITANCE = 3
 
     def neuronAndCaTurnOnNeuron(self, fromNeuron, fromCa, toNeuron, neuronConnectionType, caConnectionType):
         self.__neuronHalfTurnOnNeuron(fromNeuron,toNeuron, neuronConnectionType)
         self.caHalfTurnsOnNeuron(fromCa, toNeuron, caConnectionType)
 
     def neuronHalfTurnOnCa(self, neuron, ca):
-        self.__neuronHalfTurnOnCa(neuron, ca, CONNECTION_NETWORK)
+        self.__neuronHalfTurnOnCa(neuron, ca, self.CONNECTION_NETWORK)
 
     def neuronTurnsOnCa(self, neuron, ca):
-        self.__neuronTurnsOnCa(neuron, ca, CONNECTION_NETWORK)
+        self.__neuronTurnsOnCa(neuron, ca, self.CONNECTION_NETWORK)
 
     def neuronTurnsOnAssociationCA(self, neuron, ca):
-        self.__neuronTurnsOnCa(neuron, ca, CONNECTION_NETWORK_INHERITANCE)
+        self.__neuronTurnsOnCa(neuron, ca, self.CONNECTION_NETWORK_INHERITANCE)
 
     def neuronTurnsOffAssociationCA(self, neuron, ca):
-        self.__neuronTurnsOffCa(neuron, ca, CONNECTION_NETWORK_INHERITANCE)
+        self.__neuronTurnsOffCa(neuron, ca, self.CONNECTION_NETWORK_INHERITANCE)
 
     def neuronTurnsOffCA(self, neuron, ca):
-        self.__neuronTurnsOffCa(neuron, ca, CONNECTION_NETWORK)
+        self.__neuronTurnsOffCa(neuron, ca, self.CONNECTION_NETWORK)
 
     def twoCaTurnOnNeuron(self, fromOne, fromTwo, toNeuron, firstConnectionType, secondConnectionType):
         self.caHalfTurnsOnNeuron(fromOne, toNeuron, firstConnectionType)
@@ -38,17 +38,17 @@ class ConnectionsService:
         self.__caToNeuron(fromCa, toNeuron, self.fsa.STATE_TO_ONE_WEIGHT, connectionType)
 
     def connectCorrelatedLink(self, ca, amCA):
-        self.__caToCa(ca, amCA, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
-        self.__caToCa(amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
+        self.__caToCa(ca, amCA, self.fsa.FULL_ON_WEIGHT, self.CONNECTION_NETWORK_INHERITANCE)
+        self.__caToCa(amCA, ca, self.fsa.FULL_ON_WEIGHT, self.CONNECTION_INHERITANCE_NETWORK)
 
     def connectQueryableLink(self, ca, amCA):
-        self.__caToCa(amCA, ca, self.fsa.FULL_ON_WEIGHT, CONNECTION_INHERITANCE_NETWORK)
+        self.__caToCa(amCA, ca, self.fsa.FULL_ON_WEIGHT, self.CONNECTION_INHERITANCE_NETWORK)
 
     def connectStimulatedLink(self, ca, amCA):
-        self.__caToCa(ca, amCA, self.fsa.FULL_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+        self.__caToCa(ca, amCA, self.fsa.FULL_ON_WEIGHT, self.CONNECTION_NETWORK_INHERITANCE)
 
     def connectPrimeToAssociationCA(self, ca, amCA):
-        self.__caToCa(ca, amCA, self.fsa.HALF_ON_WEIGHT, CONNECTION_NETWORK_INHERITANCE)
+        self.__caToCa(ca, amCA, self.fsa.HALF_ON_WEIGHT, self.CONNECTION_NETWORK_INHERITANCE)
 
     def makeCA(self, start):
         connector = []
