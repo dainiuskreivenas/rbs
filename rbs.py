@@ -1,133 +1,160 @@
 """
-Rule Based System using Nest Simulator
+Rule Based System
 """
-from stateMachineClass import FSAHelperFunctions
-from network.network import Network
-from network.contracts.fact import Fact
-from network.contracts.rule import Rule
-from network.generators.sequentialRuleGenerator import SequentialRuleGenerator
-from executor.executor import Executor
-from association.association import Association
+from executor import Executor
+from contracts import Fact
+from contracts import Rule
 
-class RuleBasedSystem:
-    def __init__(self, sim, simulator, spinnakerVersion = -1, debug = False):
-        if(simulator not in ["nest", "spinnaker"]):
-            raise Exception("simulator type: '{}' is invalid. Use one of the following: nest, spinnaker.".format(simulator)) 
-        self.sim = sim
-        self.simulator = simulator
-        self.debug = debug
-        self.spinnakerVersion = spinnakerVersion
-        self.generator = SequentialRuleGenerator()
-        self.fromFile = None
-        self.basesFile = None
-        self.association = None
-
-    def useRuleGenerator(self, generator):
-        self.generator = generator
-        return self
-
-    def useStorageFile(self, file):
-        self.fromFile = file
-        return self
-
-    def useBases(self, baseFile):
-        self.basesFile = baseFile
-        return self
-
-    def buildBases(self):
-        if(self.basesFile):
-            self.association = \
-                Association(self.sim, self.simulator, self.spinnakerVersion) \
-                    .useBases(self.basesFile) \
-                    .build(self.runTime)
-
-    def buildNet(self):
-        self.net = \
-            self.net = \
-                Network(self.fsa, self.generator, self.debug) \
-                    .useStorageFile(self.fromFile) \
-
-        if(self.association):
-            self.net = \
-                self.net \
-                    .useInheritanceStructure(self.association.inheritance)
+class RuleBasedSystem: 
+    def __init__(self, 
+        exe, 
+        rulesService, 
+        rulesRepository, 
+        neuronRepository, 
+        factGroupRepository, 
+        factRepository, 
+        assertionsRepository, 
+        primeRepository, 
+        linksRepository, 
+        generator, 
+        topology,
+        baseService,
+        propertyService,
+        relationshipService):
+        self.exe = exe
+        self.__rulesService = rulesService
+        self.__rulesRepository = rulesRepository
+        self.__neuronRepository = neuronRepository
+        self.__primeRepository = primeRepository
+        self.__linksRepository = linksRepository
+        self.__factGroupRepository = factGroupRepository
+        self.__factRepository = factRepository
+        self.__assertionsRepository = assertionsRepository
+        self.__generator = generator
+        self.__topology = topology
+        self.__baseService = baseService
+        self.__propertyService = propertyService
+        self.__relationshipService = relationshipService
         
-        self.net = self.net.build()
 
-    def buildExe(self):
-        self.exe = \
-            self.exe = \
-                Executor(self.sim, self.simulator, self.fsa, self.net, self.debug)
-        
-        if(self.association):
-            self.exe = \
-                self.exe \
-                    .useAssociationTopology(self.association.topology.neuralHierarchyTopology)
-        
-        self.exe = self.exe.build()
+    def addFact(self, name, attributes, active = True, apply = True):
+        fact = self.__factRepository.addFact(Fact(name, attributes), active)
 
-        if(self.fromFile != None):
-            self.exe.apply()
-
-    def build(self, runTime):
-        self.runTime = runTime
-        self.fsa = FSAHelperFunctions(self.sim, self.simulator)
-
-        self.buildBases()
-        self.buildNet()
-        self.buildExe()
-
-        return self
-    
-    def addFact(self, fact, active = True, apply = True):
-        fact = self.net.addFact(Fact(fact[0],fact[1]), active, apply)
         if(apply):
+            self.__rulesService.applyRulesToFacts(self.__generator)
             self.exe.apply()
+
         return fact
 
-    def getFact(self, fact, apply = True):
-        fact = self.net.getFact(Fact(fact[0],fact[1]), apply)
-        if(apply):
+    def getFact(self, group, attributes, autoApply = True):
+        fact = self.__factRepository.getFact(Fact(group, attributes))
+
+        if(autoApply):
+            self.__rulesService.applyRulesToFacts(self.__generator)
             self.exe.apply()
+
         return fact
 
-    def addRule(self, rule, apply = True):
-        self.net.addRule(Rule(rule[0],rule[1][0],rule[1][1]), apply)
-        if(apply):
-            self.exe.apply()
+    def addRule(self, name, ifs, thens, autoApply = True):
+        self.__rulesRepository.addRule(Rule(name, ifs, thens))
 
-    def get_population(self, index):
-        for pop in self.exe.populations:
-            if(pop.fromIndex <= index and pop.toIndex > index):
-                return pop
-        return None
+        if(autoApply):
+            self.__rulesService.applyRulesToFacts(self.__generator)
+            self.exe.apply()
 
     def printSpikes(self):
         data = self.get_data()
 
-        for a in self.exe.net.assertions:
-            pop = self.get_population(self.net.assertions[a])
+        assertions = self.__assertionsRepository.get()
+        for a in assertions:
+            pop = self.exe.get_population(assertions[a])
             d = data[pop.pop.label]            
-            st = d.segments[0].spiketrains[self.net.assertions[a]-pop.fromIndex]
-            print "({})".format(a)
+            st = d.segments[0].spiketrains[assertions[a]-pop.fromIndex]
+            print "(Assertion: {})".format(a)
             if(len(st) > 0):
                 for s in st.magnitude:
-                    print "{} {}".format(self.net.assertions[a], s)
-        for a in self.net.interns:  
-            pop = self.get_population(a)
+                    print "{} {}".format(assertions[a], s)
+
+        primes = self.__primeRepository.get()
+        for p in primes:
+            prime = primes[p]
+            print "(Prime: {})".format(p)
+            for n in prime:
+                pop = self.exe.get_population(n)
+                d = data[pop.pop.label]
+                st = d.segments[0].spiketrains[n-pop.fromIndex]
+                if(len(st) > 0):
+                    for s in st.magnitude:
+                        print "{} {}".format(n, s)
+
+        links = self.__linksRepository.get()
+        for linkTo in links:
+            linkGroup = links[linkTo]
+            for linkType in linkGroup:
+                linkTypes = linkGroup[linkType]
+                for unit in linkTypes:
+                    link = linkTypes[unit]
+                    print "(Link: {}, {}, {})".format(linkTo, unit, linkType)
+                    for n in link:
+                        pop = self.exe.get_population(n)
+                        d = data[pop.pop.label]
+                        st = d.segments[0].spiketrains[n-pop.fromIndex]
+                        if(len(st) > 0):
+                            for s in st.magnitude:
+                                print "{} {}".format(n, s)
+
+        interns = self.__neuronRepository.getInterns()
+        for a in interns:  
+            pop = self.exe.get_population(a)
             d = data[pop.pop.label]
             st = d.segments[0].spiketrains[a-pop.fromIndex]
-            print "({})".format(a)
+            print "(Intern: {})".format(a)
             if(len(st) > 0):
                 for s in st.magnitude:
                     print "{} {}".format(a, s)
-        for g in self.net.facts:
-            for f in self.net.facts[g]:
+
+        groups = self.__factGroupRepository.get()
+        for g in groups:
+            for f in groups[g]:
                 print "(f-{} - {} {})".format(f.index, f.group, f.attributes)
                 for n in f.ca:
-                    pop = self.get_population(n)
+                    pop = self.exe.get_population(n)
                     d = data[pop.pop.label]
                     st = d.segments[0].spiketrains[n-pop.fromIndex]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
+        
+        
+        if(self.__topology):
+            inheritanceData = self.__topology.neuralHierarchyTopology.cells.get_data()
+
+            baseStructure = self.__baseService.getInheritance()
+            for u in baseStructure.units:
+                print "(Base: {})".format(u)
+                index = baseStructure.getUnitNumber(u)
+                for n in range(index*10,(index*10)+10):
+                    st = inheritanceData.segments[0].spiketrains[n]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
+
+            propertyStructure = self.__propertyService.getStructure()
+            for u in propertyStructure.units:
+                print "(Property: {})".format(u)
+                index = propertyStructure.getUnitNumber(u)
+                for n in range(index*10,(index*10)+10):
+                    st = inheritanceData.segments[0].spiketrains[n]
+                    if(len(st) > 0):
+                        for s in st.magnitude:
+                            print "{} {}".format(n, s)
+
+            relationshipStructure = self.__relationshipService.getStructure()
+            for u in relationshipStructure.units:
+                print "(Relationship: {})".format(u)
+                index = relationshipStructure.getUnitNumber(u)
+                for n in range(index*10,(index*10)+10):
+                    st = inheritanceData.segments[0].spiketrains[n]
                     if(len(st) > 0):
                         for s in st.magnitude:
                             print "{} {}".format(n, s)
@@ -135,7 +162,4 @@ class RuleBasedSystem:
         return data
 
     def get_data(self):
-        data = {}
-        for pop in self.exe.populations:
-            data[pop.pop.label] = pop.pop.get_data()
-        return data
+        return self.exe.get_data()
