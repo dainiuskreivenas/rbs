@@ -6,6 +6,14 @@ This is a RBS (Rule Based System). Build rules using facts that are cached to ne
 
 View [Wiki](https://github.com/dainiuskreivenas/rbs/wiki) for more information
 
+# To Run Tests
+
+1. Download Repository to {location}/rbs
+2. Naviaget to {location}
+3. Execute shell script command "./rbs/runTests.sh"
+
+Results will be written to: "./rbs/tests/results.sp" file.
+
 # Examples
 
 Examples can be found in the following repositories:
