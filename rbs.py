@@ -6,7 +6,21 @@ from contracts import Fact
 from contracts import Rule
 
 class RuleBasedSystem: 
-    def __init__(self, exe, rulesService, rulesRepository, neuronRepository, factGroupRepository, factRepository, assertionsRepository, primeRepository, linksRepository, generator, association = None):
+    def __init__(self, 
+        exe, 
+        rulesService, 
+        rulesRepository, 
+        neuronRepository, 
+        factGroupRepository, 
+        factRepository, 
+        assertionsRepository, 
+        primeRepository, 
+        linksRepository, 
+        generator, 
+        topology,
+        baseService,
+        propertyService,
+        relationshipService):
         self.exe = exe
         self.__rulesService = rulesService
         self.__rulesRepository = rulesRepository
@@ -17,7 +31,11 @@ class RuleBasedSystem:
         self.__factRepository = factRepository
         self.__assertionsRepository = assertionsRepository
         self.__generator = generator
-        self.__association = association
+        self.__topology = topology
+        self.__baseService = baseService
+        self.__propertyService = propertyService
+        self.__relationshipService = relationshipService
+        
 
     def addFact(self, name, attributes, active = True, apply = True):
         fact = self.__factRepository.addFact(Fact(name, attributes), active)
@@ -108,13 +126,10 @@ class RuleBasedSystem:
                             print "{} {}".format(n, s)
         
         
-        if(self.__association):
-            inheritanceData = self.__association.getNeuralTopology().cells.get_data()
-            baseService = self.__association.getBaseService()
-            propertyService = self.__association.getPropertyService()
-            relationshipService = self.__association.getRelationshipService()
+        if(self.__topology):
+            inheritanceData = self.__topology.neuralHierarchyTopology.cells.get_data()
 
-            baseStructure = baseService.getInheritance()
+            baseStructure = self.__baseService.getInheritance()
             for u in baseStructure.units:
                 print "(Base: {})".format(u)
                 index = baseStructure.getUnitNumber(u)
@@ -124,7 +139,7 @@ class RuleBasedSystem:
                         for s in st.magnitude:
                             print "{} {}".format(n, s)
 
-            propertyStructure = propertyService.getStructure()
+            propertyStructure = self.__propertyService.getStructure()
             for u in propertyStructure.units:
                 print "(Property: {})".format(u)
                 index = propertyStructure.getUnitNumber(u)
@@ -134,7 +149,7 @@ class RuleBasedSystem:
                         for s in st.magnitude:
                             print "{} {}".format(n, s)
 
-            relationshipStructure = relationshipService.getStructure()
+            relationshipStructure = self.__relationshipService.getStructure()
             for u in relationshipStructure.units:
                 print "(Relationship: {})".format(u)
                 index = relationshipStructure.getUnitNumber(u)

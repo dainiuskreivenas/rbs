@@ -1,7 +1,6 @@
 class NeuronRepository:
-    def __init__(self, connectionsService, fsa):
+    def __init__(self, connectionsService):
         self.connectionsService = connectionsService
-        self.fsa = fsa
         self.neuron = -1
         self.interns = []
 

@@ -1,3 +1,4 @@
 from stateMachineClass import FSAHelperFunctions
+from nealCoverClass import NealCoverFunctions
 from associationBuilder import AssociationBuilder
 from rbsBuilder import RuleBasedSystemBuilder

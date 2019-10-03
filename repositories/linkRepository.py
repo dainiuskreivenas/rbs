@@ -1,17 +1,19 @@
 class LinkRepository:
-    def __init__(self, neuronRepository, connectionsService, association):
-        self.neuronRepository = neuronRepository
-        self.connectionsService = connectionsService
-        self.__association = association
-        self.links = {}
+    def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):
+        self.__neuronRepository = neuronRepository
+        self.__connectionsService = connectionsService
+        self.__baseService = baseService
+        self.__propertyService = propertyService
+        self.__relationshipService = relationshipService
+        self.__links = {}
 
     def addOrGetLink(self, linkTo, unit, linkType):
         # get or add link to group
-        if(linkTo in self.links):
-            linkGroup = self.links[linkTo]
+        if(linkTo in self.__links):
+            linkGroup = self.__links[linkTo]
         else:
             linkGroup = {}
-            self.links[linkTo] = linkGroup
+            self.__links[linkTo] = linkGroup
         
         # get or add link type group
         if(linkType in linkGroup):
@@ -23,29 +25,26 @@ class LinkRepository:
         if(unit in linkGroup):
             return linkGroup[unit]
         else:
-            ca = self.neuronRepository.addCA()
+            ca = self.__neuronRepository.addCA()
             linkGroup[unit] = ca
 
             if(linkTo == "base"):
-                baseService = self.__association.getBaseService()
-                amCA = baseService.caFromUnit(unit)
+                amCA = self.__baseService.caFromUnit(unit)
             elif(linkTo == "property"):
-                propertyService = self.__association.getPropertyService()
-                amCA = propertyService.caFromUnit(unit)
+                amCA = self.__propertyService.caFromUnit(unit)
             elif(linkTo == "relationship"):
-                relationshipService = self.__association.getRelationshipService()
-                amCA = relationshipService.caFromUnit(unit)
+                amCA = self.__relationshipService.caFromUnit(unit)
             
             if(linkType == "correlate"):
-                self.connectionsService.connectCorrelatedLink(ca, amCA)
+                self.__connectionsService.connectCorrelatedLink(ca, amCA)
             elif(linkType == "query"):
-                self.connectionsService.connectQueryableLink(ca, amCA)
+                self.__connectionsService.connectQueryableLink(ca, amCA)
             elif(linkType == "stimulate"):
-                self.connectionsService.connectStimulatedLink(ca, amCA)
+                self.__connectionsService.connectStimulatedLink(ca, amCA)
             else:
                 raise Exception("Invalid Link Type: {}. Supported values: correlate, query and stimulate.".format(linkType))
 
             return ca
 
     def get(self):
-        return self.links.copy()
+        return self.__links.copy()

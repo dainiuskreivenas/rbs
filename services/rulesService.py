@@ -10,7 +10,9 @@ class RulesService:
         factRepository, 
         assertionRepository, 
         connectionsService, 
-        association, 
+        baseService, 
+        propertyService,
+        relationshipService,
         logger):
         self.__rulesRepository = rulesRepository
         self.__primeRepository = primeRepository
@@ -19,7 +21,9 @@ class RulesService:
         self.__factRepository = factRepository
         self.__assertionRepository = assertionRepository
         self.__connectionsService = connectionsService
-        self.__association = association
+        self.__baseService = baseService
+        self.__propertyService = propertyService
+        self.__relationshipService = relationshipService
         self.__logger = logger
 
     def applyRulesToFacts(self, generator):
@@ -57,10 +61,6 @@ class RulesService:
         newTree = []
         existing = []
 
-        baseService = self.__association.getBaseService()
-        propertyService = self.__association.getPropertyService()
-        relationshipService = self.__association.getRelationshipService()
-             
         for f in matches:
             search = self.__getSearchExpression(condition, f.variables)
             founds = self.__getMatchingFacts(search[0], search[1], search[2])
@@ -78,17 +78,17 @@ class RulesService:
 
                 testPass = True
                 for base in rule.bases:
-                    testPass = baseService.test(base[1], var)
+                    testPass = self.__baseService.test(base[1], var)
                     if(testPass == False):
                         break
 
                 for prop in rule.properties:
-                    testPass = propertyService.test(prop[1], var)
+                    testPass = self.__propertyService.test(prop[1], var)
                     if(testPass == False):
                         break
 
                 for rel in rule.relationships:
-                    testPass = relationshipService.test(rel[1], var)
+                    testPass = self.__relationshipService.test(rel[1], var)
                     if(testPass == False):
                         break
 
@@ -189,7 +189,7 @@ class RulesService:
                         unit = b[1]
                         if(unit[0] == "?"):
                             unit = VariableHelper.extractValue(unit, match.variables)
-                        ca = self.__association.caFromUnit(unit)
+                        ca = self.__baseService.caFromUnit(unit)
                         self.__connectionsService.neuronTurnsOffAssociationCA(ruleCa, ca)        
                         applied = True     
                         break
@@ -217,7 +217,7 @@ class RulesService:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = VariableHelper.extractValue(unit, variables)
-            ca = self.__association.baseCaFromUnit(unit)
+            ca = self.__baseService.caFromUnit(unit)
             self.__connectionsService.neuronTurnsOnAssociationCA(ruleCa, ca)
 
     def __setupPrimeAssertions(self, primeAssertions, ruleCa):
@@ -241,7 +241,7 @@ class RulesService:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = VariableHelper.extractValue(unit, variables)
-            ca = self.__association.propertyCaFromUnit()
+            ca = self.__propertyService.caFromUnit()
             self.__connectionsService.neuronTurnsOnAssociationCA(ruleCa, ca)
 
     def __setupRelationshipAssertions(self, relationshipAssertions, match, ruleCa):
@@ -250,14 +250,10 @@ class RulesService:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = VariableHelper.extractValue(unit, variables)
-            ca = self.__association.relationshipCaFromUnit()
+            ca = self.__relationshipService.caFromUnit()
             self.__connectionsService.neuronTurnsOnAssociationCA(ruleCa, ca)
 
     def __getCas(self, match, bases, primes, links, props, relationships):
-        baseService = self.__association.getBaseService()
-        propertyService = self.__association.getPropertyService()
-        relationshipService = self.__association.getRelationshipService()
-
         cas = []
         for m in match.matches:
             cas.append((m[0].ca, self.__connectionsService.CONNECTION_NETWORK))
@@ -266,21 +262,21 @@ class RulesService:
             unit = a[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
-            ca = baseService.caFromUnit(unit)
+            ca = self.__baseService.caFromUnit(unit)
             cas.append((ca, self.__connectionsService.CONNECTION_INHERITANCE_NETWORK))
 
         for p in props:
             unit = p[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
-            ca = propertyService.caFromUnit(unit)
+            ca = self.__propertyService.caFromUnit(unit)
             cas.append((ca, self.__connectionsService.CONNECTION_INHERITANCE_NETWORK))
 
         for r in relationships:
             unit = r[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
-            ca = relationshipService.caFromUnit(unit)
+            ca = self.__relationshipService.caFromUnit(unit)
             cas.append((ca, self.__connectionsService.CONNECTION_INHERITANCE_NETWORK))
         
         for p in primes:

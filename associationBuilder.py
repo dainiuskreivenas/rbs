@@ -3,8 +3,10 @@ from services import BaseService, UnitService, AssociationService
 from association import Association
 
 class AssociationBuilder:
-    def __init__(self, sim, simulator, spinnakerVersion = -1):
+    def __init__(self, sim, fsa, neal, simulator, spinnakerVersion = -1):
         self.__sim = sim
+        self.__fsa = fsa
+        self.__neal = neal
         self.__simulator = simulator
         self.__spinnakerVersion = spinnakerVersion
         self.__bases = None
@@ -24,21 +26,20 @@ class AssociationBuilder:
 
     def build(self):
 
-        neal = NealCoverFunctions(self.__simulator, self.__sim, self.__spinnakerVersion)
-        fsa = FSAHelperFunctions(self.__simulator, self.__sim, neal, self.__spinnakerVersion)
-        topology = NeuralThreeAssocClass(self.__simulator, self.__sim, neal, self.__spinnakerVersion, fsa)
+        topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
+        baseService = None
+        propertyService = None
+        relationshipService = None
 
         if(self.__bases):
-            baseService = BaseService(fsa, self.__bases)
+            baseService = BaseService(self.__fsa, self.__bases)
             topology.createBaseNet(baseService.getInheritance())
 
         if(self.__properties and self.__relationships and self.__associations):
-            propertyService = UnitService(fsa, self.__properties)
-            relationshipService = UnitService(fsa, self.__relationships)
+            propertyService = UnitService(self.__fsa, self.__properties)
+            relationshipService = UnitService(self.__fsa, self.__relationships)
             associationService = AssociationService(self.__associations)
             topology.createAssociationTopology(propertyService.getStructure(), relationshipService.getStructure())
             topology.addAssociations(associationService.getAssociations())
 
-        neal.nealApplyProjections()
-
-        return Association(topology, baseService, propertyService, relationshipService)
+        return (topology, baseService, propertyService, relationshipService)

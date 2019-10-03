@@ -8,6 +8,7 @@ class Executor:
         sim, 
         simulator, 
         fsa,
+        spinnVersion,
         neuronRepository, 
         connectionsRepository, 
         activationsRepository,
@@ -16,6 +17,7 @@ class Executor:
         self.__simulator = simulator
         self.__fsa = fsa
         self.__sim = sim
+        self.__spinnVersion = spinnVersion
         self.__neuronRepository = neuronRepository
         self.__connectionsRepository = connectionsRepository
         self.__activationsRepository = activationsRepository
@@ -85,10 +87,18 @@ class Executor:
                 items = [item[2] for item in data]
                 if(self.__simulator == "nest" or key[2] == "excitatory"):
                     conn = self.__sim.FromListConnector(items)
-                    self.__sim.Projection(key[0],key[1], conn, receptor_type="excitatory")
+                    if ((self.__simulator == "spinnaker") and (self.__spinnVersion == 7)):
+                        self.__sim.Projection(key[0], key[1], conn)
+                    elif ((self.__simulator == "nest") or
+                          ((self.__simulator == "spinnaker") and (self.__spinnVersion == 8))):
+                        self.__sim.Projection(key[0], key[1], conn, receptor_type = "excitatory")
                 else:
                     conn = self.__sim.FromListConnector(items)
-                    self.__sim.Projection(key[0],key[1], conn, receptor_type="inhibitory")   
+                    if ((self.__simulator=="spinnaker")and(self.__spinnVersion==7)):
+                        self.__sim.Projection(key[0], key[1], conn)
+                    elif ((self.__simulator=="nest") or
+                          ((self.__simulator=="spinnaker") and (self.__spinnVersion==8))):
+                        self.__sim.Projection(key[0], key[1], conn, receptor_type = "inhibitory")    
 
     def __activate(self):
         activate = []
