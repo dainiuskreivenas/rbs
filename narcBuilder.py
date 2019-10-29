@@ -15,10 +15,10 @@ class NeuralCognitiveArchitectureBuilder:
         self.__simulator = simulator
         self.__debug = debug
         self.__spinnakerVersion = spinnakerVersion
-        self.__bases = None
-        self.__properties = None
-        self.__relationships = None
-        self.__associations = None
+        self.__basesFile = None
+        self.__propertiesFile = None
+        self.__relationshipsFile = None
+        self.__associationsFile = None
         self.__topology = None
         self.__baseService = None
         self.__propertyService = None
@@ -26,14 +26,14 @@ class NeuralCognitiveArchitectureBuilder:
         self.__generatorType = None
         self.__generator = None
 
-    def useBases(self, bases):
-        self.__bases = bases
+    def useBasesFile(self, basesFile):
+        self.__basesFile = basesFile
         return self
 
-    def useRelationships(self, properties, relationships, associations):
-        self.__properties = properties
-        self.__relationships = relationships
-        self.__associations = associations
+    def useRelationshipsFiles(self, propertiesFile, relationshipsFile, associationsFile):
+        self.__propertiesFile = propertiesFile
+        self.__relationshipsFile = relationshipsFile
+        self.__associationsFile = associationsFile
         return self
 
     def build(self):
@@ -58,17 +58,17 @@ class NeuralCognitiveArchitectureBuilder:
             self.__relationshipService)
     
     def __initDependencies(self):
-        if(self.__bases and self.__relationships and self.__associations):
+        if(self.__basesFile and self.__relationshipsFile and self.__associationsFile):
             self.__topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
 
-        if(self.__bases):
-            self.__baseService = BaseService(self.__fsa, self.__bases)
+        if(self.__basesFile):
+            self.__baseService = BaseService(self.__fsa, self.__basesFile)
             self.__topology.createBaseNet(self.__baseService.getInheritance())
         
-        if(self.__properties and self.__relationships and self.__associations):
-            self.__propertyService = UnitService(self.__fsa, self.__properties)
-            self.__relationshipService = UnitService(self.__fsa, self.__relationships)
-            self.__associationService = AssociationService(self.__associations)
+        if(self.__propertiesFile and self.__relationshipsFile and self.__associationsFile):
+            self.__propertyService = UnitService(self.__fsa, self.__propertiesFile)
+            self.__relationshipService = UnitService(self.__fsa, self.__relationshipsFile)
+            self.__associationService = AssociationService(self.__associationsFile)
             self.__topology.createAssociationTopology(self.__propertyService.getStructure(), self.__relationshipService.getStructure())
             self.__topology.addAssociations(self.__associationService.getAssociations())
 
