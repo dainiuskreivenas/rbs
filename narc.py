@@ -5,7 +5,7 @@ from executor import Executor
 from contracts import Fact
 from contracts import Rule
 
-class RuleBasedSystem: 
+class NeuralCognitiveArchitecture:
     def __init__(self, 
         exe, 
         rulesService, 
