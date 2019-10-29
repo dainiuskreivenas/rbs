@@ -1,15 +1,17 @@
 from executorBuilder import ExecutorBuilder
-from rbs import RuleBasedSystem
+from narc import NeuralCognitiveArchitecture
 from generators import SequentialRuleGenerator
 from repositories import *
 from services import *
+from lib import NeuralThreeAssocClass
 
-class RuleBasedSystemBuilder:
-    def __init__(self, sim, simulator, fsa, spinnakerVersion = -1, debug = False):
+class NeuralCognitiveArchitectureBuilder:
+    def __init__(self, sim, simulator, fsa, neal, spinnakerVersion = -1, debug = False):
         if(simulator not in ["nest", "spinnaker"]):
             raise Exception("simulator type: '{}' is invalid. Use one of the following: nest, spinnaker.".format(simulator)) 
         self.__sim = sim
         self.__fsa = fsa
+        self.__neal = neal
         self.__simulator = simulator
         self.__debug = debug
         self.__spinnakerVersion = spinnakerVersion
@@ -20,11 +22,14 @@ class RuleBasedSystemBuilder:
         self.__generatorType = None
         self.__generator = None
 
-    def useAssociation(self, topology, baseService, propertyService, relationshipService):
-        self.__topology = topology
-        self.__baseService = baseService
-        self.__propertyService = propertyService
-        self.__relationshipService = relationshipService
+    def useBases(self, bases):
+        self.__bases = bases
+        return self
+
+    def useRelationships(self, properties, relationships, associations):
+        self.__properties = properties
+        self.__relationships = relationships
+        self.__associations = associations
         return self
 
     def build(self):
@@ -33,7 +38,7 @@ class RuleBasedSystemBuilder:
         generator = self.__getGenerator()
         exe = self.__buildExe()
 
-        return RuleBasedSystem(exe,
+        return NeuralCognitiveArchitecture(exe,
             self.__rulesService,
             self.__rulesRepository,
             self.__neuronRepository,
@@ -48,7 +53,21 @@ class RuleBasedSystemBuilder:
             self.__propertyService,
             self.__relationshipService)
     
-    def __initDependencies(self):        
+    def __initDependencies(self):
+        if(self.__bases and self.__relationships and self.__associations):
+            self.__topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
+
+        if(self.__bases):
+            self.__baseService = BaseService(self.__fsa, self.__bases)
+            self.__topology.createBaseNet(self.__baseService.getInheritance())
+        
+        if(self.__properties and self.__relationships and self.__associations):
+            self.__propertyService = UnitService(self.__fsa, self.__properties)
+            self.__relationshipService = UnitService(self.__fsa, self.__relationships)
+            self.__associationService = AssociationService(self.__associations)
+            self.__topology.createAssociationTopology(self.__propertyService.getStructure(), self.__relationshipService.getStructure())
+            self.__topology.addAssociations(self.__associationService.getAssociations())
+
         self.__logger = LoggerService(self.__debug)
         self.__connectionsRepository = ConnectionsRepository()
         self.__connectionsService = ConnectionsService(self.__fsa, self.__connectionsRepository)
