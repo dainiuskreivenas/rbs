@@ -1,3 +1,9 @@
+"""
+Neural Cognitive Architecture Builder
+
+Builder service to build the Neural Coginitive Architecture.
+"""
+
 from executorBuilder import ExecutorBuilder
 from narc import NeuralCognitiveArchitecture
 from generators import SequentialRuleGenerator
@@ -6,7 +12,7 @@ from services import *
 from lib import NeuralThreeAssocClass
 
 class NeuralCognitiveArchitectureBuilder:
-    def __init__(self, sim, simulator, fsa, neal, spinnakerVersion = -1, debug = False):
+    def __init__(self, simulator, sim, fsa, neal, spinnakerVersion = -1, debug = False):
         if(simulator not in ["nest", "spinnaker"]):
             raise Exception("simulator type: '{}' is invalid. Use one of the following: nest, spinnaker.".format(simulator)) 
         self.__sim = sim
@@ -58,19 +64,17 @@ class NeuralCognitiveArchitectureBuilder:
             self.__relationshipService)
     
     def __initDependencies(self):
-        if(self.__basesFile and self.__relationshipsFile and self.__associationsFile):
-            self.__topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
-
         if(self.__basesFile):
+            self.__topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
             self.__baseService = BaseService(self.__fsa, self.__basesFile)
             self.__topology.createBaseNet(self.__baseService.getInheritance())
         
-        if(self.__propertiesFile and self.__relationshipsFile and self.__associationsFile):
-            self.__propertyService = UnitService(self.__fsa, self.__propertiesFile)
-            self.__relationshipService = UnitService(self.__fsa, self.__relationshipsFile)
-            self.__associationService = AssociationService(self.__associationsFile)
-            self.__topology.createAssociationTopology(self.__propertyService.getStructure(), self.__relationshipService.getStructure())
-            self.__topology.addAssociations(self.__associationService.getAssociations())
+            if(self.__propertiesFile and self.__relationshipsFile and self.__associationsFile):
+                self.__propertyService = UnitService(self.__fsa, self.__propertiesFile)
+                self.__relationshipService = UnitService(self.__fsa, self.__relationshipsFile)
+                self.__associationService = AssociationService(self.__associationsFile)
+                self.__topology.createAssociationTopology(self.__propertyService.getStructure(), self.__relationshipService.getStructure())
+                self.__topology.addAssociations(self.__associationService.getAssociations())
 
         self.__logger = LoggerService(self.__debug)
         self.__connectionsRepository = ConnectionsRepository()
