@@ -15,6 +15,10 @@ class NeuralCognitiveArchitectureBuilder:
         self.__simulator = simulator
         self.__debug = debug
         self.__spinnakerVersion = spinnakerVersion
+        self.__bases = None
+        self.__properties = None
+        self.__relationships = None
+        self.__associations = None
         self.__topology = None
         self.__baseService = None
         self.__propertyService = None
