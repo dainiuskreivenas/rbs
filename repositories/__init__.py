@@ -8,3 +8,4 @@ from primeRepository import PrimeRepository
 from activationsRepository import ActivationsRepository
 from assertionRepository import AssertionRepository
 from rulesRepository import RulesRepository
+from internRepository import InternRepository

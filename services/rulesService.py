@@ -1,4 +1,4 @@
-from ..contracts import MatchTree, Fact
+from ..models import MatchTree, Fact
 from ..helpers import VariableHelper
 
 class RulesService:
@@ -171,7 +171,7 @@ class RulesService:
             fact = self.__factRepository.getFact(fact)
             self.applyRulesToFacts(generator)
 
-            self.__connectionsService.neuronTurnsOnCa(rulePop, fact.ca)
+            self.__connectionsService.neuronTurnsOnCa(rulePop, fact)
 
     def __setupRetractions(self, retractions, match, ruleCa, bases, primes, links):
         for retraction in retractions:
@@ -179,7 +179,7 @@ class RulesService:
 
             for m in match.matches:
                 if m[1] == retraction:
-                    self.__connectionsService.neuronTurnsOffCA(ruleCa, m[0].ca)
+                    self.__connectionsService.neuronTurnsOffCA(ruleCa, m[0])
                     applied = True
                     break
 
@@ -217,7 +217,7 @@ class RulesService:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = VariableHelper.extractValue(unit, variables)
-            ca = self.__baseService.caFromUnit(unit)
+            ca = self.__baseService.fromUnit(unit)
             self.__connectionsService.neuronTurnsOnAssociationCA(ruleCa, ca)
 
     def __setupPrimeAssertions(self, primeAssertions, ruleCa):
@@ -241,7 +241,7 @@ class RulesService:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = VariableHelper.extractValue(unit, variables)
-            ca = self.__propertyService.caFromUnit()
+            ca = self.__propertyService.fromUnit()
             self.__connectionsService.neuronTurnsOnAssociationCA(ruleCa, ca)
 
     def __setupRelationshipAssertions(self, relationshipAssertions, match, ruleCa):
@@ -250,44 +250,44 @@ class RulesService:
             if(unit[0] == "?"):
                 variables = match.variables
                 unit = VariableHelper.extractValue(unit, variables)
-            ca = self.__relationshipService.caFromUnit()
+            ca = self.__relationshipService.fromUnit()
             self.__connectionsService.neuronTurnsOnAssociationCA(ruleCa, ca)
 
     def __getCas(self, match, bases, primes, links, props, relationships):
         cas = []
         for m in match.matches:
-            cas.append((m[0].ca, self.__connectionsService.CONNECTION_NETWORK))
+            cas.append(m[0])
         
         for a in bases:
             unit = a[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
-            ca = self.__baseService.caFromUnit(unit)
-            cas.append((ca, self.__connectionsService.CONNECTION_INHERITANCE_NETWORK))
+            ca = self.__baseService.fromUnit(unit)
+            cas.append(ca)
 
         for p in props:
             unit = p[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
-            ca = self.__propertyService.caFromUnit(unit)
-            cas.append((ca, self.__connectionsService.CONNECTION_INHERITANCE_NETWORK))
+            ca = self.__propertyService.fromUnit(unit)
+            cas.append(ca)
 
         for r in relationships:
             unit = r[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
-            ca = self.__relationshipService.caFromUnit(unit)
-            cas.append((ca, self.__connectionsService.CONNECTION_INHERITANCE_NETWORK))
+            ca = self.__relationshipService.fromUnit(unit)
+            cas.append(ca)
         
         for p in primes:
             ca = self.__primeRepository.addOrGet(p[1])
-            cas.append((ca, self.__connectionsService.CONNECTION_NETWORK))
+            cas.append(ca)
 
         for l in links:
             linkTo, unit, linkType = l[1]
             if(unit[0] == "?"):
                 unit = VariableHelper.extractValue(unit, match.variables)
             ca = self.__linkRepository.addOrGetLink(linkTo, unit, linkType)
-            cas.append((ca, self.__connectionsService.CONNECTION_NETWORK))
+            cas.append(ca)
 
         return cas

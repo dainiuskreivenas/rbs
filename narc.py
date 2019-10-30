@@ -2,12 +2,11 @@
 Rule Based System
 """
 from executor import Executor
-from contracts import Fact
-from contracts import Rule
+from models import Fact, Rule
 
 class NeuralCognitiveArchitecture:
-    def __init__(self, 
-        exe, 
+    def __init__(self,
+        exe,
         rulesService, 
         rulesRepository, 
         neuronRepository, 
@@ -36,31 +35,21 @@ class NeuralCognitiveArchitecture:
         self.__propertyService = propertyService
         self.__relationshipService = relationshipService
         
+    def apply(self):
+        # generate network
+        self.__rulesService.applyRulesToFacts(self.__generator)
 
-    def addFact(self, name, attributes, active = True, apply = True):
-        fact = self.__factRepository.addFact(Fact(name, attributes), active)
+        # build neurons
+        self.exe.apply()
 
-        if(apply):
-            self.__rulesService.applyRulesToFacts(self.__generator)
-            self.exe.apply()
+    def addFact(self, name, attributes, active = True):
+        return self.__factRepository.addFact(Fact(name, attributes), active)
 
-        return fact
+    def getFact(self, group, attributes):
+        return self.__factRepository.getFact(Fact(group, attributes))
 
-    def getFact(self, group, attributes, autoApply = True):
-        fact = self.__factRepository.getFact(Fact(group, attributes))
-
-        if(autoApply):
-            self.__rulesService.applyRulesToFacts(self.__generator)
-            self.exe.apply()
-
-        return fact
-
-    def addRule(self, name, ifs, thens, autoApply = True):
+    def addRule(self, name, ifs, thens):
         self.__rulesRepository.addRule(Rule(name, ifs, thens))
-
-        if(autoApply):
-            self.__rulesService.applyRulesToFacts(self.__generator)
-            self.exe.apply()
 
     def printSpikes(self):
         data = self.get_data()

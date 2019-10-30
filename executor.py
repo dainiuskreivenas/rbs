@@ -1,13 +1,14 @@
 import logging
 from operator import itemgetter
 from itertools import groupby
-from contracts.population import Population
+from models import Population
 
 class Executor:
     def __init__(self, 
         sim, 
         simulator, 
         fsa,
+        neal,
         spinnVersion,
         neuronRepository, 
         connectionsRepository, 
@@ -16,6 +17,7 @@ class Executor:
         logger):
         self.__simulator = simulator
         self.__fsa = fsa
+        self.__neal = neal
         self.__sim = sim
         self.__spinnVersion = spinnVersion
         self.__neuronRepository = neuronRepository
@@ -24,31 +26,64 @@ class Executor:
         self.__neuralHierarchyTopology = neuralHierarchyTopology
         self.__logger = logger
         self.__connections = 0
-        self.__populations = []
+        self.__neuronPopulations = []
         self.__neuron = 0
+        self.__caPopulations = []
+        self.__ca = 0
         self.__actived = 0
 
     def apply(self): 
         self.__logger.writeDebug("Populating network")
         self.__populate()
-        self.__logger.writeDebug("Making connections")
-        self.__connect()
-        self.__logger.writeDebug("Setting activations")
-        self.__activate()
+        #self.__logger.writeDebug("Making connections")
+        #self.__connect()
+        #self.__logger.writeDebug("Setting activations")
+        #self.__activate()
+        #self.__logger.writeDebug("NEAL apply")
+        #self.__neal.nealApplyProjections()
 
     def get_data(self):
         data = {}
-        for pop in self.__populations:
+        for pop in self.__neuronPopulations:
             data[pop.pop.label] = pop.pop.get_data()
         return data
 
     def get_population(self, index):
-        for pop in self.__populations:
+        for pop in self.__neuronPopulations:
             if(pop.fromIndex <= index and pop.toIndex > index):
                 return pop
         return None
 
     def __populate(self):
+        self.__populateNeurons()
+        self.__populateCAs()
+
+    def __populateCAs(self):
+        addCAs = 0
+        ca = self.__neuronRepository.getCAs() + 1
+
+        if(self.__ca == 0):
+            self.__ca += ca
+            addCAs = self.__ca
+        else:
+            addCAs = ca - self.__ca
+            self.__ca += addCAs
+
+        if(addCAs > 0):
+            self.__logger.writeDebug("New CAs: {}".format(addCAs))
+
+            pop = self.__sim.Population(addCAs * self.__fsa.CA_SIZE, self.__sim.IF_cond_exp, self.__fsa.CELL_PARAMS)
+            pop.record("spikes")
+
+            population = Population(pop, self.__ca - addCAs, self.__ca)
+
+            self.__caPopulations.append(population)
+
+            for i in range(self.__ca - addCAs, self.__ca):
+                self.__fsa.makeCA(population, i)
+
+
+    def __populateNeurons(self):
         addNeurons = 0
         neuron = self.__neuronRepository.getNeuron() + 1
 
@@ -61,8 +96,13 @@ class Executor:
 
         if(addNeurons > 0):
             self.__logger.writeDebug("New Neurons: {}".format(addNeurons))
-            population = Population(self.__sim, self.__fsa, addNeurons, self.__neuron - addNeurons)
-            self.__populations.append(population)
+
+            pop = self.__sim.Population(addNeurons, self.__sim.IF_cond_exp, self.__fsa.CELL_PARAMS)
+            pop.record("spikes")
+            
+            population = Population(pop, self.__neuron - addNeurons, self.__neuron)
+
+            self.__neuronPopulations.append(population)
 
     def __connect(self):
         connections = None
@@ -116,7 +156,7 @@ class Executor:
             spikeGen = self.__sim.Population(1, self.__sim.SpikeSourceArray, spikeTimes)
             for a in activate:
                 population = None
-                for pop in self.__populations:
+                for pop in self.__neuronPopulations:
                     if(pop.fromIndex <= a[0] and pop.toIndex > a[0]):
                         population = pop
                         break
@@ -133,7 +173,7 @@ class Executor:
         mode = conn[4]
 
         if(mode in [0, 1, 2]):
-            for pop in self.__populations:
+            for pop in self.__neuronPopulations:
                 if(fromN >= pop.fromIndex and fromN < pop.toIndex and (mode in [0, 1])):
                     fromPop = pop
                     if(toPop != None):

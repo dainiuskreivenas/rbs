@@ -6,12 +6,14 @@ class ExecutorBuilder:
         simulator, 
         spinnVersion,
         fsa,
+        neal,
         neuronRepository, 
         connectionsRepository, 
         activationsRepository,
         logger):
         self.__simulator = simulator
         self.__fsa = fsa
+        self.__neal = neal
         self.__sim = sim
         self.__spinnVersion = spinnVersion
         self.__neuronRepository = neuronRepository
@@ -29,6 +31,7 @@ class ExecutorBuilder:
         return Executor(self.__sim,
             self.__simulator, 
             self.__fsa,
+            self.__neal,
             self.__spinnVersion,
             self.__neuronRepository,
             self.__connectionsRepository,
