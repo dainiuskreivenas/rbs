@@ -1,32 +1,10 @@
 from ..models import Connection
+from ..constants import ConnectionTypes
 
 class ConnectionsService:
     def __init__(self, connectionsRepository, internService):
         self.connectionsRepository = connectionsRepository
         self.internService = internService
-
-        ### State to State
-        self.ON = 0
-        self.HALF_ON = 1
-        self.OFF = 2
-        self.HALF_OFF = 3
-
-        ### State to Neuron
-        self.ON_ONE = 4
-        self.HALF_ON_ONE = 5
-
-        ### Neuron to State
-        self.ONE_ON = 6
-        self.ONE_HALF_ON = 7
-        self.ONE_OFF = 8
-        self.ONE_HALF_OFF = 9
-
-        ### Neuron to Neuron
-        self.ONE_ON_ONE = 10
-        self.ONE_HALF_ON_ONE = 11
-        self.ONE_OFF_ONE = 12
-        self.ONE_HALF_ON_ONE = 13
-
 
     def neuronAndCaTurnOnNeuron(self, fromNeuron, fromCa, toNeuron):
         self.__neuronHalfTurnOnNeuron(fromNeuron,toNeuron)
@@ -52,35 +30,35 @@ class ConnectionsService:
         self.caHalfTurnsOnNeuron(fromTwo, toNeuron)
 
     def caHalfTurnsOnNeuron(self, fromCa, toNeuron):
-        self.__caToNeuron(fromCa, toNeuron, self.HALF_ON_ONE)
+        self.__caToNeuron(fromCa, toNeuron, ConnectionTypes.HALF_ON_ONE)
 
     def caTurnsOnNeuron(self, fromCa, toNeuron):
-        self.__caToNeuron(fromCa, toNeuron, self.ON_ONE)
+        self.__caToNeuron(fromCa, toNeuron, ConnectionTypes.ON_ONE)
 
     def connectCorrelatedLink(self, ca, amCA):
-        self.__caToCa(ca, amCA, self.ON)
-        self.__caToCa(amCA, ca, self.ON)
+        self.__caToCa(ca, amCA, ConnectionTypes.ON)
+        self.__caToCa(amCA, ca, ConnectionTypes.ON)
 
     def connectQueryableLink(self, ca, amCA):
-        self.__caToCa(amCA, ca, self.ON)
+        self.__caToCa(amCA, ca, ConnectionTypes.ON)
 
     def connectStimulatedLink(self, ca, amCA):
-        self.__caToCa(ca, amCA, self.ON)
+        self.__caToCa(ca, amCA, ConnectionTypes.ON)
 
     def connectPrimeToAssociationCA(self, ca, amCA):
-        self.__caToCa(ca, amCA, self.HALF_ON)
+        self.__caToCa(ca, amCA, ConnectionTypes.HALF_ON)
 
     def __neuronHalfTurnOnNeuron(self, fromNeuron, toNeuron):
-        self.__neuronToNeuron(fromNeuron, toNeuron, self.ONE_HALF_ON_ONE)
+        self.__neuronToNeuron(fromNeuron, toNeuron, ConnectionTypes.ONE_HALF_ON_ONE)
 
     def __neuronTurnsOffCa(self, neuron, ca):
-        self.__neuronToCa(neuron, ca, self.ONE_OFF)
+        self.__neuronToCa(neuron, ca, ConnectionTypes.ONE_OFF)
     
     def __neuronTurnsOnCa(self, neuron, ca):
-        self.__neuronToCa(neuron, ca, self.ONE_ON)
+        self.__neuronToCa(neuron, ca, ConnectionTypes.ONE_ON)
 
     def __neuronHalfTurnOnCa(self, neuron, ca):
-        self.__neuronToCa(neuron, ca, self.ONE_HALF_ON)
+        self.__neuronToCa(neuron, ca, ConnectionTypes.ONE_HALF_ON)
 
     def __neuronToCa(self, neuron, ca, connectionType):
         self.connectionsRepository.add(Connection(neuron, ca, connectionType))

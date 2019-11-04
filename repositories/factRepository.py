@@ -3,14 +3,11 @@ class FactRepository:
         self.factGroupRepository = factGroupRepository
         self.neuronRepository = neuronRepository
         self.activationsRepository = activationsRepository
-        self.__factIndex = 0
 
     def addFact(self, fact, active):
         group = self.factGroupRepository.addOrGet(fact.group)
         
         fact.caIndex = self.neuronRepository.addCA()
-        self.__factIndex += 1
-        fact.index = self.__factIndex
         group.append(fact)
 
         if(active):

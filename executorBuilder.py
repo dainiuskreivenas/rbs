@@ -20,11 +20,11 @@ class ExecutorBuilder:
         self.__connectionsRepository = connectionsRepository
         self.__activationsRepository = activationsRepository
         self.__logger = logger
-        self.__neuralHierarchytopology = None
+        self.__associationTopology = None
 
     def useAssociationTopology(self, topology):
         if(topology):
-            self.__neuralHierarchytopology = topology.neuralHierarchyTopology
+            self.__associationTopology = topology
         return self
 
     def build(self):
@@ -36,5 +36,5 @@ class ExecutorBuilder:
             self.__neuronRepository,
             self.__connectionsRepository,
             self.__activationsRepository, 
-            self.__neuralHierarchytopology,
+            self.__associationTopology,
             self.__logger)

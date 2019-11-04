@@ -47,6 +47,7 @@ class NeuralCognitiveArchitectureBuilder:
             self.__rulesService,
             self.__rulesRepository,
             self.__neuronRepository,
+            self.__internRepository,
             self.__factGroupRepository,
             self.__factRepository,
             self.__assertionRepository,
