@@ -26,9 +26,9 @@ class Executor:
         self.__activationsRepository = activationsRepository
         self.__associationTopology = associationTopology
         self.__logger = logger
-        self.__connections = 0
+        self.connections = 0
         self.__neuronPopulations = []
-        self.__neuron = 0
+        self.neuron = 0
         self.__caPopulations = []
         self.__ca = 0
         self.__actived = 0
@@ -99,12 +99,12 @@ class Executor:
         addNeurons = 0
         neuron = self.__neuronRepository.getNeuron() + 1
 
-        if(self.__neuron == 0):
-            self.__neuron += neuron
-            addNeurons = self.__neuron
+        if(self.neuron == 0):
+            self.neuron += neuron
+            addNeurons = self.neuron
         else:
-            addNeurons = neuron - self.__neuron
-            self.__neuron += addNeurons
+            addNeurons = neuron - self.neuron
+            self.neuron += addNeurons
 
         if(addNeurons > 0):
             self.__logger.writeDebug("New Neurons: {}".format(addNeurons))
@@ -112,7 +112,7 @@ class Executor:
             pop = self.__sim.Population(addNeurons, self.__sim.IF_cond_exp, self.__fsa.CELL_PARAMS)
             pop.record("spikes")
             
-            population = Population(pop, self.__neuron - addNeurons, self.__neuron)
+            population = Population(pop, self.neuron - addNeurons, self.neuron)
 
             self.__neuronPopulations.append(population)
 
@@ -121,13 +121,13 @@ class Executor:
 
         allConnections = self.__connectionsRepository.getConnections()
 
-        if(self.__connections == 0):
+        if(self.connections == 0):
             connections = allConnections[:]
-            self.__connections = len(connections)
+            self.connections = len(connections)
         else:
-            start = self.__connections-1
+            start = self.connections-1
             connections = allConnections[start:]
-            self.__connections += len(connections)
+            self.connections += len(connections)
 
         if(len(connections) > 0):
             self.__logger.writeDebug("New Connections: {}".format(len(connections)))

@@ -168,8 +168,11 @@ class RulesService:
                 newProps.append(prop)
         
             fact = Fact(assertion[0],tuple(newProps))
-            fact = self.__factRepository.getFact(fact)
-            self.applyRulesToFacts(generator)
+            fact = self.__factRepository.find(fact)
+
+            if(fact == None):
+                fact = self.__factRepository.addFact(fact)
+                self.applyRulesToFacts(generator)
 
             self.__connectionsService.neuronTurnsOnCa(rulePop, fact)
 

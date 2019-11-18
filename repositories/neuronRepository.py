@@ -1,18 +1,18 @@
 class NeuronRepository:
     def __init__(self):
-        self.caIndexes = -1
-        self.neuron = -1
+        self.__caIndexes = -1
+        self.__neuron = -1
 
     def addNeuron(self):
-        self.neuron += 1
-        return self.neuron
+        self.__neuron += 1
+        return self.__neuron
 
     def addCA(self):
-        self.caIndexes += 1
-        return self.caIndexes
+        self.__caIndexes += 1
+        return self.__caIndexes
 
     def getCAs(self):
-        return self.caIndexes
+        return self.__caIndexes
 
     def getNeuron(self):
-        return self.neuron
+        return self.__neuron

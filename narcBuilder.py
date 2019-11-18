@@ -63,7 +63,8 @@ class NeuralCognitiveArchitectureBuilder:
             self.__topology,
             self.__baseService,
             self.__propertyService,
-            self.__relationshipService)
+            self.__relationshipService,
+            self.__connectionsService)
     
     def __initDependencies(self):
         if(self.__basesFile):
