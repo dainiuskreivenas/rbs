@@ -1,3 +1,5 @@
+from ..models import Link
+
 class LinkRepository:
     def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):
         self.__neuronRepository = neuronRepository
@@ -25,26 +27,28 @@ class LinkRepository:
         if(unit in linkGroup):
             return linkGroup[unit]
         else:
-            ca = self.__neuronRepository.addCA()
-            linkGroup[unit] = ca
+            caIndex = self.__neuronRepository.addCA()
+            link = Link(caIndex)
+            linkGroup[unit] = link
 
             if(linkTo == "base"):
-                amCA = self.__baseService.caFromUnit(unit)
+                amCA = self.__baseService.fromUnit(unit)
             elif(linkTo == "property"):
-                amCA = self.__propertyService.caFromUnit(unit)
+                amCA = self.__propertyService.fromUnit(unit)
             elif(linkTo == "relationship"):
-                amCA = self.__relationshipService.caFromUnit(unit)
+                amCA = self.__relationshipService.fromUnit(unit)
             
             if(linkType == "correlate"):
-                self.__connectionsService.connectCorrelatedLink(ca, amCA)
+                self.__connectionsService.connectCorrelatedLink(link, amCA)
             elif(linkType == "query"):
-                self.__connectionsService.connectQueryableLink(ca, amCA)
+                self.__connectionsService.connectQueryableLink(link, amCA)
             elif(linkType == "stimulate"):
-                self.__connectionsService.connectStimulatedLink(ca, amCA)
+                self.__connectionsService.connectStimulatedLink(link, amCA)
             else:
-                raise Exception("Invalid Link Type: {}. Supported values: correlate, query and stimulate.".format(linkType))
+                error = "Invalid Link Type: {}. Supported values: correlate, query and stimulate.".format(linkType)
+                raise Exception(error)
 
-            return ca
+            return link
 
     def get(self):
         return self.__links.copy()

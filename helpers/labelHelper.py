@@ -5,7 +5,7 @@ class LabelHelper:
     def generateRuleLabel(rule, match):
         variables = match.variables
 
-        label = getIndexLabel(match.matches)
+        label = getConditionsLabel(variables, match.matches, rule)
         
         assertion = addAssertions("", variables, rule.assertions)
         assertion = addBaseAssertions(assertion, variables, rule.baseAssertions)
@@ -16,19 +16,77 @@ class LabelHelper:
 
         return "{}{}{}".format(label, assertion, retratction)
 
-def getIndexLabel(matches):
-    indexes = []
+
+def parseVar(variables, val):
+    if(isinstance(val, str) and val[0] == "?"):
+        val = variables[val]
+    return val
+
+def parseTest(variables, test):
+    op = test[1]
+    left = test[2]
+    right = test[3]
+        
+    if(isinstance(left, tuple)):
+        lOp = left[0]
+        lVal = parseVar(variables, left[1])
+        rVal = parseVar(variables, left[2])
+        left = (lOp, lVal, rVal)
+    else:
+        left = parseVar(variables, left)
+        
+    if(isinstance(right, tuple)):
+        rOp = right[0]
+        lVal = parseVar(variables, right[1])
+        rVal = parseVar(variables, right[2])
+        right = (rOp, lVal, rVal)
+    else:
+        right = parseVar(variables, right)
+
+    return (op, left, right)
+        
+def getConditionsLabel(variables, matches, rule):
+    items = []
     for m in matches:
-        indexes.append(m[0].index)
-    indexes.sort()
+        items.append("({}, {})".format(m[0].group, m[0].attributes))
+
+    for test in rule.tests:        
+        items.append("({}, {})".format(test[0], parseTest(variables, test)))
+
+    for base in rule.bases:
+        val = base[1]
+        if(val[0] == "?"):
+            val = variables[val]
+        items.append("({}, {})".format(base[0], val))
+
+    for link in rule.links:
+        val = link[1][1]    
+        if(val[0] == "?"):
+            val = variables[val]
+        items.append("({}, {})".format(link[0], (link[1][0], val, link[1][2])))
+
+    for prime in rule.primes:
+        items.append("({}, {})".format(prime[0], prime[1]))
+
+    for prop in rule.properties:
+        val = prop[1]
+        if(val[0] == "?"):
+            val = variables[val]
+        items.append("({}, {})".format(prop[0], val))
+
+    for rel in rule.relationships:
+        val = rel[1]
+        if(val[0] == "?"):
+            val = variables[val]
+        items.append("({}, {})".format(rel[0], val))
 
     label = ""
-    for i,m in enumerate(indexes):
-        if(i == 0):
-            label = "{}".format(m)
+    for item in items:
+        if(label == ""):
+            label = item
         else:
-            label += "{} and {}".format(label, m)
-            
+            label += "\n{}".format(item)
+
     return label
 
 def getRetractionsLabel(rule, match):
@@ -42,11 +100,10 @@ def getRetractionsLabel(rule, match):
     if(len(retractions) == 0):
         return ""
 
-    text = " <= "
+    text = "\n <= \n"
 
     for i,a in enumerate(retractions):
         lbl = getLabelFromMatches(match.matches, a)
-
 
         if(lbl == None):
             for b in bases:
@@ -65,7 +122,6 @@ def getRetractionsLabel(rule, match):
         if(lbl == None):
             for l in links:
                 if(l[2] == a):
-                    
                     val = l[1]
                     if(val[1][0] == "?"):
                         val = (val[0], variables[val[1]], val[2])
@@ -75,7 +131,7 @@ def getRetractionsLabel(rule, match):
         if(i == 0):
             text += lbl
         else:
-            text += " and {}".format(lbl)
+            text += "\n{}".format(lbl)
     
     return text
 
@@ -100,7 +156,7 @@ def addLinkAssertions(text, variables, linkAssertions):
             val = (val[0], variables[val[1]],val[2])
         lbl = "(link, {})".format(val)
         if(textAdded):
-            text += " and {}".format(lbl)
+            text += "\n{}".format(lbl)
         else:
             text += lbl
             textAdded = True
@@ -175,8 +231,8 @@ def getLabelFromAssertion(variables, assertion):
 
 def appendNextAssertion(text):
     if(text == ""):
-        text += " => "
+        text += "\n => \n"
     else:
-        text += " and "
+        text += "\n"
     
     return text

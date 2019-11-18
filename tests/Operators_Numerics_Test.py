@@ -88,7 +88,7 @@ narc.addFact("item3", (2,1))
 
 narc.addFact("item4", (1,2))
 
-neal.nealApplyProjections()
+narc.apply()
 
 sim.run(200)
 

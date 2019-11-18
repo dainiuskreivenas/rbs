@@ -3,4 +3,4 @@ class Fact:
         self.group = group
         self.attributes = attributes
         self.pop = None
-        self.index = -1
+        self.caIndex = -1

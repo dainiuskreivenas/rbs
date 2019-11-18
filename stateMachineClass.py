@@ -38,10 +38,7 @@ class FSAHelperFunctions:
         self.CA_STOPS_CA_WEIGHT = 0.15
         self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0 
 
-        #undone RBS problems
-        #I think the RBS requires inhibitory synaptic weights to be negative
-        self.RBS_ONE_NEURON_STOPS_CA_WEIGHT = -1.0
-        self.RBS_ONE_NEURON_HALF_CA_WEIGHT = 0.02
+        self.ONE_NEURON_HALF_CA_WEIGHT = 0.02
 
         if (self.simName =="spinnaker"):
             self.INTRA_CA_WEIGHT = 0.025
@@ -168,6 +165,14 @@ class FSAHelperFunctions:
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 
+    def oneNeuronHalfTurnsOffState(self,fromNeurons,fromNeuron, toNeurons, toCA):
+        connector = []
+        for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
+            toNeuron = toOffset + (toCA*self.CA_SIZE)
+            connector = connector + [(fromNeuron,toNeuron,self.ONE_HALF_ON_WEIGHT,
+                                      self.neal.DELAY)]
+        self.neal.nealProjection(fromNeurons, toNeurons, connector,'inhibitory')
+
     def oneNeuronStimulatesState(self,fromNeurons,fromNeuron, toNeurons, toCA, 
                                 weight):
         connector = []
@@ -198,14 +203,6 @@ class FSAHelperFunctions:
     def oneNeuronHalfTurnsOnOneNeuron(self,fromNeurons,fromCA,toNeurons,toCA):
         self.oneNeuronStimulatesOneNeuron(fromNeurons,fromCA,toNeurons,toCA, 
                                        self.ONE_HALF_ON_ONE_WEIGHT)
-
-    #undone added from WTA
-    def oneNeuronInhibitsOneNeuron(self,fromNeurons,fromNeuron, 
-                                   toNeurons,toNeuron, weight):
-        connector = []
-        connector = connector + [(fromNeuron,toNeuron,weight,
-                                      self.neal.DELAY)]
-        self.neal.nealProjection(fromNeurons, toNeurons, connector,'inhibitory')
 
     def oneNeuronInhibitsState(self,fromNeurons,fromNeuron, toNeurons, toCA, 
                                weight):
@@ -327,6 +324,19 @@ class FSAHelperFunctions:
                                           self.neal.DELAY)]
 
         self.neal.nealProjection(fromNeurons,toNeurons,connector,'excitatory')
+
+    def stateHalfTurnsOffState(self,fromNeurons,fromCA,toNeurons,toCA):
+        connector = []
+        #uses HALF_ON_WEIGHT
+        for fromOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
+            fromNeuron = fromOffset + (fromCA*self.CA_SIZE)
+            for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
+                toNeuron = toOffset + (toCA*self.CA_SIZE)
+                connector=connector+[(fromNeuron,toNeuron,
+                                          self.HALF_ON_WEIGHT,
+                                          self.neal.DELAY)]
+
+        self.neal.nealProjection(fromNeurons,toNeurons,connector,'inhibitory')
 
     def stateStimulatesState(self,fromNeurons,fromCA,toNeurons,toCA,weight):
         connector = []

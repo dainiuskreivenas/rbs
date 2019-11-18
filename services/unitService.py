@@ -1,10 +1,10 @@
 from ..lib import UnitReaderClass
 
-class UnitService:
+class UnitService(object):
     def __init__(self, fsa, unitFile):
         self.__fsa = fsa
-        self.__structure = UnitReaderClass()
-        self.__structure.readUnitFile(unitFile)
+        self._structure = UnitReaderClass()
+        self._structure.readUnitFile(unitFile)
     
     def test(self, prop, variables):
         unit = prop
@@ -13,12 +13,7 @@ class UnitService:
                 return True
             else:
                 unit = variables[prop]
-        return self.__structure.inUnits(unit)
-
-    def caFromUnit(self, unit):
-        unit = self.__structure.getUnitNumber(unit)
-        start = (unit * self.__fsa.CA_SIZE)
-        return range(start, start + 10)
+        return self._structure.inUnits(unit)
 
     def getStructure(self):
-        return self.__structure
+        return self._structure

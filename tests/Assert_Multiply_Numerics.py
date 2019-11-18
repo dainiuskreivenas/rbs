@@ -46,7 +46,7 @@ narc.addRule(
 
 narc.addFact("item", (2,4))
 
-neal.nealApplyProjections()
+narc.apply()
 
 sim.run(50)
 
