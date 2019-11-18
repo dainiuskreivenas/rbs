@@ -1,3 +1,9 @@
+"""
+Neural Cognitive Architecture Builder
+
+Builder service to build the Neural Coginitive Architecture.
+"""
+
 from executorBuilder import ExecutorBuilder
 from narc import NeuralCognitiveArchitecture
 from generators import SequentialRuleGenerator
@@ -60,10 +66,8 @@ class NeuralCognitiveArchitectureBuilder:
             self.__relationshipService)
     
     def __initDependencies(self):
-        if(self.__basesFile and self.__relationshipsFile and self.__associationsFile):
-            self.__topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
-
         if(self.__basesFile):
+            self.__topology = NeuralThreeAssocClass(self.__simulator, self.__sim, self.__neal, self.__spinnakerVersion, self.__fsa)
             self.__baseService = BaseService(self.__fsa, self.__basesFile)
             self.__topology.createBaseNet(self.__baseService.getInheritance())
         

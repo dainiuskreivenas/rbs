@@ -1,5 +1,5 @@
 """
-Rule Based System
+Neural Cognitive Architecture
 """
 from executor import Executor
 from models import Fact, Rule
