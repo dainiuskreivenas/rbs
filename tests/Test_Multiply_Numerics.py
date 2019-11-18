@@ -15,7 +15,7 @@ sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 simName = "nest"
 neal = NealCoverFunctions(simName, sim)
 fsa = FSAHelperFunctions(simName, sim, neal)
-narc = NeuralCognitiveArchitectureBuilder(sim, simName, fsa, neal).build()
+narc = NeuralCognitiveArchitectureBuilder(simName, sim, fsa, neal).build()
 
 narc.addRule(
     
@@ -35,7 +35,7 @@ narc.addRule(
 
 narc.addFact("item", (2,5))
 
-neal.nealApplyProjections()
+narc.apply()
 
 sim.run(50)
 

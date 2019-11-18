@@ -23,9 +23,9 @@ def parseVar(variables, val):
     return val
 
 def parseTest(variables, test):
-    op = test[1][0]
-    left = test[1][1]
-    right = test[1][2]
+    op = test[1]
+    left = test[2]
+    right = test[3]
         
     if(isinstance(left, tuple)):
         lOp = left[0]
