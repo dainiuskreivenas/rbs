@@ -20,22 +20,24 @@ class NeuralCognitiveArchitecture:
         topology,
         baseService,
         propertyService,
-        relationshipService):
+        relationshipService,
+        connectionService):
         self.exe = exe
         self.__rulesService = rulesService
         self.__rulesRepository = rulesRepository
-        self.__neuronRepository = neuronRepository
+        self.neuronRepository = neuronRepository
         self.__internRepository = internRepository
         self.__primeRepository = primeRepository
         self.__linksRepository = linksRepository
-        self.__factGroupRepository = factGroupRepository
-        self.__factRepository = factRepository
+        self.factGroupRepository = factGroupRepository
+        self.factRepository = factRepository
         self.__assertionsRepository = assertionsRepository
         self.__generator = generator
         self.__topology = topology
         self.__baseService = baseService
         self.__propertyService = propertyService
         self.__relationshipService = relationshipService
+        self.connectionService = connectionService
         
     def apply(self):
         # generate network
@@ -45,10 +47,10 @@ class NeuralCognitiveArchitecture:
         self.exe.apply()
 
     def addFact(self, name, attributes, active = True):
-        return self.__factRepository.addFact(Fact(name, attributes), active)
+        return self.factRepository.addFact(Fact(name, attributes), active)
 
     def getFact(self, group, attributes):
-        return self.__factRepository.getFact(Fact(group, attributes))
+        return self.factRepository.getFact(Fact(group, attributes))
 
     def addRule(self, name, ifs, thens):
         self.__rulesRepository.addRule(Rule(name, ifs, thens))
@@ -107,7 +109,7 @@ class NeuralCognitiveArchitecture:
                 for s in st.magnitude:
                     print "{} {}".format(a.neuronIndex, s)
 
-        groups = self.__factGroupRepository.get()
+        groups = self.factGroupRepository.get()
         for g in groups:
             for f in groups[g]:
                 print "(f-{} - {} {})".format(f.caIndex, f.group, f.attributes)

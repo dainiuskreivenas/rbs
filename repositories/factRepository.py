@@ -15,6 +15,21 @@ class FactRepository:
 
         return fact
 
+    def find(self, fact):
+        group = self.factGroupRepository.addOrGet(fact.group)
+
+        found = None
+        for f in group:
+            match = True
+            for i,p in enumerate(f.attributes):
+                if(p != fact.attributes[i]):
+                    match = False
+                    break
+            if(match):
+                found = f
+
+        return found
+
     def getFact(self, fact):
         group = self.factGroupRepository.addOrGet(fact.group)
 
