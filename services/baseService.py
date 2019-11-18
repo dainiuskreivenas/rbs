@@ -1,15 +1,24 @@
 from ..lib import InheritanceReaderClass
+from ..models import Base
 
 class BaseService:
     def __init__(self, fsa, basesFile):
         self.__fsa = fsa
         self.__inheritance = InheritanceReaderClass()
         self.__inheritance.readInheritanceFile(basesFile)
+        self.__bases = {}
 
-    def caFromUnit(self, unit):
-        unit = self.__inheritance.getUnitNumber(unit)
-        start = (unit * self.__fsa.CA_SIZE)
-        return range(start, start + 10)
+    def fromUnit(self, unit):
+        base = None
+
+        if(unit in self.__bases):
+            base = self.__bases[unit]
+        else:
+            unitNumber = self.__inheritance.getUnitNumber(unit)
+            base = Base(unitNumber)
+            self.__bases[unit] = base
+            
+        return base
 
     def test(self, base, variables):
         unit = base

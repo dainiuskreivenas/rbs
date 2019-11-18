@@ -3,18 +3,15 @@ class FactRepository:
         self.factGroupRepository = factGroupRepository
         self.neuronRepository = neuronRepository
         self.activationsRepository = activationsRepository
-        self.__factIndex = 0
-        self.__activations = []
 
     def addFact(self, fact, active):
         group = self.factGroupRepository.addOrGet(fact.group)
-        fact.ca = self.neuronRepository.addCA()
-        self.__factIndex += 1
-        fact.index = self.__factIndex
+        
+        fact.caIndex = self.neuronRepository.addCA()
         group.append(fact)
 
         if(active):
-            self.activationsRepository.add(fact.ca)
+            self.activationsRepository.add(fact.caIndex)
 
         return fact
 
@@ -35,6 +32,3 @@ class FactRepository:
             found = self.addFact(fact, False)
         
         return found
-
-    def getActivations(self):
-        return list(self.__activations)

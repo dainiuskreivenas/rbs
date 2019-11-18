@@ -8,6 +8,7 @@ able to get the (base) to spread up the inheritance hierarchy.
 Testing is weak.  It has only been tested in nest.
 """
 
+import pickle
 from stateMachineClass import FSAHelperFunctions
 from makeInheritanceHier import NeuralInheritanceClass
 

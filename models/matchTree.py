@@ -6,7 +6,7 @@ class MatchTree:
         self.label = ""
         indexes = []
         for i,m in enumerate(matches):
-            indexes.append(m[0].index)
+            indexes.append(m[0].caIndex)
 
         for i,m in enumerate(indexes):
             if(i == 0):

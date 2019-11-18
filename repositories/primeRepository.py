@@ -1,3 +1,5 @@
+from ..models import Prime
+
 class PrimeRepository:
     def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):
         self.__neuronRepository = neuronRepository
@@ -9,25 +11,26 @@ class PrimeRepository:
 
     def addOrGet(self, prime):
         if(prime in self.__primes):
-            ca = self.__primes[prime]
+            primeObject = self.__primes[prime]
         else:
-            ca = self.__neuronRepository.addCA()
-            self.__primes[prime] = ca
+            caIndex = self.__neuronRepository.addCA()
+            primeObject = Prime(caIndex)
+            self.__primes[prime] = primeObject
 
             if(prime == "base"):
                 for u in self.__baseService.getInheritance().units:
-                    amCa = self.__baseService.caFromUnit(u)
-                    self.__connectionsService.connectPrimeToAssociationCA(ca, amCa)
+                    amCa = self.__baseService.fromUnit(u)
+                    self.__connectionsService.connectPrimeToAssociationCA(primeObject, amCa)
             if(prime == "property"):
                 for u in self.__propertyService.getStructure().units:
-                    amCa = self.__propertyService.caFromUnit(u)
-                    self.__connectionsService.connectPrimeToAssociationCA(ca, amCa)
+                    amCa = self.__propertyService.fromUnit(u)
+                    self.__connectionsService.connectPrimeToAssociationCA(primeObject, amCa)
             if(prime == "relationship"):
                 for u in self.__relationshipService.getStructure().units:
-                    amCa = self.__relationshipService.caFromUnit(u)
-                    self.__connectionsService.connectPrimeToAssociationCA(ca, amCa)
+                    amCa = self.__relationshipService.fromUnit(u)
+                    self.__connectionsService.connectPrimeToAssociationCA(primeObject, amCa)
 
-        return ca
+        return primeObject
 
     def get(self):
         return self.__primes.copy()

@@ -1,4 +1,5 @@
 from ..helpers import LabelHelper
+from ..models import Assertion
 
 class AssertionRepository:
     def __init__(self, neuronRepository):
@@ -11,10 +12,10 @@ class AssertionRepository:
         if(label in self.__assertions):
             return None
 
-        rulePop = self.__neuronRepository.addNeuron()
-        self.__assertions[label] = rulePop
+        neuronIndex = self.__neuronRepository.addNeuron()
+        self.__assertions[label] = Assertion(neuronIndex)
 
-        return rulePop
+        return self.__assertions[label]
 
     def get(self):
         return self.__assertions.copy()
