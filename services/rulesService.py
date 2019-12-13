@@ -167,12 +167,14 @@ class RulesService:
                 prop = VariableHelper.extractValue(p, variables)
                 newProps.append(prop)
         
-            fact = Fact(assertion[0],tuple(newProps))
-            fact = self.__factRepository.find(fact)
+            fact = Fact(assertion[0], tuple(newProps))
+            foundFact = self.__factRepository.find(fact)
 
-            if(fact == None):
-                fact = self.__factRepository.addFact(fact)
+            if(foundFact == None):
+                fact = self.__factRepository.addFact(fact, False)
                 self.applyRulesToFacts(generator)
+            else:
+                fact = foundFact
 
             self.__connectionsService.neuronTurnsOnCa(rulePop, fact)
 
