@@ -1,7 +1,4 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.models.link import Link
+from models.link import Link
 
 class LinkRepository:
     def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):

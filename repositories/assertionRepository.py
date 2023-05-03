@@ -1,8 +1,5 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.helpers.labelHelper import LabelHelper
-from rbs.models.assertion import Assertion
+from helpers.labelHelper import LabelHelper
+from models.assertion import Assertion
 
 class AssertionRepository:
     def __init__(self, neuronRepository):

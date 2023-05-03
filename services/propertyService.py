@@ -1,8 +1,5 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.models.property import Property
-from rbs.services.unitService import UnitService
+from models.property import Property
+from services.unitService import UnitService
 
 class PropertyService(UnitService):
     def __init__(self, fsa, propertiesFile):

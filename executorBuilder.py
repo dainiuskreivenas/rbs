@@ -1,7 +1,4 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.executor import Executor
+from executor import Executor
 
 class ExecutorBuilder:
     def __init__(self, 

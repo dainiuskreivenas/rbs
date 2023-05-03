@@ -1,13 +1,13 @@
-from rbs.models.population import Population
-from rbs.models.fact import Fact
-from rbs.models.assertion import Assertion
-from rbs.models.intern import Intern
-from rbs.models.base import Base
-from rbs.models.link import Link
-from rbs.models.prime import Prime
-from rbs.models.property import Property
-from rbs.models.relationship import Relationship
-from rbs.constants.connectionTypes import ConnectionTypes
+from models.population import Population
+from models.fact import Fact
+from models.assertion import Assertion
+from models.intern import Intern
+from models.base import Base
+from models.link import Link
+from models.prime import Prime
+from models.property import Property
+from models.relationship import Relationship
+from constants.connectionTypes import ConnectionTypes
 
 class Executor:
     def __init__(self, 

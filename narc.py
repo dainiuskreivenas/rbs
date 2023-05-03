@@ -1,11 +1,8 @@
 """
 Neural Cognitive Architecture
 """
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.models.fact import Fact
-from rbs.models.rule import Rule
+from models.fact import Fact
+from models.rule import Rule
 
 class NeuralCognitiveArchitecture:
     def __init__(self,

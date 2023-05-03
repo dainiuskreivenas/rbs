@@ -1,8 +1,5 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.models.relationship import Relationship
-from rbs.services.unitService import UnitService
+from models.relationship import Relationship
+from services.unitService import UnitService
 
 class RelationshipService(UnitService):
     def __init__(self, fsa, relationshipsFile):

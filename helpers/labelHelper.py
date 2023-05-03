@@ -1,7 +1,4 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.helpers.variableHelper import VariableHelper
+from helpers.variableHelper import VariableHelper
 
 class LabelHelper:
     @staticmethod

@@ -7,11 +7,8 @@ able to get the (base) to spread up the inheritance hierarchy.
 
 Testing is weak.  It has only been tested in nest.
 """
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
 import pickle
-from rbs.lib.makeInheritanceHier import NeuralInheritanceClass
+from lib.makeInheritanceHier import NeuralInheritanceClass
 
 class NeuralThreeAssocClass:
     #class variables

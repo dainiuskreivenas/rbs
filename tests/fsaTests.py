@@ -1,11 +1,8 @@
-#import pyNN.spiNNaker as sim
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
+#  import pyNN.spiNNaker as sim
 
 import pyNN.nest as sim
-from rbs.stateMachineClass import FSAHelperFunctions
-from rbs.nealCoverClass import NealCoverFunctions
+from stateMachineClass import FSAHelperFunctions
+from nealCoverClass import NealCoverFunctions
 
 simName = "nest"
 runtime = 1000
@@ -17,9 +14,9 @@ def createNeurons(fsa):
     fsa.makeCA(ca2, 0)
     ca3 = sim.Population(fsa.CA_SIZE, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "CA 3")
     fsa.makeCA(ca3, 0)
-    n1 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "Neuron 1")
-    n2 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "Neuron 2")
-    n3 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label = "Neuron 3")
+    n1 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="Neuron 1")
+    n2 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="Neuron 2")
+    n3 = sim.Population(1, sim.IF_cond_exp, fsa.CELL_PARAMS, label="Neuron 3")
     n1.record("spikes")
     n2.record("spikes")
     n3.record("spikes")
@@ -27,7 +24,7 @@ def createNeurons(fsa):
     ca2.record("spikes")
     ca3.record("spikes")
 
-    return ca,ca2,ca3,n1,n2,n3
+    return ca, ca2, ca3, n1, n2, n3
 
 def stateToState():
     neal = NealCoverFunctions(simName, sim)

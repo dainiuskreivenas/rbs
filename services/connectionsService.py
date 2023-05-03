@@ -1,8 +1,5 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.models.connection import Connection
-from rbs.constants.connectionTypes import ConnectionTypes
+from models.connection import Connection
+from constants.connectionTypes import ConnectionTypes
 
 class ConnectionsService:
     def __init__(self, connectionsRepository, internService):

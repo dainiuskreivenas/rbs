@@ -3,31 +3,28 @@ Neural Cognitive Architecture Builder
 
 Builder service to build the Neural Coginitive Architecture.
 """
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.generators.sequentialRuleGenerator import SequentialRuleGenerator
-from rbs.repositories.activationsRepository import ActivationsRepository
-from rbs.repositories.assertionRepository import AssertionRepository
-from rbs.repositories.connectionsRepository import ConnectionsRepository
-from rbs.repositories.factGroupRepository import FactGroupRepository
-from rbs.repositories.factRepository import FactRepository
-from rbs.repositories.internRepository import InternRepository
-from rbs.repositories.linkRepository import LinkRepository
-from rbs.repositories.neuronRepository import NeuronRepository
-from rbs.repositories.primeRepository import PrimeRepository
-from rbs.repositories.rulesRepository import RulesRepository
-from rbs.services.associationService import AssociationService
-from rbs.services.baseService import BaseService
-from rbs.services.connectionsService import ConnectionsService
-from rbs.services.internService import InternService
-from rbs.services.loggerService import LoggerService
-from rbs.services.propertyService import PropertyService
-from rbs.services.relationshipService import RelationshipService
-from rbs.services.rulesService import RulesService
-from rbs.lib.make3Assoc import NeuralThreeAssocClass
-from rbs.executorBuilder import ExecutorBuilder
-from rbs.narc import NeuralCognitiveArchitecture
+from generators.sequentialRuleGenerator import SequentialRuleGenerator
+from repositories.activationsRepository import ActivationsRepository
+from repositories.assertionRepository import AssertionRepository
+from repositories.connectionsRepository import ConnectionsRepository
+from repositories.factGroupRepository import FactGroupRepository
+from repositories.factRepository import FactRepository
+from repositories.internRepository import InternRepository
+from repositories.linkRepository import LinkRepository
+from repositories.neuronRepository import NeuronRepository
+from repositories.primeRepository import PrimeRepository
+from repositories.rulesRepository import RulesRepository
+from services.associationService import AssociationService
+from services.baseService import BaseService
+from services.connectionsService import ConnectionsService
+from services.internService import InternService
+from services.loggerService import LoggerService
+from services.propertyService import PropertyService
+from services.relationshipService import RelationshipService
+from services.rulesService import RulesService
+from lib.make3Assoc import NeuralThreeAssocClass
+from executorBuilder import ExecutorBuilder
+from narc import NeuralCognitiveArchitecture
 
 class NeuralCognitiveArchitectureBuilder:
     def __init__(self, simulator, sim, fsa, neal, spinnakerVersion = -1, debug = False):

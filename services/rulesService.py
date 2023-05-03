@@ -1,9 +1,6 @@
-import sys
-import os
-sys.path.append(os.getcwd() + '/..')
-from rbs.models.matchTree import MatchTree
-from rbs.models.fact import Fact
-from rbs.helpers.variableHelper import VariableHelper
+from models.matchTree import MatchTree
+from models.fact import Fact
+from helpers.variableHelper import VariableHelper
 
 class RulesService:
     def __init__(self, 
