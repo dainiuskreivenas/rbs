@@ -1,4 +1,4 @@
-from variableHelper import VariableHelper
+from helpers.variableHelper import VariableHelper
 
 class LabelHelper:
     @staticmethod

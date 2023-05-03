@@ -7,10 +7,8 @@ able to get the (base) to spread up the inheritance hierarchy.
 
 Testing is weak.  It has only been tested in nest.
 """
-
 import pickle
-from ..stateMachineClass import FSAHelperFunctions
-from makeInheritanceHier import NeuralInheritanceClass
+from lib.makeInheritanceHier import NeuralInheritanceClass
 
 class NeuralThreeAssocClass:
     #class variables
@@ -72,8 +70,8 @@ class NeuralThreeAssocClass:
         baseNum = self.baseStructure.getUnitNumber(base)
         propertyNum = self.propStructure.getUnitNumber(property)
         relationNum = self.relStructure.getUnitNumber(relation)
-        #print assocTuple
-        #print baseNum,propertyNum,relationNum
+        #print(assocTuple)
+        #print(baseNum,propertyNum,relationNum)
 
         self.fsa.stateHalfTurnsOnState(self.neuralHierarchyTopology.cells,
                                        baseNum,self.propertyCells,propertyNum)
@@ -91,16 +89,9 @@ class NeuralThreeAssocClass:
                                        self.propertyCells,propertyNum)
 
     def addAssociations(self,assocStructure):
-        print assocStructure.numberAssocs
+        print(assocStructure.numberAssocs)
         for assocNum in range (0,assocStructure.numberAssocs):
             self.addThreeAssoc(assocStructure.assocs[assocNum])
-
-
-    #-print function
-    def printSpikes(self):
-        self.propertyCells.printSpikes("testProps.pkl")
-        self.relationCells.printSpikes("testRels.pkl")
-        self.neuralHierarchyTopology.cells.printSpikes("test3.pkl")
 
 
     def printPklSpikes(self,inFileName,outFileName):
@@ -122,7 +113,13 @@ class NeuralThreeAssocClass:
         outFileHandle.flush()
         outFileHandle.close()
 
-    def printSpikes(self,fileName):
+    def printSpikes(self, fileName: str = ""):
+        if (fileName == ""):
+            self.propertyCells.printSpikes("testProps.pkl")
+            self.relationCells.printSpikes("testRels.pkl")
+            self.neuralHierarchyTopology.cells.printSpikes("test3.pkl")
+            return
+
         if ((self.simName =="spinnaker") and (self.spinnVersion == 7)):
             suffix = ".sp"
         elif ((self.simName =="nest") or
@@ -237,7 +234,7 @@ class NeuralThreeAssocClass:
 
 
     def createTestAllUnits(self,firstTestStart,cells,numUnits):
-        print numUnits
+        print(numUnits)
         oneTestDuration = 100.0
         stopTimes = []
         for unit in range (0,numUnits): 
@@ -247,7 +244,7 @@ class NeuralThreeAssocClass:
             lastTime =(((unit+1)*oneTestDuration)+firstTestStart)
             stopTimes = stopTimes + [lastTime]
 
-        print stopTimes
+        print(stopTimes)
         self.createStopAll(stopTimes,cells,numUnits)
         return lastTime
 
@@ -259,5 +256,5 @@ class NeuralThreeAssocClass:
                                                self.numRelationCAs)
 
 
-        print baseUnitTime,propUnitTime,relUnitTime
+        print(baseUnitTime,propUnitTime,relUnitTime)
         return relUnitTime

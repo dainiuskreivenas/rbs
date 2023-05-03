@@ -6,11 +6,6 @@ Invoke by creating the class, then calling createNeuralInheritanceHierarcy
 with an inheritance hierarchy specified in python (readInheritanceClass is one
 way).
 """
-
-import sys
-import numpy as np
-import cPickle as pickle
-
 class NeuralInheritanceClass:
     #constants
     neuronsPerCA = 10
@@ -50,7 +45,7 @@ class NeuralInheritanceClass:
             superCatName = isAPairs[pairNumber][1]
             subCatNumber = pythonHier.getUnitNumber(subCatName)
             superCatNumber = pythonHier.getUnitNumber(superCatName)
-            #print subCatName,superCatName,subCatNumber,superCatNumber
+            #print(subCatName,superCatName,subCatNumber,superCatNumber)
             #make one hierarchical relations as a half CA connection
             self.fsa.stateHalfTurnsOnState(self.cells,subCatNumber,
                                            self.cells,superCatNumber)
@@ -121,7 +116,7 @@ class NeuralInheritanceClass:
         testFullTime = self.createTestPrimeAllUnits(firstTestStart,self.numCAs)
         #this assumes that both of the functions have the same testduration.
         otherTestFullTime = self.createTestAllUnits(firstTestStart)
-        print "bob", testFullTime, otherTestFullTime
+        print("bob", testFullTime, otherTestFullTime)
         return otherTestFullTime
 
     #This is a test to see if some neurons are firing.
@@ -134,7 +129,3 @@ class NeuralInheritanceClass:
 
     def printInheritanceHier(self,fileName):
         self.cells.printSpikes(fileName)
-
-
-    
-

@@ -35,7 +35,7 @@ class UnitReaderClass:
         for resultUnit in range (0,self.numberUnits):
             if (checkUnit == self.units[resultUnit]):
                 return resultUnit
-        print "error ", checkUnit , " not in unit array"
+        print("error ", checkUnit , " not in unit array")
 
 
     #---top level functions

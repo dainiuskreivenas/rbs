@@ -3,13 +3,28 @@ Neural Cognitive Architecture Builder
 
 Builder service to build the Neural Coginitive Architecture.
 """
-
+from generators.sequentialRuleGenerator import SequentialRuleGenerator
+from repositories.activationsRepository import ActivationsRepository
+from repositories.assertionRepository import AssertionRepository
+from repositories.connectionsRepository import ConnectionsRepository
+from repositories.factGroupRepository import FactGroupRepository
+from repositories.factRepository import FactRepository
+from repositories.internRepository import InternRepository
+from repositories.linkRepository import LinkRepository
+from repositories.neuronRepository import NeuronRepository
+from repositories.primeRepository import PrimeRepository
+from repositories.rulesRepository import RulesRepository
+from services.associationService import AssociationService
+from services.baseService import BaseService
+from services.connectionsService import ConnectionsService
+from services.internService import InternService
+from services.loggerService import LoggerService
+from services.propertyService import PropertyService
+from services.relationshipService import RelationshipService
+from services.rulesService import RulesService
+from lib.make3Assoc import NeuralThreeAssocClass
 from executorBuilder import ExecutorBuilder
 from narc import NeuralCognitiveArchitecture
-from generators import SequentialRuleGenerator
-from repositories import *
-from services import *
-from lib import NeuralThreeAssocClass
 
 class NeuralCognitiveArchitectureBuilder:
     def __init__(self, simulator, sim, fsa, neal, spinnakerVersion = -1, debug = False):

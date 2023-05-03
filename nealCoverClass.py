@@ -4,13 +4,12 @@
 #need to store them all and before the run is started apply 
 #nealApplyProjections.
 class NealCoverFunctions:
-    projections = []
-    
-    def __init__(self, simName,sim,spinnVersion=-1):
+    def __init__(self, simName ,sim, spinnVersion=-1):
         self.DELAY = 1.0
         self.simulator = simName
         self.sim = sim
         self.spinnVersion = spinnVersion
+        self.projections = []
 
     def nealProjection(self,preNeurons,postNeurons, connectorList,inhExc):
         newProjection = [preNeurons,postNeurons,inhExc,connectorList]
@@ -36,7 +35,7 @@ class NealCoverFunctions:
                 if (self.sameProjectionType(self.projections[projectionNumber],
                            firstProjection)):
                     connList = connList + self.projections[projectionNumber][3]
-                    #print projectionNumber,len(connList)
+                    #print(projectionNumber,len(connList))
                     self.projections.remove(self.projections[projectionNumber])
                 else:
                     projectionNumber = projectionNumber + 1
@@ -49,9 +48,9 @@ class NealCoverFunctions:
             if ((self.simulator=="spinnaker") and (self.spinnVersion==7)):
                 self.sim.Projection(preNeurons, postNeurons, fromListConnector,
                                    target=inhExc)
-            elif ((self.simulator=="nest") or
-              ((self.simulator=="spinnaker") and (self.spinnVersion==8))):
+            elif (self.simulator=="nest" or
+                (self.simulator=="spinnaker" and self.spinnVersion==8)):
                     self.sim.Projection(preNeurons, postNeurons, fromListConnector,
                                    receptor_type=inhExc)
             
-            else: print "bad simulator nealProjection"
+            else: print("bad simulator nealProjection")

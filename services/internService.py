@@ -1,4 +1,4 @@
-from ..models import Intern
+from models.intern import Intern
 
 class InternService:
     def __init__(self, neuronRepository, internRepository):

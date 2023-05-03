@@ -1,8 +1,13 @@
-import logging
-from operator import itemgetter
-from itertools import groupby
-from models import *
-from constants import ConnectionTypes
+from models.population import Population
+from models.fact import Fact
+from models.assertion import Assertion
+from models.intern import Intern
+from models.base import Base
+from models.link import Link
+from models.prime import Prime
+from models.property import Property
+from models.relationship import Relationship
+from constants.connectionTypes import ConnectionTypes
 
 class Executor:
     def __init__(self, 
