@@ -1,6 +1,6 @@
 #pass this a pkl file name, and it will convert it to spikes.
 import sys
-import cPickle as pickle
+import pickle
 import glob
 
 def printPklSpikes(folder):

@@ -1,4 +1,7 @@
-from ..models.intern import Intern
+import sys
+import os
+sys.path.append(os.getcwd() + '/..')
+from rbs.models.intern import Intern
 
 class InternService:
     def __init__(self, neuronRepository, internRepository):

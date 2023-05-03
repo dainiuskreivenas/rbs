@@ -1,4 +1,7 @@
-from ..models.prime import Prime
+import sys
+import os
+sys.path.append(os.getcwd() + '/..')
+from rbs.models.prime import Prime
 
 class PrimeRepository:
     def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):

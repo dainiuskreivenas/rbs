@@ -1,5 +1,8 @@
-from ..lib.readInheritanceFile import InheritanceReaderClass
-from ..models.base import Base
+import sys
+import os
+sys.path.append(os.getcwd() + '/..')
+from rbs.lib.readInheritanceFile import InheritanceReaderClass
+from rbs.models.base import Base
 
 class BaseService:
     def __init__(self, fsa, basesFile):

@@ -1,4 +1,7 @@
-from ..lib.readAssocFile import AssocReaderClass
+import sys
+import os
+sys.path.append(os.getcwd() + '/..')
+from rbs.lib.readAssocFile import AssocReaderClass
 
 class AssociationService:
     def __init__(self, assocFile):

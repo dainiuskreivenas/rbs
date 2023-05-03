@@ -1,4 +1,7 @@
-from ..lib.readUnitFile import UnitReaderClass
+import sys
+import os
+sys.path.append(os.getcwd() + '/..')
+from rbs.lib.readUnitFile import UnitReaderClass
 
 class UnitService(object):
     def __init__(self, fsa, unitFile):

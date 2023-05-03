@@ -1,8 +1,13 @@
-import logging
-from operator import itemgetter
-from itertools import groupby
-from models import *
-from constants import ConnectionTypes
+from rbs.models.population import Population
+from rbs.models.fact import Fact
+from rbs.models.assertion import Assertion
+from rbs.models.intern import Intern
+from rbs.models.base import Base
+from rbs.models.link import Link
+from rbs.models.prime import Prime
+from rbs.models.property import Property
+from rbs.models.relationship import Relationship
+from rbs.constants.connectionTypes import ConnectionTypes
 
 class Executor:
     def __init__(self, 

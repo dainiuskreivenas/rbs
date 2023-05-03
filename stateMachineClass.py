@@ -22,36 +22,36 @@ class FSAHelperFunctions:
 
     #FSA Parmaeters
     def initParams(self):
-        self.CA_SIZE = 10  #This will (almost certainly) not work with a 
+        self.CA_SIZE: int = 10  #This will (almost certainly) not work with a 
                      #different sized CA.
-        self.CA_INHIBS = 2
+        self.CA_INHIBS: int = 2
 
         #normal weights
-        self.INPUT_WEIGHT = 0.12
-        self.HALF_INPUT_WEIGHT = 0.08
-        self.INTRA_CA_TO_INHIB_WEIGHT = 0.002
+        self.INPUT_WEIGHT: float = 0.12
+        self.HALF_INPUT_WEIGHT: float = 0.08
+        self.INTRA_CA_TO_INHIB_WEIGHT: float = 0.002
         #if you over inhib on my spinnaker, it fires.
-        self.INTRA_CA_FROM_INHIB_WEIGHT = 0.15 
-        self.CA_STOPS_CA_WEIGHT = 0.15
-        self.ONE_NEURON_STOPS_CA_WEIGHT = 1.0 
+        self.INTRA_CA_FROM_INHIB_WEIGHT: float = 0.15 
+        self.CA_STOPS_CA_WEIGHT: float = 0.15
+        self.ONE_NEURON_STOPS_CA_WEIGHT: float = 1.0 
 
-        self.ONE_NEURON_HALF_CA_WEIGHT = 0.02
+        self.ONE_NEURON_HALF_CA_WEIGHT: float = 0.02
 
         if (self.simName =="spinnaker"):
-            self.INTRA_CA_WEIGHT = 0.025
+            self.INTRA_CA_WEIGHT: float = 0.025
         elif (self.simName == "nest"):
-            self.INTRA_CA_WEIGHT = 0.022 
+            self.INTRA_CA_WEIGHT: float = 0.022 
         else:
-            self.INTRA_CA_WEIGHT = 0.022 
+            self.INTRA_CA_WEIGHT: float = 0.022 
 
-        self.FULL_ON_WEIGHT = 0.01 
-        self.FULL_ON_WEIGHT_SLOW = 0.0022
-        self.HALF_ON_WEIGHT = 0.0012
-        self.HALF_ON_ONE_WEIGHT = 0.002
-        self.STATE_TO_ONE_WEIGHT = .015
+        self.FULL_ON_WEIGHT: float = 0.01 
+        self.FULL_ON_WEIGHT_SLOW: float = 0.0022
+        self.HALF_ON_WEIGHT: float = 0.0012
+        self.HALF_ON_ONE_WEIGHT: float = 0.002
+        self.STATE_TO_ONE_WEIGHT: float = .015
 
-        self.ONE_HALF_ON_WEIGHT = 0.016
-        self.ONE_HALF_ON_ONE_WEIGHT = 0.08
+        self.ONE_HALF_ON_WEIGHT: float = 0.016
+        self.ONE_HALF_ON_ONE_WEIGHT: float = 0.01
         #self.ONE_NEURON_STARTS_CA_WEIGHT = self.INPUT_WEIGHT
 
 
@@ -136,7 +136,7 @@ class FSAHelperFunctions:
 
     #---states can be turned on and off by a neuron, can stimulate or 
     #inhibit one, and can half turn on one.
-    def oneNeuronTurnsOnState(self,fromNeurons,fromNeuron, toNeurons, toCA):
+    def oneNeuronTurnsOnState(self,fromNeurons,fromNeuron, toNeurons, toCA: int):
         connector = []
         for toOffset in range (0,self.CA_SIZE-self.CA_INHIBS):
             toNeuron = toOffset + (toCA*self.CA_SIZE)
