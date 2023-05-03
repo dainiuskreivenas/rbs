@@ -6,7 +6,7 @@ import glob
 def printPklSpikes(folder):
         files = glob.glob(folder+"/*/*.pkl")
         for fileName in files:
-            print fileName
+            print(fileName)
             fileHandle = open(fileName)
             neoObj = pickle.load(fileHandle)        
             segments = neoObj.segments
@@ -17,7 +17,7 @@ def printPklSpikes(folder):
                 if (len(spikeTrains[neuronNum])>0):
                     spikes = spikeTrains[neuronNum]
                     for spike in range (0,len(spikes)):
-                        print neuronNum, spikes[spike]
+                        print(neuronNum, spikes[spike])
             fileHandle.close()
 
 

@@ -1,4 +1,4 @@
-from ..lib import AssocReaderClass
+from ..lib.readAssocFile import AssocReaderClass
 
 class AssociationService:
     def __init__(self, assocFile):

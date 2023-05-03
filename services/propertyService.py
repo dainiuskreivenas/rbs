@@ -1,6 +1,5 @@
-from ..lib import UnitReaderClass
-from ..models import Property
-from unitService import UnitService
+from ..models.property import Property
+from .unitService import UnitService
 
 class PropertyService(UnitService):
     def __init__(self, fsa, propertiesFile):

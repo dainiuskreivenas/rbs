@@ -1,5 +1,5 @@
-from ..helpers import LabelHelper
-from ..models import Assertion
+from ..helpers.labelHelper import LabelHelper
+from ..models.assertion import Assertion
 
 class AssertionRepository:
     def __init__(self, neuronRepository):

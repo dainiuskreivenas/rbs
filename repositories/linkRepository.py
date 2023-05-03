@@ -1,4 +1,4 @@
-from ..models import Link
+from ..models.link import Link
 
 class LinkRepository:
     def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):

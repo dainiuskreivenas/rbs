@@ -36,7 +36,7 @@ class NealCoverFunctions:
                 if (self.sameProjectionType(self.projections[projectionNumber],
                            firstProjection)):
                     connList = connList + self.projections[projectionNumber][3]
-                    #print projectionNumber,len(connList)
+                    #print(projectionNumber,len(connList))
                     self.projections.remove(self.projections[projectionNumber])
                 else:
                     projectionNumber = projectionNumber + 1
@@ -54,4 +54,4 @@ class NealCoverFunctions:
                     self.sim.Projection(preNeurons, postNeurons, fromListConnector,
                                    receptor_type=inhExc)
             
-            else: print "bad simulator nealProjection"
+            else: print("bad simulator nealProjection")

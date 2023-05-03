@@ -1,5 +1,5 @@
-from ..models import Connection
-from ..constants import ConnectionTypes
+from ..models.connection import Connection
+from ..constants.connectionTypes import ConnectionTypes
 
 class ConnectionsService:
     def __init__(self, connectionsRepository, internService):

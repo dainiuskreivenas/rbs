@@ -42,7 +42,7 @@ class InheritanceReaderClass:
         for resultUnit in range (0,self.numberUnits):
             if (checkUnit == self.units[resultUnit]):
                 return resultUnit
-        print "error ", checkUnit , " not in unit array"
+        print("error ", checkUnit , " not in unit array")
 
     #--Functions for reading in the isAs
     #read lines until you get one starting with an @
@@ -58,17 +58,17 @@ class InheritanceReaderClass:
             else:
                 stringTriplet = line.split(' ')
                 if (len(stringTriplet) != 3):
-                    print "error ", line, " wrong length"
+                    print("error ", line, " wrong length")
                 if (stringTriplet[1] != "isA"):
-                    print "error ", line, " only handling isA now"
+                    print("error ", line, " only handling isA now")
                 subCatName = stringTriplet[0]
                 superCatName = stringTriplet[2]
                 superCatName = superCatName.strip()
                 #Check sub and supercat in units
                 if (not self.inUnits(subCatName)):
-                    print "error ", subCatName, " not a unit"
+                    print("error ", subCatName, " not a unit")
                 if (not self.inUnits(superCatName)):
-                    print "error ", superCatName, " not a unit"
+                    print("error ", superCatName, " not a unit")
 
                 self.isARelationships = self.isARelationships + [
                     [subCatName,superCatName]]

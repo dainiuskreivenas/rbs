@@ -1,3 +1,3 @@
 mkdir -p tests/results
 
-python -m rbs.tests.run > ./rbs/tests/results.sp
+python3 -m tests.run > ./tests/results.sp

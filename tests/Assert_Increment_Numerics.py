@@ -4,9 +4,9 @@ Test for numerical incrementation of Asserted Fact values
 
 """
 import pyNN.nest as sim
-from .. import NeuralCognitiveArchitectureBuilder
-from .. import FSAHelperFunctions
-from .. import NealCoverFunctions
+from ..narcBuilder import NeuralCognitiveArchitectureBuilder
+from ..stateMachineClass import FSAHelperFunctions
+from ..nealCoverClass import NealCoverFunctions
 
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 

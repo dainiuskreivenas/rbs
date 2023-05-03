@@ -1,5 +1,5 @@
-from ..lib import InheritanceReaderClass
-from ..models import Base
+from ..lib.readInheritanceFile import InheritanceReaderClass
+from ..models.base import Base
 
 class BaseService:
     def __init__(self, fsa, basesFile):

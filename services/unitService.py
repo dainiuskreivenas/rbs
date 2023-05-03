@@ -1,4 +1,4 @@
-from ..lib import UnitReaderClass
+from ..lib.readUnitFile import UnitReaderClass
 
 class UnitService(object):
     def __init__(self, fsa, unitFile):

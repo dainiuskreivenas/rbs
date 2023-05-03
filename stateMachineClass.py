@@ -6,10 +6,7 @@
 #excitatory connections to the first 8 neurons.
 #Using the nealNRPCover so no nealParams
 
-import numpy as np
 import pickle
-
-from nealCoverClass import NealCoverFunctions
 
 class FSAHelperFunctions:
     def __init__(self, simName, sim, neal,spinnVersion = None):
@@ -397,7 +394,7 @@ class FSAHelperFunctions:
         return[connector,inhConnector]
 
     def makeCA(self,neurons, CA):
-        #print 'makeCA
+        #print('makeCA)
         connectors = self.getCAConnectors(CA)
         self.neal.nealProjection(neurons,neurons,connectors[0],'excitatory')
         self.neal.nealProjection(neurons,neurons,connectors[1],'inhibitory')
@@ -413,7 +410,7 @@ class FSAHelperFunctions:
 #------test functions
     #initialize the simulator. 
     def testInit(self):
-        #print "spin" or nest
+        #print("spin" or nest)
         self.sim.setup(timestep=self.neal.DELAY,
                     min_delay=self.neal.DELAY,
                     max_delay=self.neal.DELAY, debug=0)
@@ -473,12 +470,12 @@ class FSAHelperFunctions:
         spikeTrains = segment.spiketrains
         neurons = len(spikeTrains)
         for neuronNum in range (0,neurons):
-            if (len(spikeTrains[neuronNum])>0):
+            if len(spikeTrains[neuronNum])>0:
                 spikes = spikeTrains[neuronNum]
                 for spike in range (0,len(spikes)):
-                    print neuronNum, spikes[spike]
+                    print(neuronNum, spikes[spike])
         fileHandle.close()
-    
+   
 
     def testPrintResults(self,simCells):
         if  ((self.neal.simulator == 'nest') or 

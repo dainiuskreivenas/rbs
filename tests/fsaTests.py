@@ -1,7 +1,11 @@
 #import pyNN.spiNNaker as sim
+import sys
+import os
+sys.path.append(os.getcwd() + '/..')
+
 import pyNN.nest as sim
-from .. import FSAHelperFunctions
-from .. import NealCoverFunctions
+from rbs.stateMachineClass import FSAHelperFunctions
+from rbs.nealCoverClass import NealCoverFunctions
 
 simName = "nest"
 runtime = 1000
@@ -45,14 +49,14 @@ def stateToState():
     
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print("ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2 "
-        print data.segments[0].spiketrains[0]
+        print( "ca2 ")
+        print( data.segments[0].spiketrains[0])
 
-        print "State To State - {}".format(success)
+        print( "State To State - {}".format(success))
 
 def stateToNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -73,14 +77,14 @@ def stateToNeuron():
 
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "State To Neuron - {}".format(success)
+        print( "State To Neuron - {}".format(success))
 
 def twoStateToState():
     neal = NealCoverFunctions(simName, sim)
@@ -103,18 +107,18 @@ def twoStateToState():
 
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = ca3.get_data()
-        print "ca3"
-        print data.segments[0].spiketrains[0]
+        print( "ca3")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 State To State - {}".format(success)
+        print( "2 State To State - {}".format(success))
 
 def twoStateToState_Half():
     neal = NealCoverFunctions(simName, sim)
@@ -136,18 +140,18 @@ def twoStateToState_Half():
 
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = ca3.get_data()
-        print "ca3"
-        print data.segments[0].spiketrains[0]
+        print( "ca3")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 State To State Half - {}".format(success)
+        print( "2 State To State Half - {}".format(success))
 
 def twoStateToNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -169,18 +173,18 @@ def twoStateToNeuron():
     success = len(n1.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 State To Neruon - {}".format(success)
+        print( "2 State To Neruon - {}".format(success))
 
 def twoStateToNeuron_Half():
     neal = NealCoverFunctions(simName, sim)
@@ -201,18 +205,18 @@ def twoStateToNeuron_Half():
     success = len(n1.get_data().segments[0].spiketrains[0]) == 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 State To Neruon Half - {}".format(success)
+        print( "2 State To Neruon Half - {}".format(success))
 
 def neuronToState():
     neal = NealCoverFunctions(simName, sim)
@@ -233,18 +237,18 @@ def neuronToState():
     success = len(ca2.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neruon To State - {}".format(success)
+        print( "Neruon To State - {}".format(success))
 
 def neuronToNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -265,18 +269,18 @@ def neuronToNeuron():
     success = len(n2.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neruon To Neuron - {}".format(success)
+        print( "Neruon To Neuron - {}".format(success))
 
 def twoNeuronToState():
     neal = NealCoverFunctions(simName, sim)
@@ -302,22 +306,22 @@ def twoNeuronToState():
 
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 Neruon To State - {}".format(success)
+        print( "2 Neruon To State - {}".format(success))
 
 def twoNeuronToState_Half():
     neal = NealCoverFunctions(simName, sim)
@@ -340,22 +344,22 @@ def twoNeuronToState_Half():
     success = len(ca2.get_data().segments[0].spiketrains[0]) == 0
     if (not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 Neruon To State Half - {}".format(success)
+        print( "2 Neruon To State Half - {}".format(success))
 
 def twoNeuronToNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -379,18 +383,18 @@ def twoNeuronToNeuron():
     success = len(n3.get_data().segments[0].spiketrains[0]) > 0
     if (not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
         data = n3.get_data()
-        print "n3"
-        print data.segments[0].spiketrains[0]
-        print "2 Neruon To Neuron - {}".format(success)
+        print( "n3")
+        print( data.segments[0].spiketrains[0])
+        print( "2 Neruon To Neuron - {}".format(success))
 
 def twoNeuronToNeuron_Half():
     neal = NealCoverFunctions(simName, sim)
@@ -413,22 +417,22 @@ def twoNeuronToNeuron_Half():
     success = len(n3.get_data().segments[0].spiketrains[0]) == 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
 
         data = n3.get_data()
-        print "n3"
-        print data.segments[0].spiketrains[0]
+        print( "n3")
+        print( data.segments[0].spiketrains[0])
 
-        print "2 Neruon To Neuron Half - {}".format(success)
+        print( "2 Neruon To Neuron Half - {}".format(success))
 
 def neruonAndStateToState():
     neal = NealCoverFunctions(simName, sim)
@@ -451,22 +455,22 @@ def neruonAndStateToState():
     success = len(ca3.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = ca3.get_data()
-        print "ca3"
-        print data.segments[0].spiketrains[0]
+        print( "ca3")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neuron And State To State - {}".format(success)
+        print( "Neuron And State To State - {}".format(success))
 
 def neruonAndStateToState_NotNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -489,22 +493,22 @@ def neruonAndStateToState_NotNeuron():
 
     if not success:
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = ca3.get_data()
-        print "ca3"
-        print data.segments[0].spiketrains[0]
+        print( "ca3")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neuron And State To State NotNeuron - {}".format(success)
+        print( "Neuron And State To State NotNeuron - {}".format(success))
 
 def neruonAndStateToState_NotState():
     neal = NealCoverFunctions(simName, sim)
@@ -526,22 +530,22 @@ def neruonAndStateToState_NotState():
     success = len(ca3.get_data().segments[0].spiketrains[0]) == 0
     if not success:
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = ca3.get_data()
-        print "ca3"
-        print data.segments[0].spiketrains[0]
+        print( "ca3")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neuron And State To State NotState - {}".format(success)
+        print( "Neuron And State To State NotState - {}".format(success))
 
 def neuronAndStateToNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -565,22 +569,22 @@ def neuronAndStateToNeuron():
     if not success:
 
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neuron And State To Neuron - {}".format(success)
+        print( "Neuron And State To Neuron - {}".format(success))
 
 def neuronAndStateToNeuron_NotNeuron():
     neal = NealCoverFunctions(simName, sim)
@@ -604,22 +608,22 @@ def neuronAndStateToNeuron_NotNeuron():
     if not success:
 
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
 
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
 
-        print "Neuron And State To Neuron NotNeuron - {}".format(success)
+        print( "Neuron And State To Neuron NotNeuron - {}".format(success))
 
 
 def neuronAndStateToNeuron_NotState():
@@ -644,22 +648,22 @@ def neuronAndStateToNeuron_NotState():
         return
 
     data = ca.get_data()
-    print "ca"
-    print data.segments[0].spiketrains[0]
+    print( "ca")
+    print( data.segments[0].spiketrains[0])
 
     data = ca2.get_data()
-    print "ca2"
-    print data.segments[0].spiketrains[0]
+    print( "ca2")
+    print( data.segments[0].spiketrains[0])
 
     data = n1.get_data()
-    print "n1"
-    print data.segments[0].spiketrains[0]  
+    print( "n1")
+    print( data.segments[0].spiketrains[0]  )
 
     data = n2.get_data()
-    print "n2"
-    print data.segments[0].spiketrains[0]    
+    print( "n2")
+    print( data.segments[0].spiketrains[0]    )
 
-    print "Neuron And State To Neuron NotState - {}".format(success)
+    print( "Neuron And State To Neuron NotState - {}".format(success))
 
 def threeStateRule():
     """
@@ -698,26 +702,26 @@ def threeStateRule():
     success = len(n2.get_data().segments[0].spiketrains[0]) > 0
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
     
         data = ca2.get_data()
-        print "ca2"
-        print data.segments[0].spiketrains[0]
+        print( "ca2")
+        print( data.segments[0].spiketrains[0])
     
         data = ca3.get_data()
-        print "ca3"
-        print data.segments[0].spiketrains[0]
+        print( "ca3")
+        print( data.segments[0].spiketrains[0])
     
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
     
         data = n2.get_data()
-        print "n2"
-        print data.segments[0].spiketrains[0]
+        print( "n2")
+        print( data.segments[0].spiketrains[0])
     
-        print "Three State Rule - {}".format(success)
+        print( "Three State Rule - {}".format(success))
 
 
 def oneNeuronStopsCA():
@@ -739,13 +743,13 @@ def oneNeuronStopsCA():
     success = len(ca.get_data().segments[0].spiketrains[0]) == len(n1.get_data().segments[0].spiketrains[0])
     if(not success):
         data = ca.get_data()
-        print "ca"
-        print data.segments[0].spiketrains[0]
+        print( "ca")
+        print( data.segments[0].spiketrains[0])
 
         data = n1.get_data()
-        print "n1"
-        print data.segments[0].spiketrains[0]
-        print "One Neuron stops CA - {}".format(success)
+        print( "n1")
+        print( data.segments[0].spiketrains[0])
+        print( "One Neuron stops CA - {}".format(success))
 
 
 
@@ -828,7 +832,3 @@ sim.end()
 sim.setup(timestep=1.0,min_delay=1.0,max_delay=1.0, debug=0)
 oneNeuronStopsCA()
 sim.end()
-
-
-
-

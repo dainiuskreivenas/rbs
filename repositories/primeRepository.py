@@ -1,4 +1,4 @@
-from ..models import Prime
+from ..models.prime import Prime
 
 class PrimeRepository:
     def __init__(self, neuronRepository, connectionsService, baseService, propertyService, relationshipService):

@@ -1,6 +1,5 @@
-from ..lib import UnitReaderClass
-from ..models import Relationship
-from unitService import UnitService
+from ..models.relationship import Relationship
+from .unitService import UnitService
 
 class RelationshipService(UnitService):
     def __init__(self, fsa, relationshipsFile):
